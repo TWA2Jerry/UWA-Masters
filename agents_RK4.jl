@@ -74,8 +74,8 @@ function agent_step!(agent, model)
 	
 	
 	#Calculate the new agent positions and velocities based off RK4
-	new_agent_pos = agent.pos .+ dt/6*(k1[1:2]+ 2*k2[1:2] + 2*k3[1:2] + k4[1:2])
-	new_agent_vel = agent.vel+dt/6*(k1[3:4]+ 2*k2[3:4] + 2*k3[3:4] + k4[3:4])
+	new_agent_pos = Tuple(agent.pos .+ dt/6*(k1[1:2] .+ 2*k2[1:2] .+ 2*k3[1:2] .+ k4[1:2]))
+	new_agent_vel = Tuple(agent.vel .+ dt/6*(k1[3:4] .+ 2*k2[3:4] .+ 2*k3[3:4] .+ k4[3:4]))
 	
 
 	#Update the agent position and velocities
