@@ -8,7 +8,9 @@ using Random
 using VoronoiCells
 
 ###Function that calculates the voronoi area of a given agent a given position
-
+function voronoi_area(agent, model)
+	
+end
 
 ###Function that generates the half planes assoiated with a given agent to its neighbours
 
