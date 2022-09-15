@@ -7,23 +7,7 @@ using Agents
 using Random
 using VoronoiCells
 
-
-###Create the function returns the area of a given Voronoi cell given the vertices which define the cell
-function voronoi_area(vertices)
-        num_points = length(vertices)
-        A = 0.0
-        for i in range 1:num_points
-                j = (i+1)%num_points
-                xi = vertices[i][1]
-                yi = vertices[i][2]
-                xj = vertices[j][1]
-                yj = vertices[j][2]
-                A += 0.5 * (yi + yj)* (xi - xj)
-        end
-
-        return A
-end
-
+###Function that calculates the voronoi area of a given agent a given position
 
 
 ###Function that generates the half planes assoiated with a given agent to its neighbours
