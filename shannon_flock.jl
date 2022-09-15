@@ -20,7 +20,32 @@ end
 
 
 ###Function that determines the gradient of movement
+function movement_gradient(agent, model, agent_speed)
+	#Calculate the unit vector in the current direction of motion
+	unit_v = agent.vel ./ norm(agent.vel)
+	vix = unit_v[1]
+	viy = unit_v[2]
+	positions = []
+	neighbours = nearby_agents(agent, model)
+	for neighbour in neighbours
+		pushfirst!(positions, neighbour)	
+	end		
 
+	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions
+	min_area = 100000000.0
+	min_direction = [0.0]
+	for i in range 0:7
+		direction_of_move = [cos(i*pi/8)*vix - sin(i*pi/8)*viy, sin(i*pi/8)*vix + cos(i*pi/8)*viy]
+		new_agent_pos = agent.pos .+ direction_of_move .* agent_speed
+		pushfirst!(positions, new_agent_pos)
+		new_area = voronoi_area(positions)
+		if new_area < min_area
+			min_area = new_area
+			min_direction = direction_of_move
+		end	
+	end
+	
+end
 
 ###Create the function that takes a given agent, model and then find the vertices that comprise the voronoi cell
 function voronoi_vertices(agent, model)
