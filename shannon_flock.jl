@@ -7,71 +7,52 @@ using Agents
 using Random
 using VoronoiCells
 
-
-###Create the function returns the area of a given Voronoi cell given the vertices which define the cell
-function voronoi_area(vertices)
-	num_points = length(vertices)
-	A = 0.0
-	for i in range 1:num_points
-		j = (i+1)%num_points
-		xi = vertices[i][1]
-		yi = vertices[i][2]
-		xj = vertices[j][1]
-		yj = vertices[j][2]
-		A += 0.5 * (yi + yj)* (xi - xj)	
-	end
-
-	return abs(A)
+###Function that calculates the voronoi area of a given agent a given position
+function voronoi_area(pts)
+        Cells = voronoicells(pts)
+        Areas = voronoiarea[Cells]
+        return  Areas[1]
 end
 
 
-
-###Function that generates the half planes assoiated with a given agent to its neighbours
-
+###
 
 
-###Function that calculates the intersection between two half plane lines
-function inter()
-        #This is for two half planes described by y = mx + c and y = nx + d
-        xint = (d-c)/(m-n)
-        yint = m*xint + c
-        return [xint, yint]
+
+###Function that determines the gradient of movement
+function move_gradient(agent, model, agent_speed)
+        #Calculate the unit vector in the current direction of motion
+        unit_v = agent.vel ./ norm(agent.vel)
+        vix = unit_v[1]
+        viy = unit_v[2]
+        positions = []
+        neighbours = nearby_agents(agent, model)
+        for neighbour in neighbours
+                pushfirst!(positions, neighbour)
+        end
+
+        #Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions
+        min_area = 100000000.0
+        min_direction = [0.0]
+        for i in range 0:7
+                direction_of_move = [cos(i*pi/8)*vix - sin(i*pi/8)*viy, sin(i*pi/8)*vix + cos(i*pi/8)*viy]
+                new_agent_pos = agent.pos .+ direction_of_move .* agent_speed
+                pushfirst!(positions, new_agent_pos)
+                new_area = voronoi_area(positions)
+                if new_area < min_area
+                        min_area = new_area
+                        min_direction = direction_of_move
+                end
+        end
+
 end
 
-
-
-###Create the function that takes a given agent, model and then find the vertices that comprise the voronoi cell
-function voronoi_vertices(agent, model)
-	#Generate the half planes
-
-	#Sort the half planes according to angle 
-
-	#Use the algorithm listed to generate the intersections	
-
-	#Just to make sure, sort the intersection points by angle
-end	
 
 
 ###Create the movement gradient function that gives the rate of change in position and velocity, I'll use RK4, cause why not. Actually, no RK4 since we don't have a consistent acceleration function
 function move_gradient(agent, model, k_pos, k_vel, kn)
-	#Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
-	r = sqrt((spacesize(model)[1])^2 + (spacesize(model)[2])^2) #Calculate the maximum possible distance any neighbour could be. Note that this is for continuous space. For other stuff like grids, use manhattan or chebyshev
-        neighbours = nearby_agents(agent, model, r) #neigbours is now an iterable of all other agents j\neq i
-	x = k_pos[1]
-        y = k_pos[2]
-        vx = k_vel[1]
-        vy = k_vel[2]
-	kn[1] = vx
-	kn[2] = vy
-	
-	for neighbour in neighbours
-        	#Generate the set of equations that determines the change in position and movement
-                x_j = neighbour.pos[1]
-                y_j = neighbour.pos[2]
-                kn[3] += -(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
-                kn[4] += -(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
-        end
-end
+        #Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
+
 
 ###Create the agent
 mutable struct celestial_object <: AbstractAgent
@@ -184,3 +165,4 @@ abmvideo(
     title = "Moon orbiting planet"
 )
 	
+

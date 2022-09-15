@@ -133,7 +133,7 @@ dt = 0.001
 num_moves = floor(Int64,period_time/dt)
 abmvideo(
     "moon_planet.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 500,
+    framerate = 10, frames = 1000,
     title = "Moon orbiting planet"
 )
 	
