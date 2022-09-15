@@ -28,7 +28,7 @@ function movement_gradient(agent, model, agent_speed)
 	positions = []
 	neighbours = nearby_agents(agent, model)
 	for neighbour in neighbours
-		pushfirst!(positions, neighbour)	
+		pushfirst!(positions, neighbour.position)	
 	end		
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions
@@ -37,6 +37,21 @@ function movement_gradient(agent, model, agent_speed)
 	for i in range 0:7
 		direction_of_move = [cos(i*pi/8)*vix - sin(i*pi/8)*viy, sin(i*pi/8)*vix + cos(i*pi/8)*viy]
 		new_agent_pos = agent.pos .+ direction_of_move .* agent_speed
+		
+		#Check first if there are no other agents in the potential position
+		conflict = 0
+		for neighbour_position in positions
+			if norm(new_agent_pos .- neighbour_position) > 2
+				conflict = 1
+				break
+			end			
+		end
+		
+		if conflict = 1
+			continue
+		end
+		
+		#If there are no other agents in the potential position, go ahead and evaluate the new DOD
 		pushfirst!(positions, new_agent_pos)
 		new_area = voronoi_area(positions)
 		if new_area < min_area
