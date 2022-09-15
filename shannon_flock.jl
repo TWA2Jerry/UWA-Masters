@@ -47,6 +47,8 @@ function voronoi_vertices(agent, model)
 	#Sort the half planes according to angle 
 
 	#Use the algorithm listed to generate the intersections	
+
+	#Just to make sure, sort the intersection points by angle
 end	
 
 
