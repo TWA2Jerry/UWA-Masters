@@ -8,12 +8,18 @@ using Random
 using VoronoiCells
 
 ###Function that calculates the voronoi area of a given agent a given position
-function voronoi_area(agent, model)
-	
+function voronoi_area(pts)
+	Cells = voronoicells(pts)
+	Areas = voronoiarea[Cells]
+	return 	Areas[1]
 end
 
-###Function that generates the half planes assoiated with a given agent to its neighbours
 
+###
+
+
+
+###Function that determines the gradient of movement
 
 
 ###Create the function that takes a given agent, model and then find the vertices that comprise the voronoi cell
