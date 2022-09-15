@@ -21,7 +21,7 @@ function voronoi_area(vertices)
 		A += 0.5 * (yi + yj)* (xi - xj)	
 	end
 
-	return A
+	return abs(A)
 end
 
 
@@ -30,9 +30,23 @@ end
 
 
 
+###Function that calculates the intersection between two half plane lines
+function inter()
+        #This is for two half planes described by y = mx + c and y = nx + d
+        xint = (d-c)/(m-n)
+        yint = m*xint + c
+        return [xint, yint]
+end
+
+
+
 ###Create the function that takes a given agent, model and then find the vertices that comprise the voronoi cell
 function voronoi_vertices(agent, model)
-	
+	#Generate the half planes
+
+	#Sort the half planes according to angle 
+
+	#Use the algorithm listed to generate the intersections	
 end	
 
 
