@@ -15,7 +15,7 @@ function voronoi_area(pts)
 end
 
 ###Function that determines the gradient of movement
-function move_gradient(agent, model)
+function move_gradient(agent, model, agent_speed)
 	#Calculate the unit vector in the current direction of motion
 	unit_v = agent.vel ./ norm(agent.vel)
 	vix = unit_v[1]
@@ -48,14 +48,15 @@ function move_gradient(agent, model)
 		
 		#If there are no other agents in the potential position, go ahead and evaluate the new DOD
 		pushfirst!(positions, new_agent_pos)
-		new_area = voronoi_area(positions)
+		new_areas = voronoi_area(positions)
+		new_agent_area = new_areas[1]
 		if new_area < min_area
 			min_area = new_area
 			min_direction = direction_of_move
 		end	
 	end
 
-	return Tuple(agent.pos .+ mind_direction .* agent_speed)
+	return Tuple(agent.pos .+ mind_direction .* agent_speed .* model.dt)
 end
 
 
