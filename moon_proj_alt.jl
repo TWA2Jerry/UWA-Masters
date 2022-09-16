@@ -5,63 +5,29 @@
 ###Preliminaries
 using Agents
 using Random
-using VoronoiCells
 
-###Function that calculates the voronoi area of a given agent a given position
-function voronoi_area(pts)
-        Cells = voronoicells(pts)
-        Areas = voronoiarea[Cells]
-        return  Areas[1]
-end
 
-###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn, q)
-	#Calculate the unit vector in the current direction of motion
-	unit_v = agent.vel ./ norm(agent.vel)
-	agent_speed = norm(agent.vel)
-	vix = unit_v[1]
-	viy = unit_v[2]
-	positions = []
-	neighbours = nearby_agents(agent, model)
+
+###Create the movement gradient function that gives the rate of change in position and velocity, I'll use RK4, cause why not. Actually, no RK4 since we don't have a consistent acceleration function
+function move_gradient(agent, model, k_pos, k_vel, kn)
+	#Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
+	r = sqrt((spacesize(model)[1])^2 + (spacesize(model)[2])^2) #Calculate the maximum possible distance any neighbour could be. Note that this is for continuous space. For other stuff like grids, use manhattan or chebyshev
+        neighbours = nearby_agents(agent, model, r) #neigbours is now an iterable of all other agents j\neq i
+	x = agent.pos[1]
+        y = agent.pos[2]
+        vx = agent.vel[1]
+        vy = agent.vel[2]
+	kn[1] = vx
+	kn[2] = vy
+	
 	for neighbour in neighbours
-		pushfirst!(positions, neighbour.position)	
-	end		
-
-	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions
-	min_area = 100000000.0
-	min_direction = [0.0, 0.0]
-	for i in range 0:7
-		direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
-		new_agent_pos = agent.pos .+ direction_of_move .* agent_speed
-		
-		#Check first if there are no other agents in the potential position
-		conflict = 0
-		for neighbour_position in positions
-			if norm(new_agent_pos .- neighbour_position) > 2
-				conflict = 1
-				break
-			end			
-		end
-		
-		if conflict = 1
-			continue
-		end
-		
-		#If there are no other agents in the potential position, go ahead and evaluate the new DOD
-		pushfirst!(positions, new_agent_pos)
-		new_areas = voronoi_area(positions)
-		new_agent_area = new_areas[1]
-		if new_area < min_area
-			min_area = new_area
-			min_direction = direction_of_move
-		end	
-	end
-
-	#It really doesn't have to be like this, but at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
-	kn[1] += (direction_of_move .* agent_speed)[1]
-	kn[2] += (direction_of_move .* agent_speed)[2]
+        	#Generate the set of equations that determines the change in position and movement
+                x_j = neighbour.pos[1]
+                y_j = neighbour.pos[2]
+                kn[3] += -(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+                kn[4] += -(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+        end
 end
-
 
 ###Create the agent
 mutable struct celestial_object <: AbstractAgent
@@ -80,7 +46,7 @@ function initialise(; seed = 123)
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 0.01)
+	property = Dict(:t => 0.0, :dt => 0.01)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -90,7 +56,7 @@ function initialise(; seed = 123)
 	#Create the model
 	model = ABM(
 		celestial_object, space; 
-		properties, rng, scheduler = Schedulers.fastest
+		property, rng, scheduler = Schedulers.fastest
 	)	
 
 	#Calculate, in planetary units such that m_planet = 1, and G = 1, the velocity required for the moon to achieve a circular orbit around the planet 
@@ -118,20 +84,20 @@ function agent_step!(agent, model)
 	#print("Step!\n", agent.planet)
 	dt = model.dt
 	k1 = [0.0, 0.0, 0.0, 0.0]
-        #k2 = [0.0, 0.0, 0.0, 0.0]
-        #k3 = [0.0, 0.0, 0.0, 0.0]
-        #k4 = [0.0, 0.0, 0.0, 0.0]
+        k2 = [0.0, 0.0, 0.0, 0.0]
+        k3 = [0.0, 0.0, 0.0, 0.0]
+        k4 = [0.0, 0.0, 0.0, 0.0]
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_gradient(agent, model, k1, 8)
-        #move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2)
-        #move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3)
-        #move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4);
+        move_gradient(agent, model, agent.pos, agent.vel, k1)
+        move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2)
+        move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3)
+        move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4);
 	
 	#Update the agent position and velocity
-	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel = Tuple(agent.vel .+ dt .* k1[3:4])
+	new_agent_pos = Tuple(agent.pos .+ dt/6*(k1[1:2] .+ 2*k2[1:2] .+ 2*k3[1:2] .+ k4[1:2]))
+        new_agent_vel = Tuple(agent.vel .+ dt/6*(k1[3:4] .+ 2*k2[3:4] .+ 2*k3[3:4] .+ k4[3:4]))
 	agent.vel = new_agent_vel
 	print(new_agent_pos, "\n")
 	#print(k1, "\n")
@@ -139,6 +105,10 @@ function agent_step!(agent, model)
 	move_agent!(agent, new_agent_pos, model)	
 	end
 	
+	#If the agent is the planet, do nothing. This is just to check that we are indeed, doing nothing
+	#if(agent.planet == 1) 
+	#print("Agent 2 position is ", agent.pos, "\n")
+	#end
 end
 
 
@@ -146,26 +116,19 @@ end
 function model_step!(model)
 	model.t += model.dt
 end
-
-
 	
 ###Initialise the model
 model = initialise()
-
 
 
 ###Test the model has been initialised and works
 using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
 
-
-
 figure, _ = abmplot(model)
 figure # returning the figure displays it
 save("moon_planet.png", figure)
 	
-
-
 ###Animate
 model = initialise();
 period_time = 2*pi*19.0^1.5
@@ -173,8 +136,7 @@ dt = 0.001
 num_moves = floor(Int64,period_time/dt)
 abmvideo(
     "moon_planet.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 500,
+    framerate = 10, frames = 1000,
     title = "Moon orbiting planet"
 )
 	
-
