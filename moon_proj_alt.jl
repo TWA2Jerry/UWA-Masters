@@ -46,7 +46,7 @@ function initialise(; seed = 123)
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
 	#Create the properties of the model
-	property = Dict(:t => 0.0, :dt => 0.01)
+	properties = Dict(:t => 0.0, :dt => 0.01)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -56,7 +56,7 @@ function initialise(; seed = 123)
 	#Create the model
 	model = ABM(
 		celestial_object, space; 
-		property, rng, scheduler = Schedulers.fastest
+		properties, rng, scheduler = Schedulers.fastest
 	)	
 
 	#Calculate, in planetary units such that m_planet = 1, and G = 1, the velocity required for the moon to achieve a circular orbit around the planet 
@@ -127,7 +127,7 @@ using CairoMakie # choosing a plotting backend
 
 figure, _ = abmplot(model)
 figure # returning the figure displays it
-save("moon_planet.png", figure)
+save("moon_planet_alt.png", figure)
 	
 ###Animate
 model = initialise();
@@ -135,7 +135,7 @@ period_time = 2*pi*19.0^1.5
 dt = 0.001
 num_moves = floor(Int64,period_time/dt)
 abmvideo(
-    "moon_planet.mp4", model, agent_step!, model_step!;
+    "moon_planet_alt.mp4", model, agent_step!, model_step!;
     framerate = 10, frames = 1000,
     title = "Moon orbiting planet"
 )
