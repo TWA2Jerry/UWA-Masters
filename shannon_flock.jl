@@ -44,7 +44,9 @@ function move_gradient(agent, model,  kn, q, m)
 	end		
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
-	min_area = agent.dodA
+	pushfirst!(positions, agent.pos)
+	min_area = (voronoi_area(positions))[1] #The current DOD
+	deleteat!(positions, 1)
 	min_direction = [0.0, 0.0]
 	for i in 0:q #For every direction
 		conflict = 0
@@ -67,6 +69,7 @@ function move_gradient(agent, model,  kn, q, m)
 			#If there are no other agents in the potential position, go ahead and evaluate the new DOD
 			pushfirst!(positions, new_agent_pos)
 			new_areas = voronoi_area(positions)
+			deleteat!(positions, 1)
 			new_agent_area = new_areas[1]
 			if new_area < min_area
 				min_area = new_area
@@ -102,7 +105,6 @@ mutable struct bird <: AbstractAgent
 	id::Int
 	pos::NTuple{2, Float64}
 	vel::NTuple{2, Float64}
-	dodA::Float64
 end
 	
 
@@ -118,7 +120,7 @@ function initialise(; seed = 123)
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 0.01)
+	properties = Dict(:t => 0.0, :dt => 1.0)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -131,16 +133,9 @@ function initialise(; seed = 123)
 		properties, rng, scheduler = Schedulers.fastest
 	)	
 
-	#Calculate, in planetary units such that m_planet = 1, and G = 1, the velocity required for the moon to achieve a circular orbit around the planet 
-	r = 19.0
-	moon_speed = sqrt(1.0/r)
-	moon_period = 2*pi*r^1.5
-	vi_x = 0.0
-	vi_y = moon_speed
-
 	#Populate the model
-	agent1 = celestial_object(1, (69.0, 50.0), (vi_x, vi_y), 0) #The moon
-	agent2 = celestial_object(2, (50.0, 50.0), (0.0, 0.0), 1) #The planet	
+	agent1 = bird(1, (69.0, 50.0), (rand(), rand())) #The moon
+	agent2 = bird(2, (50.0, 50.0), (rand(), rand())) #The planet	
 
 	add_agent!(agent1, (69.0, 50.0), model)
 	add_agent!(agent2, (50.0, 50.0), model)
@@ -162,7 +157,7 @@ function agent_step!(agent, model)
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_gradient(agent, model, k1, 8)
+        move_gradient(agent, model, k1, 8, 1)
         #move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2)
         #move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3)
         #move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4);
