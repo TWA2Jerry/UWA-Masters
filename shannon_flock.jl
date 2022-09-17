@@ -7,6 +7,20 @@ using Agents
 using Random
 using VoronoiCells
 
+
+
+###Defining a norm function, cause why not
+function norm (v)
+	sum_of_squares = 0.0
+	for i in 1:length(v)
+		sum_of_squares += (v[i])^2
+	end
+	
+	return sqrt(sum_of_squares)
+end
+
+
+
 ###Function that calculates the voronoi area of a given agent a given position
 function voronoi_area(pts)
         Cells = voronoicells(pts)
@@ -14,8 +28,10 @@ function voronoi_area(pts)
         return  Areas[1]
 end
 
+
+
 ###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn, q)
+function move_gradient(agent, model,  kn, q, m)
 	#Calculate the unit vector in the current direction of motion
 	unit_v = agent.vel ./ norm(agent.vel)
 	agent_speed = norm(agent.vel)
@@ -27,34 +43,51 @@ function move_gradient(agent, model,  kn, q)
 		pushfirst!(positions, neighbour.position)	
 	end		
 
-	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions
-	min_area = 100000000.0
+	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
+	min_area = agent.dodA
 	min_direction = [0.0, 0.0]
-	for i in range 0:7
-		direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
-		new_agent_pos = agent.pos .+ direction_of_move .* agent_speed
-		
-		#Check first if there are no other agents in the potential position
+	for i in 0:q #For every direction
 		conflict = 0
-		for neighbour_position in positions
-			if norm(new_agent_pos .- neighbour_position) > 2
-				conflict = 1
-				break
-			end			
+		for j in 1:m #For every position up to m
+			direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
+			new_agent_pos = agent.pos .+ m .* direction_of_move .* agent_speed
+		
+			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
+			for neighbour_position in positions
+				if norm(new_agent_pos .- neighbour_position) < 2
+					conflict = 1
+					break
+				end			
+			end
+		
+			if conflict = 1
+				continue
+			end
+		
+			#If there are no other agents in the potential position, go ahead and evaluate the new DOD
+			pushfirst!(positions, new_agent_pos)
+			new_areas = voronoi_area(positions)
+			new_agent_area = new_areas[1]
+			if new_area < min_area
+				min_area = new_area
+				min_direction = direction_of_move
+			end	
 		end
 		
 		if conflict = 1
-			continue
-		end
-		
-		#If there are no other agents in the potential position, go ahead and evaluate the new DOD
-		pushfirst!(positions, new_agent_pos)
-		new_areas = voronoi_area(positions)
-		new_agent_area = new_areas[1]
-		if new_area < min_area
-			min_area = new_area
-			min_direction = direction_of_move
-		end	
+                	continue
+                end
+
+		#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
+                pushfirst!(positions, new_agent_pos)
+                new_areas = voronoi_area(positions)
+                new_agent_area = new_areas[1]
+                if (new_area < min_area)
+                	min_area = new_area
+                        min_direction = direction_of_move
+                end
+
+
 	end
 
 	#It really doesn't have to be like this, but at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
@@ -63,15 +96,20 @@ function move_gradient(agent, model,  kn, q)
 end
 
 
+
 ###Create the agent
-mutable struct celestial_object <: AbstractAgent
+mutable struct bird <: AbstractAgent
 	id::Int
 	pos::NTuple{2, Float64}
 	vel::NTuple{2, Float64}
-	planet::Bool
+	dodA::Float64
 end
 	
+
+
 print("Agent template created")
+
+
 
 ###Create the initialisation function
 using Random #for reproducibility
@@ -89,7 +127,7 @@ function initialise(; seed = 123)
 
 	#Create the model
 	model = ABM(
-		celestial_object, space; 
+		bird, space; 
 		properties, rng, scheduler = Schedulers.fastest
 	)	
 
