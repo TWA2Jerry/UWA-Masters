@@ -25,7 +25,7 @@ end
 function voronoi_area(pts)
         Cells = voronoicells(pts)
         Areas = voronoiarea[Cells]
-        return  Areas[1]
+        return  Areas
 end
 
 
@@ -45,14 +45,14 @@ function move_gradient(agent, model,  kn, q, m)
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	pushfirst!(positions, agent.pos)
-	min_area = (voronoi_area(positions))[1] #The current DOD
+	min_area = agent.A #The agent's current DOD area
 	deleteat!(positions, 1)
 	min_direction = [0.0, 0.0]
 	for i in 0:q #For every direction
 		conflict = 0
+		direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
 		for j in 1:m #For every position up to m
-			direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
-			new_agent_pos = agent.pos .+ m .* direction_of_move .* agent_speed
+			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
@@ -61,23 +61,13 @@ function move_gradient(agent, model,  kn, q, m)
 					break
 				end			
 			end
-		
-			if conflict = 1
-				continue
+			
+			if (conflict == 1)		
+				break
 			end
-		
-			#If there are no other agents in the potential position, go ahead and evaluate the new DOD
-			pushfirst!(positions, new_agent_pos)
-			new_areas = voronoi_area(positions)
-			deleteat!(positions, 1)
-			new_agent_area = new_areas[1]
-			if new_area < min_area
-				min_area = new_area
-				min_direction = direction_of_move
-			end	
 		end
 		
-		if conflict = 1
+		if (conflict == 1) #Look at another direction if there's a agent in at or close to the potential position
                 	continue
                 end
 
@@ -105,6 +95,7 @@ mutable struct bird <: AbstractAgent
 	id::Int
 	pos::NTuple{2, Float64}
 	vel::NTuple{2, Float64}
+	A::Float64 #The area of the agent's DOD
 end
 	
 
@@ -115,7 +106,7 @@ print("Agent template created")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123)
+function initialise(; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -133,12 +124,23 @@ function initialise(; seed = 123)
 		properties, rng, scheduler = Schedulers.fastest
 	)	
 
-	#Populate the model
-	agent1 = bird(1, (69.0, 50.0), (rand(), rand())) #The moon
-	agent2 = bird(2, (50.0, 50.0), (rand(), rand())) #The planet	
 
-	add_agent!(agent1, (69.0, 50.0), model)
-	add_agent!(agent2, (50.0, 50.0), model)
+	#Generate random initial positions for each bird, then calculate the DoDs
+	initial_positions = []
+	for i in 1:no_birds
+		rand_position = Tuple(100*rand(Float64, 2))
+		pushfirst!(initial_positions, rand_position)
+	end
+
+	#Calculate the DoDs based off the initial positions
+	initial_dods = voronoi_area(initial_positions)
+	
+	#Now make the agents with their respective DoDs and add to the model
+	for i in 1:no_birds
+		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
+		add_agent!(agent, initial_positions[i], model)	
+	end	
+
 	return model
 end  
 
@@ -147,7 +149,6 @@ end
 ###Create the agent step function. This will call upon the force or acceleration function. I'm assuming that this function will be applied to each agent in turn
 function agent_step!(agent, model)		
 	#Update the agent position and velocities, but only if it is a 
-	if(agent.planet == 0)
 	#print("Step!\n", agent.planet)
 	dt = model.dt
 	k1 = [0.0, 0.0, 0.0, 0.0]
@@ -173,6 +174,7 @@ function agent_step!(agent, model)
 	end
 	
 end
+
 
 
 ###Create the model_step function
