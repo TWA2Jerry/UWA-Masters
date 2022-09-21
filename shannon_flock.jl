@@ -9,7 +9,7 @@ using VoronoiCells
 
 
 
-###Defining a norm function, cause why not
+###Defining a norm function for vectors or even tuples, cause why n t
 function norm (v)
 	sum_of_squares = 0.0
 	for i in 1:length(v)

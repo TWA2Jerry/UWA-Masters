@@ -1,11 +1,23 @@
-function intercept_points 
+using DataStructures
 
-	//Look at each of the neighbours of the agent, and generate the half planes
-		//Use the half-way point as the point p
+function intercept_points (ri, neighbouring_points)
+	#ri represents the position of our agent i, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
-		//Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
+	#Look at each of the neighbours of the agent, and generate the half planes
+	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
+	for point in neighbouring_points	
+		#Use the half-way point as the point p
+		r_ji = point .- ri
+		half_plane_point = 0.5 .* v_ji .+ ri
 
-	//deque for the half planes/lines
+		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
+		v_jix = -1.0 .* (0.5 .* r_ji[2])
+		v_jiy = 0.5 .* r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
+		pq = [v_jix, v_jiy]
+	end
+
+	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
+	
 
 	//Put the first half plane in, and calculate its intercepts with the circle. Do this using the fact that y = mx+c, and the equation of the circle is x^ + y^2 = \rho ^2
 
