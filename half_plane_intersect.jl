@@ -14,6 +14,8 @@ function intercept_points (ri, neighbouring_points)
 		v_jix = -1.0 .* (0.5 .* r_ji[2])
 		v_jiy = 0.5 .* r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
 		pq = [v_jix, v_jiy]
+		half_plane = [pq, half_plane_point]
+		push!(half_planes, half_plane)
 	end
 
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
