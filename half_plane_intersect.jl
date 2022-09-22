@@ -1,4 +1,26 @@
 using DataStructures
+eps = 0.0000000001
+
+
+###Function for calculating the intersection between two points
+function inter(h1, h2)
+	#h1 and h2 represent the half plane objects that we are trying to find the intersect for
+	
+end
+
+
+
+###Function for calculating a cross product
+function cross_product(v1, v2)
+	return v1[1] * v2[2] - v1[2]*v2[1]
+end
+
+
+
+###Function for calculating whether or not a point lies within a half plane
+function outside(half_plane, point)
+	return cross(half_plane[2], point - half_plane[3]) < -eps
+end
 
 function intercept_points (ri, neighbouring_points)
 	#ri represents the position of our agent i, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
@@ -19,17 +41,68 @@ function intercept_points (ri, neighbouring_points)
 	end
 
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
+	dq = []	
+
+	#Add in the bounding box lines, and sort the vector of half planes according to their angles
+	bottom_side = [0.0, [50.0, 0.0], [50.0, 0.0]]
+	right_side = [pi/2, [0.0, 50.0], [100.0, 50.0]]
+	top_side = [pi, [-50.0, 0.0], [50.0, 100.0]]
+	left_side = [-pi/2, [0.0, -50.0], [0.0, 50.0]]
+
+	push!(half_planes, bottom_side)
+	push!(half_planes, right_side)
+	push!(half_planes, top_side)
+	push!(half_planes, left_side)
+
+	sort(half_planes)
+
+
+	#Iterate through the half planes, adding them one at a time, cutting out any redundant half planes as we go
+	len = 0
+	for i in 1:length(half_planes)	
+		#For all previous intersections, if the intersection is outside the about-to-be added half-plane, remove that corresponding half-plane from the front of the queue. Of course, if it was an intersection with the circle, don't remove the corresponding half plane just yet
+		while(len > 1 && outside(half_planes[i], inter(dq[len], dq[len-1])))
+			pop!(dq)
+			len -= 1
+		end
+		
+		#Remove any half planes from the back of the queue, again, don't do it if 
+		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
+			popfirst!(dq)
+			lne -= 1
+		end
+		
+		#Add the new half plane
+		push!(dq, half_planes[i])
+		len += 1
+	end
+
+	#Do a final cleanup
+	while(len > 2 && outside(dq[0], inter(dq[len], dq[len-1])))
+		pop(dq)
+		len -= 1
+	end
+
+	while(len > 2 && outside(dq[len], inter(dq[1], dq[2])))
+		popfirst!(dq)
+		len -= 1
+	end
+
+	#Report empty intersection (if number of edges is less than 3?)
+	if(len < 3)
+		print("Yo this intersection be empty")
+		return -1
+	end
+
+
+	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
+	for i in 1:length(dq)
+		if(dq[i][4])
+			deleteat!(dq, i)
+		end
+	end
+
+	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	
-
-	//Put the first half plane in, and calculate its intercepts with the circle. Do this using the fact that y = mx+c, and the equation of the circle is x^ + y^2 = \rho ^2
-
-	//Iterate through the other half planes
-		//For all previous intersections, if the intersection is outside the about-to-be added half-plane, remove that corresponding half-plane from the front of the queue. Of course, if it was an intersection with the circle, don't remove the corresponding half plane just yet
-
-		//Remove any half planes from the back of the queue, again, don't do it if 
-
-		//So yeah, we should keep a dequeue also of the intercepts, and go through the dequeue of intersects instead, but keeping a track of whether the intersect is in fact an intersect with the circle. If it is with the circle, do not remove the latest line from the lines/half planes dequeue. 
-
-		//Add the half plane for this iteration, and also add its front end intersect with the circle
 
 end
