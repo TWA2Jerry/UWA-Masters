@@ -7,8 +7,11 @@ function inter(h1, h2)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
         m1 = h1[2][2]/h1[2][1]
         m2 = h2[2][2]/h2[2][1]
-        c1 = [2] -
+        c1 = h1[3][2] - m1*h1[3][1]
+	c2 = h2[3][2] - m2*h2[3][1]
         xint = (c2-c1)/(m1-m2)
+	yint = m1 * xint
+	return [xint, yint]
 end
 
 
@@ -36,7 +39,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function intercept_points (ri, neighbouring_points)
+function intercept_points (ri, neighbouring_points, rho)
 	#ri represents the position of our agent i, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -44,25 +47,26 @@ function intercept_points (ri, neighbouring_points)
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
 		r_ji = point .- ri
-		half_plane_point = 0.5 .* v_ji .+ ri
+		half_plane_point = 0.5 .* r_ji .+ ri
 
 		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
-		v_jix = -1.0 .* (0.5 .* r_ji[2])
-		v_jiy = 0.5 .* r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
+		v_jix = -1.0 * (0.5 * r_ji[2])
+		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
 		pq = [v_jix, v_jiy]
 		angle = atan(v_ijy, v_ijx)
-                half_plane = [angle, pq, half_plane_point]
+		is_box = 0 #This is just to differentiate between the box and actual line segments later
+                half_plane = [angle, pq, half_plane_point, is_box]
 		push!(half_planes, half_plane)
 	end
 
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
 	dq = []	
 
-	#Add in the bounding box lines, and sort the vector of half planes according to their angles
-	bottom_side = [0.0, [50.0, 0.0], [50.0, 0.0]]
-	right_side = [pi/2, [0.0, 50.0], [100.0, 50.0]]
-	top_side = [pi, [-50.0, 0.0], [50.0, 100.0]]
-	left_side = [-pi/2, [0.0, -50.0], [0.0, 50.0]]
+	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
+	bottom_side = [0.0, [50.0, 0.0], [50.0, 0.0], 1]
+	right_side = [pi/2, [0.0, 50.0], [100.0, 50.0], 1]
+	top_side = [pi, [-50.0, 0.0], [50.0, 100.0], 1]
+	left_side = [-pi/2, [0.0, -50.0], [0.0, 50.0], 1]
 
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
@@ -80,13 +84,6 @@ function intercept_points (ri, neighbouring_points)
 			pop!(dq)
 			len -= 1
 		end
-		
-		#Remove any half planes from the back of the queue, again, don't do it if 
-		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
-			popfirst!(dq)
-			lne -= 1
-		end
-		
 		
 		#Remove any half planes from the back of the queue, again, don't do it if 
 		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
@@ -125,6 +122,51 @@ function intercept_points (ri, neighbouring_points)
 	end
 
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
+	vertices = []
+	dql = length(dq)
+	for i in 1:length(dq)
+		#Calculate the intersect between two thangs, and make sure they be valid
+		intersect_i = inter(dq[i], dq[(i+1)%length(dq)])
+		vhalf_int = intersect_i .- vertices[length(vertices)] #This is the vector from the last intersect to the new potential intersect
+		v_proper = vhalf_int .* dq[i][2]
+		if(v_proper < 0)
+			#Calculate the appropriate intersect of the half plane dq[i] with the circle
+			m = dq[i][2][2]/dq[i][2][1]
+			c = dq[i][3][2] - m*dq[i][3][1]			
+			
+			x1 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+			y1 = m*x1 + c
+
+			x2 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+			y2 = m*x2 + c
+			
+			#Okay, we should really check if the solutions aren't imaginary, but eh
+			vhalf_int1 = [x1, y1] .- vertices[length(vertices)] #This is the vector from the last vertex to the intersect of the base edge with the circle
+			circle_intersect_i = vhalf_int1 .* dq[i][2] < 0? [x2, y2] : [x1, y1] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
+			push!(vertices, [circle_intersect_i,1])
+			
+
+			#Calculate the appropriate intersect of the half plane dq[(i+1)%length(dq)] with the circle		
+                        m = dq[(i+1)%dql][2][2]/dq[(i+1)%dql][2][1]
+                        c = dq[(i+1)%dql][3][2] - m*dq[(i+1)%dql][3][1]
+
+                        x1 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+                        y1 = m*x1 + c
+
+                        x2 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+                        y2 = m*x2 + c
+
+                        #Okay, we should really check if the solutions aren't imaginary, but eh
+                        vhalf_int2 = [x1, y1] .- vertices[0] #This is the vector from the last vertex to the intersect of the base edge with the circle
+                        circle_intersect_ip1 = vhalf_int2 .* dq[(i+1)%dql][2] < 0? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
+                        push!(vertices, [circle_intersect_ip1, 1])
+
 	
+			#Add these intersects to the list of edges, but label them as being circle edges
+		else
+			#Just add the intersect already calculated
+			push!(vertices, [intersect_i, 0])
+		end
+	end
 
 end
