@@ -1,6 +1,14 @@
 using DataStructures
 
-function intercept_points (ri, neighbouring_points)
+function inter(h1, h2)
+	#h1 and h2 represent the half planes we want to calculate the line intersections for
+	m1 = h1[2][2]/h1[2][1]
+	m2 = h2[2][2]/h2[2][1]
+	c1 = [2] - 
+	xint = (c2-c1)/(m1-m2)
+end
+
+function voronoi_area (ri, neighbouring_points)
 	#ri represents the position of our agent i, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -14,14 +22,16 @@ function intercept_points (ri, neighbouring_points)
 		v_jix = -1.0 .* (0.5 .* r_ji[2])
 		v_jiy = 0.5 .* r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
 		pq = [v_jix, v_jiy]
-		half_plane = [pq, half_plane_point]
+		angle = atan(v_ijy, v_ijx)
+		half_plane = [angle, pq, half_plane_point]
 		push!(half_planes, half_plane)
 	end
 
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
-	
+		
 
 	//Put the first half plane in, and calculate its intercepts with the circle. Do this using the fact that y = mx+c, and the equation of the circle is x^ + y^2 = \rho ^2
+	
 
 	//Iterate through the other half planes
 		//For all previous intersections, if the intersection is outside the about-to-be added half-plane, remove that corresponding half-plane from the front of the queue. Of course, if it was an intersection with the circle, don't remove the corresponding half plane just yet
