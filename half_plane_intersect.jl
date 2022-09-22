@@ -4,8 +4,11 @@ eps = 0.0000000001
 
 ###Function for calculating the intersection between two points
 function inter(h1, h2)
-	#h1 and h2 represent the half plane objects that we are trying to find the intersect for
-	
+        #h1 and h2 represent the half planes we want to calculate the line intersections for
+        m1 = h1[2][2]/h1[2][1]
+        m2 = h2[2][2]/h2[2][1]
+        c1 = [2] -
+        xint = (c2-c1)/(m1-m2)
 end
 
 
@@ -22,6 +25,17 @@ function outside(half_plane, point)
 	return cross(half_plane[2], point - half_plane[3]) < -eps
 end
 
+
+
+
+###Function for calculating whether or not a point lies within a half plane
+function outside(half_plane, point)
+	return cross(half_plane[2], point - half_plane[3]) < -eps
+end
+
+
+
+###Function for generating the set of vertices defining the voronoi cell
 function intercept_points (ri, neighbouring_points)
 	#ri represents the position of our agent i, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
@@ -36,7 +50,8 @@ function intercept_points (ri, neighbouring_points)
 		v_jix = -1.0 .* (0.5 .* r_ji[2])
 		v_jiy = 0.5 .* r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
 		pq = [v_jix, v_jiy]
-		half_plane = [pq, half_plane_point]
+		angle = atan(v_ijy, v_ijx)
+                half_plane = [angle, pq, half_plane_point]
 		push!(half_planes, half_plane)
 	end
 
@@ -65,6 +80,13 @@ function intercept_points (ri, neighbouring_points)
 			pop!(dq)
 			len -= 1
 		end
+		
+		#Remove any half planes from the back of the queue, again, don't do it if 
+		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
+			popfirst!(dq)
+			lne -= 1
+		end
+		
 		
 		#Remove any half planes from the back of the queue, again, don't do it if 
 		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
