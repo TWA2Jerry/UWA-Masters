@@ -1,6 +1,15 @@
 using DataStructures
 eps = 0.0000000001
 
+function norm (v)
+        sum_of_squares = 0.0
+        for i in 1:length(v)
+                sum_of_squares += (v[i])^2
+        end
+
+        return sqrt(sum_of_squares)
+end
+
 
 ###Function for calculating the intersection between two points
 function inter(h1, h2)
@@ -20,14 +29,6 @@ end
 function cross_product(v1, v2)
 	return v1[1] * v2[2] - v1[2]*v2[1]
 end
-
-
-
-###Function for calculating whether or not a point lies within a half plane
-function outside(half_plane, point)
-	return cross(half_plane[2], point - half_plane[3]) < -eps
-end
-
 
 
 
@@ -90,7 +91,19 @@ function intercept_points (ri, neighbouring_points, rho)
 			popfirst!(dq)
 			lne -= 1
 		end
-		
+	
+		#Check for parallel half planes
+		if(len > 0 && norm(cross_product(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps
+			if(half_planes[i][2] .* dq[len][2] < 0.0)
+				print("Uh, Houston, we may have a anti-parallel pair")
+				return -1
+				if (out(half_planes[i], dq[len][3])) #Check if the last line in the 
+				pop!(dq)
+				len -= 1
+			else continue
+			end
+		end
+
 		#Add the new half plane
 		push!(dq, half_planes[i])
 		len += 1
