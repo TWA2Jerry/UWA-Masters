@@ -26,13 +26,13 @@ end
 
 
 ###Function for calculating a cross product
-function cross_product(v1, v2)
+function cross(v1, v2)
 	return v1[1] * v2[2] - v1[2]*v2[1]
 end
 
 
 
-###Function for calculating whether or not a point lies within a half plane
+###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 function outside(half_plane, point)
 	return cross(half_plane[2], point - half_plane[3]) < -eps
 end
@@ -93,7 +93,7 @@ function intercept_points (ri, neighbouring_points, rho)
 		end
 	
 		#Check for parallel half planes
-		if(len > 0 && norm(cross_product(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps
+		if(len > 0 && norm(cross(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
 			if(half_planes[i][2] .* dq[len][2] < 0.0)
 				print("Uh, Houston, we may have a anti-parallel pair")
 				return -1
