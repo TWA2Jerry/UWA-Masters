@@ -21,22 +21,36 @@ end
 
 
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
-function voronoi_area(cell)
+function voronoi_area(cell, rho)
        	Area = 0.0
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
+		#Use the shoestring formula to calcualte the area
+		j = (i+1)%num_points
+		xi = vertices[i][1][1]
+		yi = vertices[i][1][2]
+		xj = vertices[j][1][1]
+		yj = vertices[j][1][2]
+                Area += 0.5 * (yi + yj)* (xi - xj)
+		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
+		if(vertices[i][2] == 1 && vertices[j][2] == 1)
+			chord_length = norm(vertices[j][1] .- vertices[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
+			r = sqrt(rho^2 - (0.5 .* chord_length)^2)
+			h = rho - r
+			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
+			Area += circle_segment_area
+		end
+        end
 
-		#If the vertices are just vertices from the intersect of two lines, just use shoestring formula
-		#If vertices are from the intersect of lines with circles, then use shoestring formula but also calculate the circle segment area given the length of the chord. 
 
-	return  Area
+		return  abs(Area)
 end
 
 
 
 ###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn, q, m)
+function move_gradient(agent, model,  kn, q, m, rho)
 	#Calculate the unit vector in the current direction of motion
 	unit_v = agent.vel ./ norm(agent.vel)
 	agent_speed = norm(agent.vel)
@@ -49,10 +63,8 @@ function move_gradient(agent, model,  kn, q, m)
 	end		
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
-	pushfirst!(positions, agent.pos)
 	min_area = agent.A #The agent's current DOD area
-	deleteat!(positions, 1)
-	min_direction = [0.0, 0.0]
+	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	for i in 0:q #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
@@ -61,7 +73,7 @@ function move_gradient(agent, model,  kn, q, m)
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 2
+				if norm(new_agent_pos .- neighbour_position) < 2 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					conflict = 1
 					break
 				end			
@@ -77,18 +89,15 @@ function move_gradient(agent, model,  kn, q, m)
                 end
 
 		#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                pushfirst!(positions, new_agent_pos)
-                new_areas = voronoi_area(positions)
-                new_agent_area = new_areas[1]
-                if (new_area < min_area)
+		agent_voronoi_cell = voronoi_cell(agent.pos, positions, rho) #Generates the set of vertices which define the voronoi cell
+		new_area = voronoi_area(agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+		if (new_area < min_area)
                 	min_area = new_area
                         min_direction = direction_of_move
                 end
-
-
 	end
 
-	#It really doesn't have to be like this, but at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
+	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] += (direction_of_move .* agent_speed)[1]
 	kn[2] += (direction_of_move .* agent_speed)[2]
 end
@@ -176,9 +185,8 @@ function agent_step!(agent, model)
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
 	move_agent!(agent, new_agent_pos, model)	
-	end
-	
 end
+	
 
 
 

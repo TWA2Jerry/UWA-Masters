@@ -5,6 +5,11 @@
 ###Preliminaries
 using Agents
 using Random
+out_file = open("moon_proj_dat_jul.txt", "w")
+
+
+
+
 ###Create the movement gradient function that gives the rate of change in position and velocity, I'll use RK4, cause why not. Actually, no RK4 since we don't have a consistent acceleration function
 function move_gradient(agent, model, k_pos, k_vel, kn)
 	#Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
@@ -69,6 +74,7 @@ function initialise(; seed = 123)
 
 	add_agent!(agent1, (69.0, 50.0), model)
 	add_agent!(agent2, (50.0, 50.0), model)
+	write(out_file, agent1.pos)
 	return model
 end  
 
@@ -99,9 +105,11 @@ function agent_step!(agent, model)
 	print(new_agent_pos, "\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
+	write(out_file,"$(new_agent_pos[1]) $(new_agent_pos[2]) \n") 
 	move_agent!(agent, new_agent_pos, model)	
 	end
 	
+
 	#If the agent is the planet, do nothing. This is just to check that we are indeed, doing nothing
 	#if(agent.planet == 1) 
 	#print("Agent 2 position is ", agent.pos, "\n")
@@ -119,7 +127,7 @@ model = initialise()
 
 
 ###Test the model has been initialised and works
-using InteractiveDynamics
+#= using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
 
 figure, _ = abmplot(model)
@@ -136,4 +144,4 @@ abmvideo(
     framerate = 10, frames = 1000,
     title = "Moon orbiting planet"
 )
-	
+=#	

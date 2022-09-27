@@ -1,0 +1,5 @@
+This is my gun, my only gun
+5 
+[1, 2] 
+(1, 2) 
+1 2
