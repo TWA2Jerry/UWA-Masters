@@ -5,7 +5,6 @@
 ###Preliminaries
 using Agents
 using Random
-using VoronoiCells
 
 
 
@@ -21,11 +20,17 @@ end
 
 
 
-###Function that calculates the voronoi area of a given agent a given position
-function voronoi_area(pts)
-        Cells = voronoicells(pts)
-        Areas = voronoiarea[Cells]
-        return  Areas
+###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
+function voronoi_area(cell)
+       	Area = 0.0
+
+	#Iterate through successive pairs of vertices in the cell
+	for i in 1:length(cell)
+
+		#If the vertices are just vertices from the intersect of two lines, just use shoestring formula
+		#If vertices are from the intersect of lines with circles, then use shoestring formula but also calculate the circle segment area given the length of the chord. 
+
+	return  Area
 end
 
 

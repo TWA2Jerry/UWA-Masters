@@ -25,7 +25,7 @@ end
 
 
 
-###Function for calculating a cross product
+###Function for calculating the magnitude of the cross product between two vectors v1 and v2
 function cross(v1, v2)
 	return v1[1] * v2[2] - v1[2]*v2[1]
 end
@@ -40,8 +40,8 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function intercept_points (ri, neighbouring_points, rho)
-	#ri represents the position of our agent i, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
+function voronoi_cell (ri, neighbouring_points, rho)
+	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
 	#Look at each of the neighbours of the agent, and generate the half planes
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
@@ -97,7 +97,7 @@ function intercept_points (ri, neighbouring_points, rho)
 			if(half_planes[i][2] .* dq[len][2] < 0.0)
 				print("Uh, Houston, we may have a anti-parallel pair")
 				return -1
-				if (out(half_planes[i], dq[len][3])) #Check if the last line in the 
+				if (out(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
 				pop!(dq)
 				len -= 1
 			else continue
