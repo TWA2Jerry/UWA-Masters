@@ -7,7 +7,14 @@ using Agents
 using Random
 out_file = open("moon_proj_dat_jul.txt", "w")
 
-
+###Function for the norm of a vector, cause why not
+function norm(v)
+	sum_of_squares = 0.0
+	for i in 1:length(v)
+		sum_of_squares += v[i]^2
+	end
+	return sqrt(sum_of_squares)
+end
 
 
 ###Create the movement gradient function that gives the rate of change in position and velocity, I'll use RK4, cause why not. Actually, no RK4 since we don't have a consistent acceleration function
@@ -74,7 +81,8 @@ function initialise(; seed = 123)
 
 	add_agent!(agent1, (69.0, 50.0), model)
 	add_agent!(agent2, (50.0, 50.0), model)
-	write(out_file, agent1.pos)
+	r_mp = norm(agent1.pos .- agent2.pos)
+	write(out_file, "$(agent1.pos[1]) $(agent1.pos[2]) $r_mp\n")
 	return model
 end  
 
@@ -105,7 +113,8 @@ function agent_step!(agent, model)
 	print(new_agent_pos, "\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
-	write(out_file,"$(new_agent_pos[1]) $(new_agent_pos[2]) \n") 
+	r_mp = norm(new_agent_pos .- (50.0, 50.0))
+	write(out_file,"$(new_agent_pos[1]) $(new_agent_pos[2]) $r_mp\n") 
 	move_agent!(agent, new_agent_pos, model)	
 	end
 	
@@ -125,7 +134,9 @@ end
 ###Initialise the model
 model = initialise()
 
-
+for i in 1:Int(89.7/0.001)
+	step!(model, agent_step)
+end
 ###Test the model has been initialised and works
 #= using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
