@@ -17,8 +17,8 @@ function norm(v)
 end
 
 
-###Create the movement gradient function that gives the rate of change in position and velocity, I'll use RK4, cause why not. Actually, no RK4 since we don't have a consistent acceleration function
-function move_gradient(agent, model, k_pos, k_vel, kn)
+###Create the movement gradient function that gives the rate of change in position and velocity, using RK4
+function move_gradient(agent, model, k_pos, k_vel, kn, n) #Note that we have to specify k_pos, k_vel since it's not the actual agent pos and vel, but the agent pos and vel given the addition of a kn
 	#Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
 	r = sqrt((spacesize(model)[1])^2 + (spacesize(model)[2])^2) #Calculate the maximum possible distance any neighbour could be. Note that this is for continuous space. For other stuff like grids, use manhattan or chebyshev
         neighbours = nearby_agents(agent, model, r) #neigbours is now an iterable of all other agents j\neq i
@@ -28,14 +28,22 @@ function move_gradient(agent, model, k_pos, k_vel, kn)
         vy = k_vel[2]
 	kn[1] = vx
 	kn[2] = vy
-	
-	for neighbour in neighbours
+	#print("For kn = ", kn, "the number of neighbours detected is ", neighbours, "\n")
+	#= for neighbour in neighbours
         	#Generate the set of equations that determines the change in position and movement
-                x_j = neighbour.pos[1]
+		print("For n = ", n, " Neighbour position at $(neighbour.pos)\n")
+		x_j = neighbour.pos[1]
                 y_j = neighbour.pos[2]
-                kn[3] += -(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
-                kn[4] += -(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+                kn[3] = -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+                kn[4] = -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
         end
+
+	=#
+	x_j = 50.0
+	y_j = 50.0
+	kn[3] = -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+        kn[4] = -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+
 end
 
 ###Create the agent
@@ -55,7 +63,7 @@ function initialise(; seed = 123)
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 0.01)
+	properties = Dict(:t => 0.0, :dt => 0.001)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -71,7 +79,7 @@ function initialise(; seed = 123)
 	#Calculate, in planetary units such that m_planet = 1, and G = 1, the velocity required for the moon to achieve a circular orbit around the planet 
 	r = 19.0
 	moon_speed = sqrt(1.0/r)
-	moon_period = 2*pi*r^1.5
+	moon_period = 2*pi*r^(1.5)
 	vi_x = 0.0
 	vi_y = moon_speed
 
@@ -82,7 +90,7 @@ function initialise(; seed = 123)
 	add_agent!(agent1, (69.0, 50.0), model)
 	add_agent!(agent2, (50.0, 50.0), model)
 	r_mp = norm(agent1.pos .- agent2.pos)
-	write(out_file, "$(agent1.pos[1]) $(agent1.pos[2]) $r_mp\n")
+	write(out_file, "$(agent1.pos[1]) $(agent1.pos[2])) $((agent1.pos .- agent2.pos)[1]) $((agent1.pos .- agent2.pos)[2]) $r_mp\n")
 	return model
 end  
 
@@ -101,20 +109,22 @@ function agent_step!(agent, model)
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_gradient(agent, model, agent.pos, agent.vel, k1)
-        move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2)
-        move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3)
-        move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4);
+        move_gradient(agent, model, agent.pos, agent.vel, k1, 1)
+	#print("The value of k1 after the ODE function is ", k1, "\n")
+	move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2, 2)
+        #print("The value of k2 after the ODE function is ", k2, "\n")
+	move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3, 3)
+        move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4, 4);
 	
 	#Update the agent position and velocity
-	new_agent_pos = Tuple(agent.pos .+ dt/6*(k1[1:2] .+ 2*k2[1:2] .+ 2*k3[1:2] .+ k4[1:2]))
-        new_agent_vel = Tuple(agent.vel .+ dt/6*(k1[3:4] .+ 2*k2[3:4] .+ 2*k3[3:4] .+ k4[3:4]))
+	new_agent_pos = Tuple(agent.pos .+ dt/6 .*(k1[1:2] .+ 2*k2[1:2] .+ 2*k3[1:2] .+ k4[1:2]))
+        new_agent_vel = Tuple(agent.vel .+ dt/6 .*(k1[3:4] .+ 2*k2[3:4] .+ 2*k3[3:4] .+ k4[3:4]))
 	agent.vel = new_agent_vel
-	print(new_agent_pos, "\n")
+	#print(new_agent_pos, "\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
 	r_mp = norm(new_agent_pos .- (50.0, 50.0))
-	write(out_file,"$(new_agent_pos[1]) $(new_agent_pos[2]) $r_mp\n") 
+	write(out_file,"$(new_agent_pos[1]) $(new_agent_pos[2]) $(new_agent_pos[1]-50.0) $(new_agent_pos[2]-50.0)  $r_mp\n") 
 	move_agent!(agent, new_agent_pos, model)	
 	end
 	
@@ -134,8 +144,14 @@ end
 ###Initialise the model
 model = initialise()
 
+moon_period = 2*pi*19.0^1.5
+print("Moon period calculated to be ", moon_period, "\n")
+rounded_moon_period = round(moon_period, digits = 3)
+print("Rounded moon period calculated to be ", rounded_moon_period, "\n")
+N = Int(floor(0.5*rounded_moon_period/0.001))
+print("N calculated to be ", N, "\n")
 for i in 1:Int(89.7/0.001)
-	step!(model, agent_step)
+	step!(model, agent_step!)
 end
 ###Test the model has been initialised and works
 #= using InteractiveDynamics
