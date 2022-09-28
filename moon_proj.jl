@@ -150,7 +150,7 @@ rounded_moon_period = round(moon_period, digits = 3)
 print("Rounded moon period calculated to be ", rounded_moon_period, "\n")
 N = Int(floor(0.5*rounded_moon_period/0.001))
 print("N calculated to be ", N, "\n")
-for i in 1:Int(89.7/0.001)
+for i in 1:200000
 	step!(model, agent_step!)
 end
 ###Test the model has been initialised and works
