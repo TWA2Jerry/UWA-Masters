@@ -21,7 +21,8 @@ end
 function move_gradient(agent, model, k_pos, k_vel, kn, n) #Note that we have to specify k_pos, k_vel since it's not the actual agent pos and vel, but the agent pos and vel given the addition of a kn
 	#Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
 	r = sqrt((spacesize(model)[1])^2 + (spacesize(model)[2])^2) #Calculate the maximum possible distance any neighbour could be. Note that this is for continuous space. For other stuff like grids, use manhattan or chebyshev
-        neighbours = nearby_agents(agent, model, r) #neigbours is now an iterable of all other agents j\neq i
+        #neighbours = nearby_agents(agent, model, r) #neigbours is now an iterable of all other agents j\neq i
+	neighbour_ids = nearby_ids(agent, model, r)
 	x = k_pos[1]
         y = k_pos[2]
         vx = k_vel[1]
@@ -29,21 +30,23 @@ function move_gradient(agent, model, k_pos, k_vel, kn, n) #Note that we have to 
 	kn[1] = vx
 	kn[2] = vy
 	#print("For kn = ", kn, "the number of neighbours detected is ", neighbours, "\n")
-	#= for neighbour in neighbours
+	no_neighbours_detected = 0
+	for neighbour_id in neighbour_ids
         	#Generate the set of equations that determines the change in position and movement
-		print("For n = ", n, " Neighbour position at $(neighbour.pos)\n")
-		x_j = neighbour.pos[1]
-                y_j = neighbour.pos[2]
+		no_neighbours_detected += 1
+		print("For n = ", n, "with the ", no_neighbours_detected, "-th neighbour", "Neighbour position at $(model[neighbour_id].pos)\n")
+		x_j = model[neighbour_id].pos[1]
+		y_j = model[neighbour_id].pos[2]
                 kn[3] = -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
                 kn[4] = -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
         end
 
-	=#
-	x_j = 50.0
+	
+	#= x_j = 50.0
 	y_j = 50.0
 	kn[3] = -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
         kn[4] = -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
-
+	=#
 end
 
 ###Create the agent
@@ -61,6 +64,8 @@ using Random #for reproducibility
 function initialise(; seed = 123)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
+	#space = ContinuousSpace((100.0, 100.0); periodic = true, spacing = )
+
 	
 	#Create the properties of the model
 	properties = Dict(:t => 0.0, :dt => 0.001)
@@ -150,7 +155,7 @@ rounded_moon_period = round(moon_period, digits = 3)
 print("Rounded moon period calculated to be ", rounded_moon_period, "\n")
 N = Int(floor(0.5*rounded_moon_period/0.001))
 print("N calculated to be ", N, "\n")
-for i in 1:200000
+for i in 1:5
 	step!(model, agent_step!)
 end
 ###Test the model has been initialised and works
