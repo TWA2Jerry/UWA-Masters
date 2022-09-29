@@ -22,7 +22,7 @@ function move_gradient(agent, model, k_pos, k_vel, kn, n) #Note that we have to 
 	#Determine the neighbours of the agent. In this case, we want the moon, and we look through all of possible space
 	r = sqrt((spacesize(model)[1])^2 + (spacesize(model)[2])^2) #Calculate the maximum possible distance any neighbour could be. Note that this is for continuous space. For other stuff like grids, use manhattan or chebyshev
         #neighbours = nearby_agents(agent, model, r) #neigbours is now an iterable of all other agents j\neq i
-	neighbour_ids = nearby_ids(agent, model, r)
+	allagent_iterable = allagents(model)
 	x = k_pos[1]
         y = k_pos[2]
         vx = k_vel[1]
@@ -31,12 +31,15 @@ function move_gradient(agent, model, k_pos, k_vel, kn, n) #Note that we have to 
 	kn[2] = vy
 	#print("For kn = ", kn, "the number of neighbours detected is ", neighbours, "\n")
 	no_neighbours_detected = 0
-	for neighbour_id in neighbour_ids
+	for neighbour in allagent_iterable
         	#Generate the set of equations that determines the change in position and movement
+		if(neighbour.id == agent.id)
+			continue
+		end
 		no_neighbours_detected += 1
-		print("For n = ", n, "with the ", no_neighbours_detected, "-th neighbour", "Neighbour position at $(model[neighbour_id].pos)\n")
-		x_j = model[neighbour_id].pos[1]
-		y_j = model[neighbour_id].pos[2]
+		#print("For n = ", n, "with the ", no_neighbours_detected, "-th neighbour", "Neighbour position at $(neighbour.pos)\n")
+		x_j = neighbour.pos[1]
+		y_j = neighbour.pos[2]
                 kn[3] = -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
                 kn[4] = -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
         end
@@ -155,7 +158,7 @@ rounded_moon_period = round(moon_period, digits = 3)
 print("Rounded moon period calculated to be ", rounded_moon_period, "\n")
 N = Int(floor(0.5*rounded_moon_period/0.001))
 print("N calculated to be ", N, "\n")
-for i in 1:5
+for i in 1:260108
 	step!(model, agent_step!)
 end
 ###Test the model has been initialised and works
