@@ -57,8 +57,11 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	vix = unit_v[1]
 	viy = unit_v[2]
 	positions = []
-	neighbours = nearby_agents(agent, model)
-	for neighbour in neighbours
+	all_agents_iterable = allagents(model)
+	for neighbour in all_agents_iterable
+		if(neighbour.id == agent.id)
+			continue
+		end
 		pushfirst!(positions, neighbour.position)	
 	end		
 

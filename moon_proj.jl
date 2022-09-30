@@ -40,8 +40,8 @@ function move_gradient(agent, model, k_pos, k_vel, kn, n) #Note that we have to 
 		#print("For n = ", n, "with the ", no_neighbours_detected, "-th neighbour", "Neighbour position at $(neighbour.pos)\n")
 		x_j = neighbour.pos[1]
 		y_j = neighbour.pos[2]
-                kn[3] = -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
-                kn[4] = -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+                kn[3] += -1.0*(x-x_j)/((x-x_j)^2+(y-y_j)^2)^1.5
+                kn[4] += -1.0*(y-y_j)/((x-x_j)^2+(y-y_j)^2)^1.5
         end
 
 	
