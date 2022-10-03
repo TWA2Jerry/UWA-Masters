@@ -1,7 +1,5 @@
-using DataStructures
-eps = 0.0000000001
 
-function norm (v)
+function norm(v)
         sum_of_squares = 0.0
         for i in 1:length(v)
                 sum_of_squares += (v[i])^2
@@ -16,7 +14,11 @@ function inter(h1, h2)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
         m1 = h1[2][2]/h1[2][1]
         m2 = h2[2][2]/h2[2][1]
-        c1 = h1[3][2] - m1*h1[3][1]
+	if(m1 == m2)
+		printf("Parallel planes yo\n")
+		return -1
+	end 
+	c1 = h1[3][2] - m1*h1[3][1]
 	c2 = h2[3][2] - m2*h2[3][1]
         xint = (c2-c1)/(m1-m2)
 	yint = m1 * xint
@@ -41,7 +43,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell (ri, neighbouring_points, rho)
+function voronoi_cell(ri, neighbouring_points, rho)
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -101,7 +103,8 @@ function voronoi_cell (ri, neighbouring_points, rho)
 				if (out(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
 				pop!(dq)
 				len -= 1
-			else continue
+				else continue
+				end
 			end
 		end
 
@@ -130,7 +133,7 @@ function voronoi_cell (ri, neighbouring_points, rho)
 
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
 	for i in 1:length(dq)
-		if(dq[i][4])
+		if(dq[i][4] || norm(dq[i][3] .- ri) > rho)
 			deleteat!(dq, i)
 		end
 	end
@@ -140,9 +143,12 @@ function voronoi_cell (ri, neighbouring_points, rho)
 	dql = length(dq)
 	for i in 1:length(dq)
 		#Calculate the intersect between two thangs, and make sure they be valid
+		v_proper = -1
 		intersect_i = inter(dq[i], dq[(i+1)%length(dq)])
-		vhalf_int = intersect_i .- vertices[length(vertices)] #This is the vector from the last intersect to the new potential intersect
-		v_proper = vhalf_int .* dq[i][2]
+		if(intersect_i = inter(dq[i], dq[(i+1)%length(dq)]) != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
+			vhalf_int = intersect_i .- vertices[length(vertices)] #This is the vector from the last intersect to the new potential intersect
+			v_proper = vhalf_int .* dq[i][2]
+		end
 		if(v_proper < 0)
 			#Calculate the appropriate intersect of the half plane dq[i] with the circle
 			m = dq[i][2][2]/dq[i][2][1]
@@ -156,7 +162,7 @@ function voronoi_cell (ri, neighbouring_points, rho)
 			
 			#Okay, we should really check if the solutions aren't imaginary, but eh
 			vhalf_int1 = [x1, y1] .- vertices[length(vertices)] #This is the vector from the last vertex to the intersect of the base edge with the circle
-			circle_intersect_i = vhalf_int1 .* dq[i][2] < 0? [x2, y2] : [x1, y1] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
+			circle_intersect_i = vhalf_int1 .* dq[i][2] < 0 ? [x2, y2] : [x1, y1] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 			push!(vertices, [circle_intersect_i,1])
 			
 
@@ -172,7 +178,7 @@ function voronoi_cell (ri, neighbouring_points, rho)
 
                         #Okay, we should really check if the solutions aren't imaginary, but eh
                         vhalf_int2 = [x1, y1] .- vertices[0] #This is the vector from the last vertex to the intersect of the base edge with the circle
-                        circle_intersect_ip1 = vhalf_int2 .* dq[(i+1)%dql][2] < 0? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
+                        circle_intersect_ip1 = vhalf_int2 .* dq[(i+1)%dql][2] < 0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
                         push!(vertices, [circle_intersect_ip1, 1])
 
 	
@@ -183,4 +189,10 @@ function voronoi_cell (ri, neighbouring_points, rho)
 		end
 	end
 
+	return vertices
+
 end
+
+#for vertex in vertices
+	#printf(vertex[1])
+#end
