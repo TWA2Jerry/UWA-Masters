@@ -277,9 +277,14 @@ neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [50.0, 45.0]]
 =#
 
 #Weird triangle test case
-agent_pos = [50.0, 50.0]
+#=
 neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
+=#
 
+#Only two neighbours, parallel planes
+neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
+
+agent_pos = [50.0, 50.0]
 rho = 10.0
 vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
 for vertex in vertices
