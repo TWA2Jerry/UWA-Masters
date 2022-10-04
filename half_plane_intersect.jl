@@ -209,12 +209,18 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		if(v_proper < 0.0)
 			#Calculate the appropriate intersect of the half plane dq[i] with the circle
 			m = dq[i][2][2]/dq[i][2][1]
-			c = dq[i][3][2] - m*dq[i][3][1]			
+			print("Gradient for i is $m \n")
+			c = dq[i][3][2] - m*dq[i][3][1]	
+			print("c for i is $c\n")
 			
-			x1 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+			a = 1+m^2
+			b = -2*ri[1]+2*m*c-2*m*ri[2]
+			d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
+			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+			print("x1 calculated to be $x1\n")
 			y1 = m*x1 + c
 
-			x2 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+			x2 = (-(2*b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
 			y2 = m*x2 + c
 			
 			#Okay, we should really check if the solutions aren't imaginary, but eh
@@ -227,19 +233,24 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			
 
 			#Calculate the appropriate intersect of the half plane dq[(i+1)%length(dq)] with the circle		
-                        m = dq[(i+1)%dql][2][2]/dq[(i+1)%dql][2][1]
-                        c = dq[(i+1)%dql][3][2] - m*dq[(i+1)%dql][3][1]
+                        m = dq[(i)%dql+1][2][2]/dq[(i)%dql+1][2][1]
+			c = dq[(i)%dql+1][3][2] - m*dq[(i)%dql+1][3][1]
 
-                        x1 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+			a = 1+m^2
+                        b = -2*ri[1]+2*m*c-2*m*ri[2]
+                        d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
+                        x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                        print("x1 calculated for i+1 to be $x2\n")
                         y1 = m*x1 + c
 
-                        x2 = (-(2*m*c) - sqrt((2*m*c)^2 - 4*(m^2+1)*(c^2-rho^2)))/(2*(m^2+1))
+                        x2 = (-(2*b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
                         y2 = m*x2 + c
+
 
                         #Okay, we should really check if the solutions aren't imaginary, but eh
                         #REDUNDANT vhalf_int2 = [x1, y1] .- vertices[0] #This is the vector from the last vertex to the intersect of the base edge with the circle
 			b1_b2 = [x1, y1] .- [x2, y2] #Calculation of the vector from the second intersect to first intersect 
-			circle_intersect_ip1 = dot(b1_b2, dq[(i+1)%dql][2]) <= 0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
+			circle_intersect_ip1 = dot(b1_b2, dq[(i)%dql+1][2]) <= 0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
                         push!(vertices, [circle_intersect_ip1, 1])
 
 	
@@ -254,11 +265,23 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 end
 
-agent_pos = [50.0, 50.0]
+#Square test case
+#=agent_pos = [50.0, 50.0]
 neighbouring_positions = [[60.0, 50.0], [50.0, 60.0], [40.0, 50.0], [50.0, 40.0]]
 rho = 10.0
-vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
+=#
 
+#Triangle test case
+#=agent_pos = [50.0, 50.0]
+neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [50.0, 45.0]]
+=#
+
+#Weird triangle test case
+agent_pos = [50.0, 50.0]
+neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
+
+rho = 10.0
+vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
 for vertex in vertices
 	print(vertex[1])
 end
