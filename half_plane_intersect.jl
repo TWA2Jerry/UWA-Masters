@@ -220,7 +220,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			print("x1 calculated to be $x1\n")
 			y1 = m*x1 + c
 
-			x2 = (-(2*b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+			x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
 			y2 = m*x2 + c
 			
 			#Okay, we should really check if the solutions aren't imaginary, but eh
@@ -243,7 +243,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
                         print("x1 calculated for i+1 to be $x2\n")
                         y1 = m*x1 + c
 
-                        x2 = (-(2*b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                        x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
                         y2 = m*x2 + c
 
 
