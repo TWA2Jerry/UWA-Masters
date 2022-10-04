@@ -6,10 +6,10 @@
 using Agents
 using Random
 
+include("half_plane_intersect.jl")
 
-
-###Defining a norm function for vectors or even tuples, cause why n t
-function norm (v)
+###Defining a norm function for vectors or even tuples, cause why not. I think we'll use teh function in the half_plane_intersection file though
+#=function norm (v)
 	sum_of_squares = 0.0
 	for i in 1:length(v)
 		sum_of_squares += (v[i])^2
@@ -17,7 +17,7 @@ function norm (v)
 	
 	return sqrt(sum_of_squares)
 end
-
+=#
 
 
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
@@ -27,7 +27,7 @@ function voronoi_area(cell, rho)
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
 		#Use the shoestring formula to calcualte the area
-		j = (i+1)%num_points
+		j = (i)%num_points+1
 		xi = vertices[i][1][1]
 		yi = vertices[i][1][2]
 		xj = vertices[j][1][1]
@@ -62,15 +62,15 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		if(neighbour.id == agent.id)
 			continue
 		end
-		pushfirst!(positions, neighbour.position)	
+		pushfirst!(positions, neighbour.pos)	
 	end		
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	min_area = agent.A #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
-	for i in 0:q #For every direction
+	for i in 0:(q-1) #For every direction
 		conflict = 0
-		direction_of_move = [cos(i*pi/q)*vix - sin(i*pi/q)*viy, sin(i*pi/q)*vix + cos(i*pi/q)*viy]
+		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
 		
@@ -150,14 +150,32 @@ function initialise(; seed = 123, no_birds = 100)
 	end
 
 	#Calculate the DoDs based off the initial positions
-	initial_dods = voronoi_area(initial_positions)
-	
+	#initial_dods = voronoi_area(initial_positions, rho)
+	initial_dods = []
+	for i in 1:no_birds
+		print("Calculating initial DOD for agent $i.")
+		ri  = initial_positions[i]
+		neighbouring_positions = []
+		for j in 1:no_birds
+			if(i == j)
+				continue 
+			end
+			push!(neighbouring_positions, initial_positions[j])
+		end
+		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
+		initial_A = voronoi_area(initial_cell, rho) 
+		print("Initial DOD calculated to be $initial_A\n")
+		push!(initial_dods, initial_A)
+	end
+			
+
 	#Now make the agents with their respective DoDs and add to the model
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
 		add_agent!(agent, initial_positions[i], model)	
 	end	
 
+	print("Initialisation complete. \n\n\n")
 	return model
 end  
 
