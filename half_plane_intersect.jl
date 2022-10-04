@@ -26,9 +26,10 @@ end
 function inter(h1, h2)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
 	print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
-	m1 = h1[2][2]/h1[2][1]
-	m2 = h2[2][2]/h2[2][1]
-	#=
+	#m1 = h1[2][2]/h1[2][1]
+	#m2 = h2[2][2]/h2[2][1]
+	#m1 = 0.0
+	#m2 = 0.0
 	if(h1[2][1] == 0.0)
 		print("Infinite gradient detected for m1\n")
 		m1 = inf
@@ -45,16 +46,16 @@ function inter(h1, h2)
 	if(abs(m1 - m2) < abs(eps))
 		print("Parallel planes yo\n")
 		return -1
-	end =# 
+	end  
 	#print("m1 - m2 found to be $(m1-m2)\n")
 	c1 = h1[3][2] - m1*h1[3][1]
 	c2 = h2[3][2] - m2*h2[3][1]
         xint = (c2-c1)/(m1-m2)
 	yint = -1
 	if(abs(m1 - inf) < abs(eps))
-		yint = m2 * xint
+		yint = m2 * xint + c2
 	else 
-		yint = m1 * xint
+		yint = m1 * xint + c1
 	end
 	print("Intersect calculated as $([xint, yint])\n")
 	return [xint, yint]
@@ -112,9 +113,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	push!(half_planes, top_side)
 	push!(half_planes, left_side)
 
-	sort(half_planes)
-
-
+	sort!(half_planes)
+	print("After sorting, half_planes is given by \n")
+	for i in 1:length(half_planes)
+		print("$(half_planes[i])\n")
+	end
 	#Iterate through the half planes, adding them one at a time, cutting out any redundant half planes as we go
 	len = 0
 	for i in 1:length(half_planes)	
@@ -132,7 +135,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	
 		#Check for parallel half planes
 		if(len > 0 && norm(cross(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
-			if(half_planes[i][2] .* dq[len][2] < 0.0)
+			if(dot(half_planes[i][2], dq[len][2]) < 0.0)
 				print("Uh, Houston, we may have a anti-parallel pair")
 				return -1
 				if (out(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
@@ -150,7 +153,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 	#Do a final cleanup
 	while(len > 2 && outside(dq[1], inter(dq[len], dq[len-1])))
-		pop(dq)
+		pop!(dq)
 		len -= 1
 	end
 
@@ -176,7 +179,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		i += 1
 	end
 	
-	print("We have now removed all bounding box and redundant half-planes\n")
+	print("We have now removed all bounding box and redundant half-planes, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		print("The half plane is $half_plane\n")
 	end
@@ -185,16 +188,21 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	dql = length(dq)
 	for i in 1:length(dq)
 		#Calculate the intersect between two thangs, and make sure they be valid
+		print("Iteration of $i\n")
 		v_proper = -1
-		intersect_i = inter(dq[i], dq[(i+1)%length(dq)])
+		intersect_i = inter(dq[i], dq[(i)%length(dq)+1])
 		print("The intersect is $intersect_i\n")
 		if(intersect_i != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
-			if(norm(agent_pos .- intersect_i) <= rho) 	
+			print("Passed non-parallel condition\n")
+			if(norm(agent_pos .- intersect_i) <= rho)
+				print("Passed within circle condition\n")
 				if(i == 1)
+					print("Passed i = 1 condition\n")
 					v_proper = 1.0
 				else 
-					vhalf_int = intersect_i .- vertices[length(vertices)] #This is the vector from the last intersect to the new potential intersect
-					v_proper = vhalf_int .* dq[i][2]
+					vhalf_int = intersect_i .- vertices[length(vertices)][1] #This is the vector from the last intersect to the new potential intersect
+					v_proper = dot(vhalf_int, dq[i][2])
+					print("Dot product of old->new intersect with new plane is $v_proper\n")
 				end
 			end
 		end
@@ -214,7 +222,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
 			print("The value of a1_a2 is $a1_a2 and the value of the half plane is $(dq[i][2])\n")
 			print("The dot product of a1_a2 with the vector of the half segment is $(a1_a2 .*  dq[i][2])\n")
-			circle_intersect_i = a1_a2 .*  dq[i][2] >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
+			circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 			push!(vertices, [circle_intersect_i,1])
 			
 
@@ -231,7 +239,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
                         #Okay, we should really check if the solutions aren't imaginary, but eh
                         #REDUNDANT vhalf_int2 = [x1, y1] .- vertices[0] #This is the vector from the last vertex to the intersect of the base edge with the circle
 			b1_b2 = [x1, y1] .- [x2, y2] #Calculation of the vector from the second intersect to first intersect 
-			circle_intersect_ip1 = b1_b2 .* dq[(i+1)%dql][2] <= 0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
+			circle_intersect_ip1 = dot(b1_b2, dq[(i+1)%dql][2]) <= 0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
                         push!(vertices, [circle_intersect_ip1, 1])
 
 	
