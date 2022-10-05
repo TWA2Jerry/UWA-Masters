@@ -1,4 +1,4 @@
-eps = 0.00000001
+eps = 0.0000000001
 inf = 1000000000000.0
 function norm(v)
         sum_of_squares = 0.0
@@ -25,21 +25,21 @@ end
 ###Function for calculating the intersection between two points
 function inter(h1, h2)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
-	print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
+	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
 	#m1 = h1[2][2]/h1[2][1]
 	#m2 = h2[2][2]/h2[2][1]
 	#m1 = 0.0
 	#m2 = 0.0
 	if(h1[2][1] == 0.0)
-		print("Infinite gradient detected for m1\n")
+		#print("Infinite gradient detected for m1\n")
 		m1 = inf
 	else 
 		m1 = h1[2][2]/h1[2][1]
 	end
-	print("m1 found to be $m1\n")
+	#print("m1 found to be $m1\n")
 	if(h2[2][1] == 0.0)
 		m2 = inf
-		print("Infinite gradient detected for m2\n")
+		#print("Infinite gradient detected for m2\n")
 	else
 		m2 = h2[2][2]/h2[2][1]
 	end	
@@ -47,7 +47,7 @@ function inter(h1, h2)
 		print("Parallel planes yo\n")
 		return -1
 	end  
-	#print("m1 - m2 found to be $(m1-m2)\n")
+	##print("m1 - m2 found to be $(m1-m2)\n")
 	c1 = h1[3][2] - m1*h1[3][1]
 	c2 = h2[3][2] - m2*h2[3][1]
         xint = (c2-c1)/(m1-m2)
@@ -57,7 +57,7 @@ function inter(h1, h2)
 	else 
 		yint = m1 * xint + c1
 	end
-	print("Intersect calculated as $([xint, yint])\n")
+	#print("Intersect calculated as $([xint, yint])\n")
 	return [xint, yint]
 end
 
@@ -114,10 +114,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	push!(half_planes, left_side)
 
 	sort!(half_planes)
-	print("After sorting, half_planes is given by \n")
-	for i in 1:length(half_planes)
+	#print("After sorting, half_planes is given by \n")
+	#=for i in 1:length(half_planes)
 		print("$(half_planes[i])\n")
 	end
+	=#
 	#Iterate through the half planes, adding them one at a time, cutting out any redundant half planes as we go
 	len = 0
 	for i in 1:length(half_planes)	
@@ -136,7 +137,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		#Check for parallel half planes
 		if(len > 0 && norm(cross(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
 			if(dot(half_planes[i][2], dq[len][2]) < 0.0)
-				print("Uh, Houston, we may have a anti-parallel pair")
+				#print("Uh, Houston, we may have a anti-parallel pair")
 				return -1
 				if (out(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
 				pop!(dq)
@@ -178,46 +179,68 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		end
 		i += 1
 	end
-	
-	print("We have now removed all bounding box and redundant half-planes, the remaining half planes are (given by their vectors) \n")
-	for half_plane in dq
+
+	#print("We have now removed all bounding box and redundant half-planes, the remaining half planes are (given by their vectors) \n")
+	#=for half_plane in dq
 		print("The half plane is $half_plane\n")
 	end
+	=#
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vertices = []
 	dql = length(dq)
 	for i in 1:length(dq)
+		if(dql == 1) #To handle the case if there's only one fence for an agent
+			print("Single fence agent detected\n")
+			m = dq[i][2][2]/dq[i][2][1]
+                        #print("Gradient for i is $m \n")
+                        c = dq[i][3][2] - m*dq[i][3][1]
+                        #print("c for i is $c\n")
+
+                        a = 1+m^2
+                        b = -2*ri[1]+2*m*c-2*m*ri[2]
+                        d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
+                        x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                        #print("x1 calculated to be $x1\n")
+                        y1 = m*x1 + c
+
+                        x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                        y2 = m*x2 + c
+
+			push!(vertices, [[x1, y1], 1])
+			push!(vertices, [[x2, y2], 1])
+			break
+		end
 		#Calculate the intersect between two thangs, and make sure they be valid
-		print("Iteration of $i\n")
+		#print("Iteration of $i\n")
 		v_proper = -1
 		intersect_i = inter(dq[i], dq[(i)%length(dq)+1])
-		print("The intersect is $intersect_i\n")
+		#print("The intersect is $intersect_i\n")
 		if(intersect_i != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
-			print("Passed non-parallel condition\n")
-			if(norm(agent_pos .- intersect_i) <= rho)
-				print("Passed within circle condition\n")
+			#print("Passed non-parallel condition\n")
+			if(norm(ri .- intersect_i) <= rho)
+				#print("Passed within circle condition\n")
 				if(i == 1)
-					print("Passed i = 1 condition\n")
+					#print("Passed i = 1 condition\n")
 					v_proper = 1.0
 				else 
 					vhalf_int = intersect_i .- vertices[length(vertices)][1] #This is the vector from the last intersect to the new potential intersect
 					v_proper = dot(vhalf_int, dq[i][2])
-					print("Dot product of old->new intersect with new plane is $v_proper\n")
+					#print("Dot product of old->new intersect with new plane is $v_proper\n")
 				end
 			end
 		end
 		if(v_proper < 0.0)
 			#Calculate the appropriate intersect of the half plane dq[i] with the circle
 			m = dq[i][2][2]/dq[i][2][1]
-			print("Gradient for i is $m \n")
+			#print("Gradient for i is $m \n")
 			c = dq[i][3][2] - m*dq[i][3][1]	
-			print("c for i is $c\n")
+			#print("c for i is $c\n")
 			
 			a = 1+m^2
 			b = -2*ri[1]+2*m*c-2*m*ri[2]
 			d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-			print("x1 calculated to be $x1\n")
+			#print("x1 calculated to be $x1\n")
 			y1 = m*x1 + c
 
 			x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
@@ -226,8 +249,8 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			#Okay, we should really check if the solutions aren't imaginary, but eh
 			#REDUNDANT vhalf_int1 = [x1, y1] .- vertices[length(vertices)] #This is the vector from the last vertex to the intersect of the base edge with the circle
 			a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
-			print("The value of a1_a2 is $a1_a2 and the value of the half plane is $(dq[i][2])\n")
-			print("The dot product of a1_a2 with the vector of the half segment is $(a1_a2 .*  dq[i][2])\n")
+			#print("The value of a1_a2 is $a1_a2 and the value of the half plane is $(dq[i][2])\n")
+			#print("The dot product of a1_a2 with the vector of the half segment is $(a1_a2 .*  dq[i][2])\n")
 			circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 			push!(vertices, [circle_intersect_i,1])
 			
@@ -240,7 +263,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
                         b = -2*ri[1]+2*m*c-2*m*ri[2]
                         d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
                         x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                        print("x1 calculated for i+1 to be $x2\n")
+                        #print("x1 calculated for i+1 to be $x2\n")
                         y1 = m*x1 + c
 
                         x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
@@ -282,11 +305,15 @@ neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
 =#
 
 #Only two neighbours, parallel planes
+#=
 neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
+=#
 
+#=
 agent_pos = [50.0, 50.0]
 rho = 10.0
 vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
 for vertex in vertices
-	print(vertex[1])
+	#print(vertex[1])
 end
+=#

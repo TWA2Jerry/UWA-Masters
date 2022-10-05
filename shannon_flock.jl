@@ -19,23 +19,27 @@ include("half_plane_intersect.jl")
 end
 =#
 
-
+rho = 10.0
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
 function voronoi_area(cell, rho)
        	Area = 0.0
-
+	num_points = length(cell)
+	if(num_points == 0)
+		Area = pi*rho^2
+		return Area
+	end
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
 		#Use the shoestring formula to calcualte the area
 		j = (i)%num_points+1
-		xi = vertices[i][1][1]
-		yi = vertices[i][1][2]
-		xj = vertices[j][1][1]
-		yj = vertices[j][1][2]
+		xi = cell[i][1][1]
+		yi = cell[i][1][2]
+		xj = cell[j][1][1]
+		yj = cell[j][1][2]
                 Area += 0.5 * (yi + yj)* (xi - xj)
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
-		if(vertices[i][2] == 1 && vertices[j][2] == 1)
-			chord_length = norm(vertices[j][1] .- vertices[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
+		if(cell[i][2] == 1 && cell[j][2] == 1)
+			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
 			r = sqrt(rho^2 - (0.5 .* chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
@@ -52,8 +56,9 @@ end
 ###Function that determines the gradient of movement
 function move_gradient(agent, model,  kn, q, m, rho)
 	#Calculate the unit vector in the current direction of motion
-	unit_v = agent.vel ./ norm(agent.vel)
-	agent_speed = norm(agent.vel)
+	dt = model.dt
+	unit_v = agent.vel ./ 1.0
+	agent_speed = 1.0
 	vix = unit_v[1]
 	viy = unit_v[2]
 	positions = []
@@ -68,6 +73,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	min_area = agent.A #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
+	move_made = 0
+	print("For agent $(agent.id), its min area is $min_area \n")
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
@@ -88,21 +95,26 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		
 		if (conflict == 1) #Look at another direction if there's a agent in at or close to the potential position
-                	continue
+			print("Conflict detected\n")
+			continue
                 end
 
 		#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-		agent_voronoi_cell = voronoi_cell(agent.pos, positions, rho) #Generates the set of vertices which define the voronoi cell
+		pot_new_pos = agent.pos .+ direction_of_move .* agent_speed .* dt
+		agent_voronoi_cell = voronoi_cell(pot_new_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
 		new_area = voronoi_area(agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+		#print("Potential new area of $new_area\n")
 		if (new_area < min_area)
                 	min_area = new_area
                         min_direction = direction_of_move
+			move_made = 1
                 end
 	end
 
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
-	kn[1] += (direction_of_move .* agent_speed)[1]
-	kn[2] += (direction_of_move .* agent_speed)[2]
+	kn[1] += (min_direction .* agent_speed)[1]
+	kn[2] += (min_direction .* agent_speed)[2]
+	return move_made
 end
 
 
@@ -123,7 +135,7 @@ print("Agent template created")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 100)
+function initialise(; seed = 123, no_birds = 5)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -172,6 +184,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#Now make the agents with their respective DoDs and add to the model
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
+		print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)	
 	end	
 
@@ -193,16 +206,19 @@ function agent_step!(agent, model)
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_gradient(agent, model, k1, 8, 1)
+        move_made = move_gradient(agent, model, k1, 8, 1, 10.0)
         #move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2)
         #move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3)
         #move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4);
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel = Tuple(agent.vel .+ dt .* k1[3:4])
-	agent.vel = new_agent_vel
-	print(new_agent_pos, "\n")
+        new_agent_vel = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+	change_in_position = new_agent_pos .- (agent.pos)
+	if(move_made==1)
+		agent.vel = new_agent_vel
+	end
+	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
 	move_agent!(agent, new_agent_pos, model)	
@@ -231,19 +247,16 @@ using CairoMakie # choosing a plotting backend
 
 figure, _ = abmplot(model)
 figure # returning the figure displays it
-save("moon_planet.png", figure)
+save("shannon_flock.png", figure)
 	
 
 
 ###Animate
-model = initialise();
-period_time = 2*pi*19.0^1.5
-dt = 0.001
-num_moves = floor(Int64,period_time/dt)
+#model = initialise();
 abmvideo(
-    "moon_planet.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 500,
-    title = "Moon orbiting planet"
+    "Shannon_flock.mp4", model, agent_step!, model_step!;
+    framerate = 4, frames = 20,
+    title = "Shannon flock"
 )
 	
 
