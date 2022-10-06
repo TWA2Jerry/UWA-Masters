@@ -43,6 +43,10 @@ function voronoi_area(cell, rho)
 			r = sqrt(rho^2 - (0.5 .* chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
+			if(num_points==2)
+				Area = pi*rho^2 - circle_segment_area
+				return Area
+			end
 			Area += circle_segment_area
 		end
         end
@@ -114,6 +118,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] += (min_direction .* agent_speed)[1]
 	kn[2] += (min_direction .* agent_speed)[2]
+	agent.A = min_area
 	return move_made
 end
 
@@ -184,6 +189,7 @@ function initialise(; seed = 123, no_birds = 5)
 	#Now make the agents with their respective DoDs and add to the model
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
+		agent.vel = agent.vel ./ norm(agent.vel)
 		print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)	
 	end	
