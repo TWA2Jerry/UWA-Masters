@@ -21,7 +21,7 @@ end
 
 rho = 10.0
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
-function voronoi_area(cell, rho)
+function voronoi_area(ri, cell, rho)
        	Area = 0.0
 	num_points = length(cell)
 	if(num_points == 0)
@@ -40,16 +40,34 @@ function voronoi_area(cell, rho)
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
 		if(cell[i][2] == 1 && cell[j][2] == 1)
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
-			r = sqrt(rho^2 - (0.5 .* chord_length)^2)
+			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
-			if(num_points==2)
+			
+
+			#Check, if the agent position is inside the chord half plane. 
+			chord_vector = cell[j][1] .- cell[i][1]
+			chord_point = 0.5 .* chord_vector + cell[i][1]
+			chord_half_plane = (atan(chord_vector[1], chord_vector[1]), chord_vector, chord_point, 0)
+			if(outside(chord_half_plane, ri))
+				balloon = pi*rho^2 - circle_segment_area
+				if(num_points == 2)
+					return balloon
+				end
+				Area += balloon
+			else 
+				Area += circle_segment_area
+			end
+
+			#=if(num_points==2)
 				Area = pi*rho^2 - circle_segment_area
+				print("Single fence area calculated\n")
 				return Area
 			end
 			Area += circle_segment_area
-		end
-        end
+			=#
+        	end
+	end
 
 
 		return  abs(Area)
@@ -78,7 +96,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	min_area = agent.A #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
-	print("For agent $(agent.id), its min area is $min_area \n")
+	#print("For agent $(agent.id), its min area is $min_area \n")
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
@@ -99,14 +117,14 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		
 		if (conflict == 1) #Look at another direction if there's a agent in at or close to the potential position
-			print("Conflict detected\n")
+			#print("Conflict detected\n")
 			continue
                 end
 
 		#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
 		pot_new_pos = agent.pos .+ direction_of_move .* agent_speed .* dt
 		agent_voronoi_cell = voronoi_cell(pot_new_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
-		new_area = voronoi_area(agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+		new_area = voronoi_area(pot_new_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 		#print("Potential new area of $new_area\n")
 		if (new_area < min_area)
                 	min_area = new_area
@@ -140,7 +158,7 @@ print("Agent template created")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 5)
+function initialise(; seed = 123, no_birds = 50)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -162,7 +180,7 @@ function initialise(; seed = 123, no_birds = 5)
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
 	for i in 1:no_birds
-		rand_position = Tuple(100*rand(Float64, 2))
+		rand_position = Tuple(50*rand(Float64, 2)) .+ (25.0, 25.0)
 		pushfirst!(initial_positions, rand_position)
 	end
 
@@ -180,7 +198,7 @@ function initialise(; seed = 123, no_birds = 5)
 			push!(neighbouring_positions, initial_positions[j])
 		end
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
-		initial_A = voronoi_area(initial_cell, rho) 
+		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
 		push!(initial_dods, initial_A)
 	end
