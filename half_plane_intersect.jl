@@ -45,6 +45,7 @@ function inter(h1, h2)
 	end	
 	if(abs(m1 - m2) < abs(eps))
 		print("Parallel planes yo\n")
+		exit()
 		return -1
 	end  
 	##print("m1 - m2 found to be $(m1-m2)\n")
@@ -139,11 +140,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			if(dot(half_planes[i][2], dq[len][2]) < 0.0)
 				#print("Uh, Houston, we may have a anti-parallel pair")
 				return -1
-				if (out(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
-				pop!(dq)
-				len -= 1
-				else continue
-				end
+			end
+			if (outside(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
+			pop!(dq)
+			len -= 1
+			else continue
 			end
 		end
 
@@ -166,11 +167,13 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	#Report empty intersection (if number of edges is less than 3?)
 	if(len < 3)
 		print("Yo this intersection be empty")
+		exit()
 		return -1
 	end
 
-
+	print("dq processing complete, the deqeue is given by $dq")
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
+	#=
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) > rho)
@@ -179,6 +182,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		end
 		i += 1
 	end
+	=#
 
 	#print("We have now removed all bounding box and redundant half-planes, the remaining half planes are (given by their vectors) \n")
 	#=for half_plane in dq
@@ -190,7 +194,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	dql = length(dq)
 	for i in 1:length(dq)
 		if(dql == 1) #To handle the case if there's only one fence for an agent
-			print("Single fence agent detected\n")
+			#print("Single fence agent detected\n")
 			m = dq[i][2][2]/dq[i][2][1]
                         #print("Gradient for i is $m \n")
                         c = dq[i][3][2] - m*dq[i][3][1]
@@ -217,7 +221,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		#print("The intersect is $intersect_i\n")
 		if(intersect_i != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
 			#print("Passed non-parallel condition\n")
-			if(norm(ri .- intersect_i) <= rho)
+			#if(norm(ri .- intersect_i) <= rho)
 				#print("Passed within circle condition\n")
 				if(i == 1)
 					#print("Passed i = 1 condition\n")
@@ -227,9 +231,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 					v_proper = dot(vhalf_int, dq[i][2])
 					#print("Dot product of old->new intersect with new plane is $v_proper\n")
 				end
-			end
+			#end
 		end
 		if(v_proper < 0.0)
+			print("Still no valid intersect detected\n")
+			exit()
 			#Calculate the appropriate intersect of the half plane dq[i] with the circle
 			m = dq[i][2][2]/dq[i][2][1]
 			#print("Gradient for i is $m \n")
@@ -289,15 +295,12 @@ function voronoi_cell(ri, neighbouring_points, rho)
 end
 
 #Square test case
-#=agent_pos = [50.0, 50.0]
-neighbouring_positions = [[60.0, 50.0], [50.0, 60.0], [40.0, 50.0], [50.0, 40.0]]
-rho = 10.0
-=#
+#neighbouring_positions = [[60.0, 50.0], [50.0, 60.0], [40.0, 50.0], [50.0, 40.0]]
 
 #Triangle test case
-#=agent_pos = [50.0, 50.0]
-neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [50.0, 45.0]]
-=#
+#agent_pos = [50.0, 50.0]
+#neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [50.0, 45.0]]
+#
 
 #Weird triangle test case
 #=
@@ -305,15 +308,12 @@ neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
 =#
 
 #Only two neighbours, parallel planes
-#=
 neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
-=#
 
-#=
 agent_pos = [50.0, 50.0]
 rho = 10.0
 vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
+print("\n\nNow displaying the vertices\n")
 for vertex in vertices
-	#print(vertex[1])
+	print(vertex[1])
 end
-=#

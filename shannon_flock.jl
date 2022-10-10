@@ -8,21 +8,15 @@ using Random
 
 include("half_plane_intersect.jl")
 
-###Defining a norm function for vectors or even tuples, cause why not. I think we'll use teh function in the half_plane_intersection file though
-#=function norm (v)
-	sum_of_squares = 0.0
-	for i in 1:length(v)
-		sum_of_squares += (v[i])^2
-	end
-	
-	return sqrt(sum_of_squares)
-end
-=#
-
 rho = 10.0
+initialised = 0
+area_zero = zeros(Int64, 100)
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
 function voronoi_area(ri, cell, rho)
        	Area = 0.0
+	circle_detected = 0
+	segment_detected = 0
+	balloon_detected = 0
 	num_points = length(cell)
 	if(num_points == 0)
 		Area = pi*rho^2
@@ -39,6 +33,8 @@ function voronoi_area(ri, cell, rho)
                 Area += 0.5 * (yi + yj)* (xi - xj)
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
 		if(cell[i][2] == 1 && cell[j][2] == 1)
+			print("Circle segments detected\n")
+			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
@@ -48,28 +44,24 @@ function voronoi_area(ri, cell, rho)
 			#Check, if the agent position is inside the chord half plane. 
 			chord_vector = cell[j][1] .- cell[i][1]
 			chord_point = 0.5 .* chord_vector + cell[i][1]
-			chord_half_plane = (atan(chord_vector[1], chord_vector[1]), chord_vector, chord_point, 0)
-			if(outside(chord_half_plane, ri))
+			chord_half_plane = (atan(chord_vector[2], chord_vector[1]), chord_vector, chord_point, 0)
+			if(outside(chord_half_plane, ri) == 1)
 				balloon = pi*rho^2 - circle_segment_area
+				balloon_detected = 1
 				if(num_points == 2)
 					return balloon
 				end
 				Area += balloon
 			else 
+				segment_detected = 1
 				Area += circle_segment_area
 			end
-
-			#=if(num_points==2)
-				Area = pi*rho^2 - circle_segment_area
-				print("Single fence area calculated\n")
-				return Area
-			end
-			Area += circle_segment_area
-			=#
-        	end
+		end
 	end
 
-
+		if(abs(Area) > pi*rho^2 && initialised == 0)
+                        print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected\n")
+		end
 		return  abs(Area)
 end
 
@@ -134,8 +126,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	end
 
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
-	kn[1] += (min_direction .* agent_speed)[1]
-	kn[2] += (min_direction .* agent_speed)[2]
+	kn[1] = (min_direction .* agent_speed)[1]
+	kn[2] = (min_direction .* agent_speed)[2]
 	agent.A = min_area
 	return move_made
 end
@@ -152,13 +144,13 @@ end
 	
 
 
-print("Agent template created")
+print("Agent template created\n")
 
 
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 50)
+function initialise(; seed = 123, no_birds = 10)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -168,7 +160,7 @@ function initialise(; seed = 123, no_birds = 50)
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
 	
-	print("Before model")
+	print("Before model\n")
 
 	#Create the model
 	model = ABM(
@@ -200,6 +192,13 @@ function initialise(; seed = 123, no_birds = 50)
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
+		if(abs(initial_A) > pi*rho^2)
+                        #print("Conventional area exceeded, circle detected? $circle_detected\n")
+		elseif initial_A < eps
+			print("Effective area of 0.\n")
+			area_zero[i] = 1
+		end
+
 		push!(initial_dods, initial_A)
 	end
 			
@@ -213,6 +212,7 @@ function initialise(; seed = 123, no_birds = 50)
 	end	
 
 	print("Initialisation complete. \n\n\n")
+	global initialised = 1
 	return model
 end  
 
@@ -224,16 +224,10 @@ function agent_step!(agent, model)
 	#print("Step!\n", agent.planet)
 	dt = model.dt
 	k1 = [0.0, 0.0, 0.0, 0.0]
-        #k2 = [0.0, 0.0, 0.0, 0.0]
-        #k3 = [0.0, 0.0, 0.0, 0.0]
-        #k4 = [0.0, 0.0, 0.0, 0.0]
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 1, 10.0)
-        #move_gradient(agent, model, agent.pos .+ dt/2*k1[1:2], agent.vel .+ dt/2*k1[3:4],  k2)
-        #move_gradient(agent, model, agent.pos .+ dt/2*k2[1:2], agent.vel .+ dt/2*k2[3:4], k3)
-        #move_gradient(agent, model, agent.pos .+ dt*k3[1:2], agent.vel .+ dt*k3[3:4], k4);
+        move_made = move_gradient(agent, model, k1, 8, 1, rho)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -241,6 +235,8 @@ function agent_step!(agent, model)
 	change_in_position = new_agent_pos .- (agent.pos)
 	if(move_made==1)
 		agent.vel = new_agent_vel
+	else 
+		#print("No movement made, agent area was $(agent.A)\n")
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -279,7 +275,7 @@ save("shannon_flock.png", figure)
 #model = initialise();
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 20,
+    framerate = 4, frames = 32,
     title = "Shannon flock"
 )
 	
