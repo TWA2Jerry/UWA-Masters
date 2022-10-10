@@ -171,7 +171,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		return -1
 	end
 
-	print("dq processing complete, the deqeue is given by $dq")
+	#print("dq processing complete, the deqeue is given by $dq")
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
 	#=
 	i = 1

@@ -5,12 +5,18 @@
 ###Preliminaries
 using Agents
 using Random
+using VoronoiCells
+using GeometryBasics
+using Plots
+
+print("Packages loaded\n")
 
 include("half_plane_intersect.jl")
 
 rho = 10.0
 initialised = 0
 area_zero = zeros(Int64, 100)
+rect = Rectangle(Point2(0,0), Point2(100, 100))
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
 function voronoi_area(ri, cell, rho)
        	Area = 0.0
@@ -60,7 +66,7 @@ function voronoi_area(ri, cell, rho)
 	end
 
 		if(abs(Area) > pi*rho^2 && initialised == 0)
-                        print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected\n")
+                        #print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected\n")
 		end
 		return  abs(Area)
 end
@@ -171,10 +177,16 @@ function initialise(; seed = 123, no_birds = 10)
 
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
+	pack_positions = Vector{Point2{Float64}}(undef, 10)
 	for i in 1:no_birds
-		rand_position = Tuple(50*rand(Float64, 2)) .+ (25.0, 25.0)
-		pushfirst!(initial_positions, rand_position)
+		rand_position = Tuple(100*rand(Float64, 2)) 
+		push!(initial_positions, rand_position)
+		pack_positions[i] = Point2(rand_position)
 	end
+
+	#Calculate the DOD based off the initial positions
+	init_tess = voronoicells(pack_positions, rect)
+	init_tess_areas = voronoiarea(init_tess)
 
 	#Calculate the DoDs based off the initial positions
 	#initial_dods = voronoi_area(initial_positions, rho)
@@ -198,7 +210,9 @@ function initialise(; seed = 123, no_birds = 10)
 			print("Effective area of 0.\n")
 			area_zero[i] = 1
 		end
-
+		if(abs(initial_A-init_tess_areas[i]) > eps)
+			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
+		end
 		push!(initial_dods, initial_A)
 	end
 			
@@ -213,6 +227,13 @@ function initialise(; seed = 123, no_birds = 10)
 
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
+	
+
+	scatter(pack_positions, markersize = 6, label = "generators")
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:10])
+display(plot!(init_tess, legend=:topleft))
+savefig("voronoi_pack_init_tess.png")
+
 	return model
 end  
 
@@ -273,10 +294,11 @@ save("shannon_flock.png", figure)
 
 ###Animate
 #model = initialise();
+#=
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
     framerate = 4, frames = 32,
     title = "Shannon flock"
 )
-	
+=#	
 
