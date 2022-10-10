@@ -123,9 +123,21 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		pot_new_pos = agent.pos .+ direction_of_move .* agent_speed .* dt
 		agent_voronoi_cell = voronoi_cell(pot_new_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
 		new_area = voronoi_area(pot_new_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+		
+		#Check area calculation through voronoi package
+		
+		pack_positions = Vector{Point2{Float64}}(undef, nagents(model)) 
+		for i in 1:nagents(model)-1
+			pack_positions[i+1] = Point2(positions[i])
+		end
+		pack_positions[1] = Point2(pot_new_pos)
+		tess = voronoicells(pack_positions, rect)
+		tess_areas = voronoiarea(tess)
+
 		#print("Potential new area of $new_area\n")
 		if (new_area < min_area)
                 	min_area = new_area
+			print("Area check, our calculated area was $min_area, theirs was $(tess_areas[1])\n")
                         min_direction = direction_of_move
 			move_made = 1
                 end
@@ -277,7 +289,7 @@ end
 	
 ###Initialise the model
 model = initialise()
-
+print("Number of agents is $(nagents(model))\n")
 
 
 ###Test the model has been initialised and works
@@ -294,11 +306,11 @@ save("shannon_flock.png", figure)
 
 ###Animate
 #model = initialise();
-#=
+
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
     framerate = 4, frames = 32,
     title = "Shannon flock"
 )
-=#	
+	
 

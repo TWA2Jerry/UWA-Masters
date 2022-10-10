@@ -308,8 +308,9 @@ neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
 =#
 
 #Only two neighbours, parallel planes
-neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
+#neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
 
+#=
 agent_pos = [50.0, 50.0]
 rho = 10.0
 vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
@@ -317,3 +318,4 @@ print("\n\nNow displaying the vertices\n")
 for vertex in vertices
 	print(vertex[1])
 end
+=#
