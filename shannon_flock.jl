@@ -133,11 +133,13 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		pack_positions[1] = Point2(pot_new_pos)
 		tess = voronoicells(pack_positions, rect)
 		tess_areas = voronoiarea(tess)
+		print("Area check, our calculated area was $new_area, theirs was $(tess_areas[1])\n")
+
 
 		#print("Potential new area of $new_area\n")
 		if (new_area < min_area)
                 	min_area = new_area
-			print("Area check, our calculated area was $min_area, theirs was $(tess_areas[1])\n")
+			print("New min area, direction of $direction_of_move\n")
                         min_direction = direction_of_move
 			move_made = 1
                 end
@@ -191,7 +193,7 @@ function initialise(; seed = 123, no_birds = 10)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, 10)
 	for i in 1:no_birds
-		rand_position = Tuple(100*rand(Float64, 2)) 
+		rand_position = Tuple(50*rand(Float64, 2)) .+ (25.0, 25.0)
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 	end
