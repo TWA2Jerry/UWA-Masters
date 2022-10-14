@@ -39,7 +39,7 @@ function voronoi_area(ri, cell, rho)
                 Area += 0.5 * (yi + yj)* (xi - xj)
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
 		if(cell[i][2] == 1 && cell[j][2] == 1)
-			print("Circle segments detected\n")
+			#print("Circle segments detected\n")
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
@@ -66,7 +66,7 @@ function voronoi_area(ri, cell, rho)
 	end
 
 		if(abs(Area) > pi*rho^2 && initialised == 0)
-                        #print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected\n")
+			print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
 		end
 		return  abs(Area)
 end
@@ -89,15 +89,17 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		pushfirst!(positions, neighbour.pos)	
 	end		
-
-	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	min_area = agent.A #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
+
+
+	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
+		
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
 		
@@ -125,7 +127,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		new_area = voronoi_area(pot_new_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 		
 		#Check area calculation through voronoi package
-		
+		#=
 		pack_positions = Vector{Point2{Float64}}(undef, nagents(model)) 
 		for i in 1:nagents(model)-1
 			pack_positions[i+1] = Point2(positions[i])
@@ -133,17 +135,20 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		pack_positions[1] = Point2(pot_new_pos)
 		tess = voronoicells(pack_positions, rect)
 		tess_areas = voronoiarea(tess)
-		print("Area check, our calculated area was $new_area, theirs was $(tess_areas[1])\n")
-
+		if(abs(new_area-tess_areas[1]) > 0.1)
+			print("Area check, our calculated area was $new_area, theirs was $(tess_areas[1])\n")
+		end
+		=#
 
 		#print("Potential new area of $new_area\n")
 		if (new_area < min_area)
                 	min_area = new_area
-			print("New min area, direction of $direction_of_move\n")
+			#print("New min area, direction of $direction_of_move\n")
                         min_direction = direction_of_move
 			move_made = 1
                 end
 	end
+	#print("Final optimal direction of move calculated to be $min_direction, corresponding to a new position of $(agent.pos .+ min_direction)\n")
 
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
@@ -191,7 +196,7 @@ function initialise(; seed = 123, no_birds = 10)
 
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
-	pack_positions = Vector{Point2{Float64}}(undef, 10)
+	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
 		rand_position = Tuple(50*rand(Float64, 2)) .+ (25.0, 25.0)
 		push!(initial_positions, rand_position)
@@ -219,9 +224,10 @@ function initialise(; seed = 123, no_birds = 10)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
-                        #print("Conventional area exceeded, circle detected? $circle_detected\n")
+			print("Conventional area exceeded by agent $(i)\n")
 		elseif initial_A < eps
-			print("Effective area of 0.\n")
+			print("Effective area of 0. The cell was comprised of vertices $(initial_cell)\n")
+			
 			area_zero[i] = 1
 		end
 		if(abs(initial_A-init_tess_areas[i]) > eps)
@@ -244,7 +250,7 @@ function initialise(; seed = 123, no_birds = 10)
 	
 
 	scatter(pack_positions, markersize = 6, label = "generators")
-annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:10])
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
 display(plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 
@@ -309,10 +315,12 @@ save("shannon_flock.png", figure)
 ###Animate
 #model = initialise();
 
+#=
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
     framerate = 4, frames = 32,
     title = "Shannon flock"
 )
+=#
 	
 
