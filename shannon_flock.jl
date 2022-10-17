@@ -28,6 +28,17 @@ function voronoi_area(ri, cell, rho)
 		Area = pi*rho^2
 		return Area
 	end
+
+	print(" The vertices for the cell are ")
+	for i in 1:num_points
+                                    vector_to_vertex = cell[i][1] .- ri
+                                        angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
+                                        print("$angle_to_vertex ")
+                                        #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
+                                end
+                                print("\n")
+
+
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
 		#Use the shoestring formula to calcualte the area
@@ -49,16 +60,24 @@ function voronoi_area(ri, cell, rho)
 
 			#Check, if the agent position is inside the chord half plane. 
 			chord_vector = cell[j][1] .- cell[i][1]
-			chord_point = 0.5 .* chord_vector + cell[i][1]
-			chord_half_plane = (atan(chord_vector[2], chord_vector[1]), chord_vector, chord_point, 0)
-			if(outside(chord_half_plane, ri) == 1)
+			chord_point = 0.5 .* chord_vector .+ cell[i][1]
+			chord_half_plane = [atan(chord_vector[2], chord_vector[1]), chord_vector, chord_point, 0]
+			if(num_points == 2)
+                        	return pi*rho^2 - circle_segment_area
+                        end
+			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
-				if(num_points == 2)
-					return balloon
+				print("Ballon segment detected, balloon area was $balloon. The angles of the vertices of the cell were ")
+				for i in 1:num_points
+					vector_to_vertex = cell[i][1] .- ri
+					angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
+					print("$angle_to_vertex ")
+					#print("$(atan(cell[i][1][2], cell[i][1][1])) ")
 				end
-				Area += balloon
-			else 
+				print("\n")
+				#Area += balloon
+			elseif (cell[i][3] != cell[j][3]) 
 				segment_detected = 1
 				Area += circle_segment_area
 			end
@@ -66,7 +85,7 @@ function voronoi_area(ri, cell, rho)
 	end
 
 		if(abs(Area) > pi*rho^2 && initialised == 0)
-			print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
+			#print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
 		end
 		return  abs(Area)
 end
@@ -224,7 +243,7 @@ function initialise(; seed = 123, no_birds = 10)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
-			print("Conventional area exceeded by agent $(i)\n")
+			#print("Conventional area exceeded by agent $(i)\n")
 		elseif initial_A < eps
 			print("Effective area of 0. The cell was comprised of vertices $(initial_cell)\n")
 			
