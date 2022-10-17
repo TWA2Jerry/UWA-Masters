@@ -20,6 +20,7 @@ rect = Rectangle(Point2(0,0), Point2(100, 100))
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
 function voronoi_area(ri, cell, rho)
        	Area = 0.0
+	circle_area = 0.0
 	circle_detected = 0
 	segment_detected = 0
 	balloon_detected = 0
@@ -68,26 +69,27 @@ function voronoi_area(ri, cell, rho)
 			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
-				print("Ballon segment detected, balloon area was $balloon. The angles of the vertices of the cell were ")
-				for i in 1:num_points
+				print("Ballon segment detected, balloon area was $balloon.")
+				#=for i in 1:num_points
 					vector_to_vertex = cell[i][1] .- ri
 					angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
 					print("$angle_to_vertex ")
 					#print("$(atan(cell[i][1][2], cell[i][1][1])) ")
 				end
+				=#
 				print("\n")
-				#Area += balloon
+				circle_area += balloon
 			elseif (cell[i][3] != cell[j][3]) 
 				segment_detected = 1
-				Area += circle_segment_area
+				circle_area += circle_segment_area
 			end
 		end
 	end
 
-		if(abs(Area) > pi*rho^2 && initialised == 0)
-			#print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
+		if(abs(Area)+circle_area > pi*rho^2 && initialised == 0)
+			print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
 		end
-		return  abs(Area)
+		return  abs(Area)+circle_area
 end
 
 
@@ -230,7 +232,7 @@ function initialise(; seed = 123, no_birds = 10)
 	#initial_dods = voronoi_area(initial_positions, rho)
 	initial_dods = []
 	for i in 1:no_birds
-		print("Calculating initial DOD for agent $i.")
+		print("\n\nCalculating initial DOD for agent $i.")
 		ri  = initial_positions[i]
 		neighbouring_positions = []
 		for j in 1:no_birds
