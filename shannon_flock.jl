@@ -86,9 +86,11 @@ function voronoi_area(ri, cell, rho)
 		end
 	end
 
+		#=
 		if(abs(Area)+circle_area > pi*rho^2 && initialised == 0)
 			print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
 		end
+		=#
 		return  abs(Area)+circle_area
 end
 
@@ -113,14 +115,15 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	min_area = agent.A #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
-
+	pos_area_array = [] #This is an array which will hold all the directions and the areas in those directions
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
-		
+		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
+		print("Angle of move was $angle_of_move\n")
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
 		
@@ -160,7 +163,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			print("Area check, our calculated area was $new_area, theirs was $(tess_areas[1])\n")
 		end
 		=#
-
+		
 		#print("Potential new area of $new_area\n")
 		if (new_area < min_area)
                 	min_area = new_area
@@ -168,8 +171,19 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         min_direction = direction_of_move
 			move_made = 1
                 end
+
+		#Add the direction of move and area to the array of such items
+		push!(pos_area_array, [pot_new_pos, new_area])
 	end
 	#print("Final optimal direction of move calculated to be $min_direction, corresponding to a new position of $(agent.pos .+ min_direction)\n")
+
+	#If no move was made, go through each direction and the potential positions and areas considered 
+	if(move_made != 1)
+		print("The agent $(agent.id) did not move this turn. It's current DOD is $(agent.A), the positions and areas considered were \n")
+		for pair in pos_area_array
+			print("Position: $(pair[1]), area: $(pair[2])\n")
+		end
+	end
 
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
@@ -196,7 +210,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 10)
+function initialise(; seed = 123, no_birds = 50)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -336,12 +350,12 @@ save("shannon_flock.png", figure)
 ###Animate
 #model = initialise();
 
-#=
+
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 32,
+    framerate = 4, frames = 20,
     title = "Shannon flock"
 )
-=#
+
 	
 

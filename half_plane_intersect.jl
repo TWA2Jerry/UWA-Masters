@@ -173,7 +173,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 	#print("dq processing complete, the deqeue is given by $dq")
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-		
+	#=	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) > rho)
@@ -189,7 +189,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		#print("The half plane is $half_plane\n")
 		print("The half plane angle is $(half_plane[1])\n")
 	end
-	
+	=#
 
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vertices = []
@@ -223,7 +223,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		#print("The intersect is $intersect_i\n")
 		if(intersect_i != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
 			#print("Passed non-parallel condition\n")
-			if(norm(ri .- intersect_i) <= rho)
+			#if(norm(ri .- intersect_i) <= rho)
 				#print("Passed within circle condition\n")
 				if(i == 1)
 					#print("Passed i = 1 condition\n")
@@ -234,12 +234,12 @@ function voronoi_cell(ri, neighbouring_points, rho)
 					if(norm(intersect_i .- vertices[length(vertices)][1]) < eps)
 						v_proper = -1
 					end
-					print("Dot product of old->new intersect with new plane is $v_proper\n")
+					#print("Dot product of old->new intersect with new plane is $v_proper\n")
 				end
-			end
+			#end
 		end
 		if(v_proper < 0.0)
-			#print("Still no valid intersect detected\n")
+			print("Still no valid intersect detected\n")
 			#Calculate the appropriate intersect of the half plane dq[i] with the circle
 			m = dq[i][2][2]/dq[i][2][1]
 			#print("Gradient for i is $m \n")
