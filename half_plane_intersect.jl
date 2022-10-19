@@ -219,6 +219,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		#Calculate the intersect between two thangs, and make sure they be valid
 		#print("Iteration of $i\n")
 		v_proper = -1
+		outside_circle = 0
 		intersect_i = inter(dq[i], dq[(i)%length(dq)+1])
 		#print("The intersect is $intersect_i\n")
 		if(intersect_i != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
@@ -234,8 +235,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 					if(norm(intersect_i .- vertices[length(vertices)][1]) < eps)
 						v_proper = -1
 					end
-					print("Dot product of old->new intersect with new plane is $v_proper\n")
+					#print("Dot product of old->new intersect with new plane is $v_proper\n")
 				end
+			else
+				print("Intersect was calculated to be outside the circle.\n")
+				outside_circle = 1
 			end
 		end
 		if(v_proper < 0.0)
@@ -295,7 +299,12 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			ip1_vec = circle_intersect_ip1 .- ri
 			angle_i = atan(i_vec[2], i_vec[1])
 			angle_ip1 = atan(ip1_vec[2], ip1_vec[1])
-			print("Due to an invalid intersect, intersects with circle calculated instead. Intersects were (by angle) $angle_i and $angle_ip1\n")
+			if(outside_circle == 1)
+				bro = intersect_i .- ri
+				bruh = atan(bro[2], bro[1])
+				print("For an original intersect outside the circle, it had an angle of $bruh. ")
+			end
+			print("Due to an invalid intersect, intersects with circle calculated instead. Intersects were (by angle, i followed by i+1) $angle_i and $angle_ip1\n")
 	
 			#Add these intersects to the list of edges, but label them as being circle edges
 		else

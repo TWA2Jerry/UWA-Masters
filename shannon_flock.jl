@@ -58,6 +58,16 @@ function voronoi_area(ri, cell, rho)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
 			
+			vec_to_i = cell[i][1] .- ri
+			vec_to_ip1 = cell[j][1] .- ri
+			angle_to_i = atan(vec_to_i[2], vec_to_i[1])
+			angle_to_ip1 = atan(vec_to_ip1[2], vec_to_ip1[1])
+			theta = abs(angle_to_ip1 - angle_to_i)
+			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
+			if(abs(alt_circle_segment_area - circle_segment_area) > 0.001)
+				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area")
+				#exit()
+			end
 
 			#Check, if the agent position is inside the chord half plane. 
 			chord_vector = cell[j][1] .- cell[i][1]
