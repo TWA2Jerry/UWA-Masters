@@ -252,7 +252,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 				end
 			#end
 		end
-		if(v_proper < 0.0)
+		if(v_proper < 0.0 && abs(v_proper) > eps)
 			print("Still no valid intersect detected\n")
 			#Calculate the appropriate intersect of the half plane dq[i] with the circle
 			m = dq[i][2][2]/dq[i][2][1]

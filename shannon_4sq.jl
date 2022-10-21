@@ -213,7 +213,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 50)
+function initialise(; seed = 123, no_birds = 4)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -235,10 +235,16 @@ function initialise(; seed = 123, no_birds = 50)
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
-	for i in 1:no_birds
-		rand_position = Tuple(70 .* rand(Float64, 2)) .+ (10.0, 10.0)
-		push!(initial_positions, rand_position)
-		pack_positions[i] = Point2(rand_position)
+		push!(initial_positions, (25.0, 75.0))
+		pack_positions[1] = Point2((25.0, 75.0))
+		push!(initial_positions, (25.0, 25.0))
+                pack_positions[2] = Point2((25.0, 25.0))
+		push!(initial_positions, (75.0, 25.0))
+                pack_positions[3] = Point2((75.0, 25.0))
+		push!(initial_positions, (75.0, 75.0))
+                pack_positions[4] = Point2((75.0, 75.0))
+
+	for i in 1:4
 		push!(moves_areas, [])
 		push!(new_pos, (0.0, 0.0))
 	end
