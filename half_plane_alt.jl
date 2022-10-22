@@ -83,6 +83,7 @@ end
 function voronoi_cell(ri, neighbouring_points, rho)
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 
+###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	for point in neighbouring_points	
@@ -172,6 +173,14 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	end
 
 	#print("dq processing complete, the deqeue is given by $dq")
+	
+
+
+
+
+
+###
+###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
 		
 	i = 1
@@ -192,108 +201,78 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	
 
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
-	vertices = []
+	vql = []
+	newdq = []
 	dql = length(dq)
-	for i in 1:length(dq)
-		if(dql == 1) #To handle the case if there's only one fence for an agent
-			#print("Single fence agent detected\n")
-			m = dq[i][2][2]/dq[i][2][1]
-                        #print("Gradient for i is $m \n")
-                        c = dq[i][3][2] - m*dq[i][3][1]
-                        #print("c for i is $c\n")
+	len = 0
+	vlen = 0
+	for i in 1:dql
+		#print("Single fence agent detected\n")
+		m = dq[i][2][2]/dq[i][2][1]
+                #print("Gradient for i is $m \n")
+                c = dq[i][3][2] - m*dq[i][3][1]
+                #print("c for i is $c\n")
+                a = 1+m^2
+                b = -2*ri[1]+2*m*c-2*m*ri[2]
+                d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
+                x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                #print("x1 calculated to be $x1\n")
+                y1 = m*x1 + c
 
-                        a = 1+m^2
-                        b = -2*ri[1]+2*m*c-2*m*ri[2]
-                        d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
-                        x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                        #print("x1 calculated to be $x1\n")
-                        y1 = m*x1 + c
+                x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                y2 = m*x2 + c
 
-                        x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                        y2 = m*x2 + c
+		a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
+                f_circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 
-			push!(vertices, [[x1, y1], 1, i])
-			push!(vertices, [[x2, y2], 1, i])
-			break
-		end
-		#Calculate the intersect between two thangs, and make sure they be valid
-		#print("Iteration of $i\n")
-		v_proper = -1
-		outside_circle = 0
-		intersect_i = inter(dq[i], dq[(i)%length(dq)+1])
-		#print("The intersect is $intersect_i\n")
-		if(intersect_i != -1) #Only consider looking at whether or not the intersect is "in front" if the planes aren't parallel
-			#print("Passed non-parallel condition\n")
-			if(norm(ri .- intersect_i) <= rho)
-				#print("Passed within circle condition\n")
-				if(i == 1)
-					#print("Passed i = 1 condition\n")
-					v_proper = 1.0
-				else 
-					vhalf_int = intersect_i .- vertices[length(vertices)][1] #This is the vector from the last intersect to the new potential intersect
-					v_proper = dot(vhalf_int, dq[i][2])
-					if(norm(intersect_i .- vertices[length(vertices)][1]) < eps)
-						v_proper = -1
-					end
-					#print("Dot product of old->new intersect with new plane is $v_proper\n")
-				end
-			else
-				print("Intersect was calculated to be outside the circle.\n")
-				outside_circle = 1
+		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
+
+		while(vlen >= 1 && outside(dq[i], vq[vlen]))
+			if(vq[vlen][3] != 0)
+				pop!(newdq)
+				len -= 1
 			end
+			pop!(vq)
+                        vlen -= 1
+                end
+
+                #Remove any half planes from the back of the queue, again, don't do it if 
+		while(vlen >= 1 && outside(dq[i], vq[1]))
+			if(vq[vlen][2] != 0)
+				popfirst!(newdq)
+				len -= 1
+			end
+			popfirst!(vq)
+                        vlen -= 1
+                end
+
+                #Check for parallel half planes is no longer needed as far as I'm aware, because we...okay maybe it is...
+		
+		if (len >= 1)
+			#Determine the intersect of hp_i with hp_(i-1)
+
+		else 
+
 		end
-		if(v_proper < 0.0)
-			#print("Still no valid intersect detected\n")
-			#Calculate the appropriate intersect of the half plane dq[i] with the circle
-			m = dq[i][2][2]/dq[i][2][1]
-			#print("Gradient for i is $m \n")
-			c = dq[i][3][2] - m*dq[i][3][1]	
-			#print("c for i is $c\n")
-			
-			a = 1+m^2
-			b = -2*ri[1]+2*m*c-2*m*ri[2]
-			d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
-			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-			#print("x1 calculated to be $x1\n")
-			y1 = m*x1 + c
+		#Add the new half plane
+                push!(newdq, dq[i])
+                len += 1
+        end
 
-			x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-			y2 = m*x2 + c
-			
-			#Okay, we should really check if the solutions aren't imaginary, but eh
-			#REDUNDANT vhalf_int1 = [x1, y1] .- vertices[length(vertices)] #This is the vector from the last vertex to the intersect of the base edge with the circle
-			a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
-			#print("The value of a1_a2 is $a1_a2 and the value of the half plane is $(dq[i][2])\n")
-			#print("The dot product of a1_a2 with the vector of the half segment is $(a1_a2 .*  dq[i][2])\n")
-			circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
-			
-			if(i > 1)       
-				vec_i = circle_intersect_i .- vertices[length(vertices)][1]
-				direction_of_vec = dot(vec_i, dq[i][2])
-				#print("The direction of the circle intersect from the last vertex is $direction_of_vec\n")
-                        end
-			push!(vertices, [circle_intersect_i,1, i])
+        #Do a final cleanup
+        while(len > 2 && outside(dq[1], inter(dq[len], dq[len-1])))
+                pop!(dq)
+                len -= 1
+        end
 
-			#Calculate the appropriate intersect of the half plane dq[(i+1)%length(dq)] with the circle		
-                        m = dq[(i)%dql+1][2][2]/dq[(i)%dql+1][2][1]
-			c = dq[(i)%dql+1][3][2] - m*dq[(i)%dql+1][3][1]
-
-			a = 1+m^2
-                        b = -2*ri[1]+2*m*c-2*m*ri[2]
-                        d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
-                        x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                        #print("x1 calculated for i+1 to be $x2\n")
-                        y1 = m*x1 + c
-
-                        x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                        y2 = m*x2 + c
+        while(len > 2 && outside(dq[len], inter(dq[1], dq[2])))
+                popfirst!(dq)
+                len -= 1
+        end
+		
+		
 
 
-                        #Okay, we should really check if the solutions aren't imaginary, but eh
-                        #REDUNDANT vhalf_int2 = [x1, y1] .- vertices[0] #This is the vector from the last vertex to the intersect of the base edge with the circle
-			b1_b2 = [x1, y1] .- [x2, y2] #Calculation of the vector from the second intersect to first intersect 
-			circle_intersect_ip1 = dot(b1_b2, dq[(i)%dql+1][2]) <= 0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex
-                        push!(vertices, [circle_intersect_ip1, 1, i%dql+1])
 				
 			i_vec = circle_intersect_i .- ri
 			ip1_vec = circle_intersect_ip1 .- ri
@@ -308,12 +287,6 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			#print("Due to an invalid intersect, intersects with circle calculated instead. Intersects were (by angle, i followed by i+1) $angle_i and $angle_ip1\n")
 			print("Due to an invalid intersect between half planes $i and $(i%dql+1), intersects with circle calculated instead. Intersects were (i and i+1): $circle_intersect_i, $circle_intersect_ip1\n")
 
-			#Add these intersects to the list of edges, but label them as being circle edges
-		else
-			#Just add the intersect already calculated
-			push!(vertices, [intersect_i, 0, i])
-		end
-	end
 	if(length(vertices) == 2 && norm(vertices[1][1] .- vertices[2][1]) < eps)
 		print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
 	end
