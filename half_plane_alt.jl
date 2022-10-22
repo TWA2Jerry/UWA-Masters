@@ -246,8 +246,17 @@ function voronoi_cell(ri, neighbouring_points, rho)
                         vlen -= 1
                 end
 
-                #Check for parallel half planes is no longer needed as far as I'm aware, because we...okay maybe it is...
-		
+		#Check for parallel half planes is no longer needed as far as I'm aware, because we...okay maybe it is...because if you cut out none, you'll still end up trying to compute parallel plane intersects
+		if(len > 0 && norm(cross(dq[i][2], newdq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
+                        if(dot(dq[i][2], newdq[len][2]) < 0.0)
+                                print("Uh, Houston, we may have a anti-parallel pair")
+				exit()
+				return -1
+                        end
+                        continue
+                end
+
+
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 
