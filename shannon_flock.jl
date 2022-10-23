@@ -11,12 +11,18 @@ using Plots
 
 print("Packages loaded\n")
 
-include("half_plane_intersect.jl")
+include("half_plane_alt.jl")
 
 rho = 10.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(100, 100))
+moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
+no_move = ones(Int64, 50) #An array which will allow us to keep track of which agents never move
+new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
+
+
+
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
 function voronoi_area(ri, cell, rho)
        	Area = 0.0
@@ -50,7 +56,7 @@ function voronoi_area(ri, cell, rho)
 		yj = cell[j][1][2]
                 Area += 0.5 * (yi + yj)* (xi - xj)
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
-		if(cell[i][2] == 1 && cell[j][2] == 1)
+		if(cell[i][3] == 0 && cell[j][2] == 0) #If the forward line segment for intersect i aand the backward lines segment for intersect j is a circle, then we have a chord
 			#print("Circle segments detected\n")
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
@@ -62,7 +68,7 @@ function voronoi_area(ri, cell, rho)
 			vec_to_ip1 = cell[j][1] .- ri
 			angle_to_i = atan(vec_to_i[2], vec_to_i[1])
 			angle_to_ip1 = atan(vec_to_ip1[2], vec_to_ip1[1])
-			theta = abs(angle_to_ip1 - angle_to_i)
+			theta = min((angle_to_ip1 - angle_to_i + 2*pi)%(2*pi), (angle_to_i - angle_to_ip1 + 2*pi)%(2*pi))
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
 			if(abs(alt_circle_segment_area - circle_segment_area) > 0.001)
 				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area")
@@ -95,10 +101,11 @@ function voronoi_area(ri, cell, rho)
 			end
 		end
 	end
-
+		#=
 		if(abs(Area)+circle_area > pi*rho^2 && initialised == 0)
 			print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
 		end
+		=#
 		return  abs(Area)+circle_area
 end
 
@@ -130,7 +137,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
-		
+		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
 		
@@ -178,13 +185,19 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         min_direction = direction_of_move
 			move_made = 1
                 end
+
+		push!(pos_area_array, [angle_of_move, new_area])
 	end
-	#print("Final optimal direction of move calculated to be $min_direction, corresponding to a new position of $(agent.pos .+ min_direction)\n")
+
+	push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
+	if(move_made == 1)
+		no_move[agent.id] = 0
+	end
 
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
 	kn[2] = (min_direction .* agent_speed)[2]
-	agent.A = min_area
+	new_pos[agent.id] = min_direction .* agent_speed .* model.dt .+ agent.pos
 	return move_made
 end
 
@@ -211,7 +224,7 @@ function initialise(; seed = 123, no_birds = 10)
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -232,6 +245,8 @@ function initialise(; seed = 123, no_birds = 10)
 		rand_position = Tuple(50*rand(Float64, 2)) .+ (25.0, 25.0)
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
+		push!(moves_areas, [])
+		push!(new_pos, (0.0, 0.0))
 	end
 
 	#Calculate the DOD based off the initial positions
@@ -313,7 +328,7 @@ function agent_step!(agent, model)
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
-	move_agent!(agent, new_agent_pos, model)	
+	#move_agent!(agent, new_agent_pos, model)	
 end
 	
 
@@ -321,7 +336,28 @@ end
 
 ###Create the model_step function
 function model_step!(model)
-	model.t += model.dt
+        all_agents_iterable = allagents(model)
+        for agent in all_agents_iterable
+                move_agent!(agent, Tuple(new_pos[agent.id]), model)
+        end
+
+        #Now recalculate the agent DODs based off their new positions
+        for agent_i in all_agents_iterable
+                neighbour_positions = []
+                for agent_j in all_agents_iterable
+                        if(agent_i.id == agent_j.id)
+                                continue
+                        end
+                        push!(neighbour_positions, agent_j.pos)
+                end
+                ri = agent_i.pos
+                new_cell_i = voronoi_cell(ri, neighbour_positions, rho)
+                new_area = voronoi_area(ri, new_cell_i, rho)
+                agent_i.A = new_area
+        end
+        model.t += model.dt
+        model.n += 1
+
 end
 
 
