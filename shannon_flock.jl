@@ -13,7 +13,7 @@ print("Packages loaded\n")
 
 include("half_plane_alt.jl")
 
-rho = 10.0
+rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(100, 100))
@@ -95,7 +95,7 @@ function voronoi_area(ri, cell, rho)
 				=#
 				print("\n")
 				circle_area += balloon
-			elseif (cell[i][3] != cell[j][3]) 
+			else 
 				segment_detected = 1
 				circle_area += circle_segment_area
 			end
@@ -130,7 +130,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	min_area = agent.A #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
-
+	pos_area_array = []
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
@@ -219,7 +219,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 10)
+function initialise(; seed = 123, no_birds = 50)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
@@ -242,7 +242,7 @@ function initialise(; seed = 123, no_birds = 10)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
-		rand_position = Tuple(50*rand(Float64, 2)) .+ (25.0, 25.0)
+		rand_position = Tuple(80*rand(Float64, 2)) .+ (10.0, 10.0)
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
@@ -382,12 +382,12 @@ save("shannon_flock.png", figure)
 ###Animate
 #model = initialise();
 
-#=
+
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 32,
+    framerate = 4, frames = 72,
     title = "Shannon flock"
 )
-=#
+
 	
 
