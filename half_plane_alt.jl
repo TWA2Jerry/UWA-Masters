@@ -227,7 +227,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
 
-		while(vlen >= 1 && outside(dq[i], vq[vlen]))
+		while(vlen >= 1 && outside(dq[i], vq[vlen][1]))
 			if(vq[vlen][3] != 0)
 				pop!(newdq)
 				len -= 1
@@ -237,7 +237,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
                 end
 
                 #Remove any half planes from the back of the queue, again, don't do it if 
-		while(vlen >= 1 && outside(dq[i], vq[1]))
+		while(vlen >= 1 && outside(dq[i], vq[1][1]))
 			if(vq[vlen][2] != 0)
 				popfirst!(newdq)
 				len -= 1
@@ -259,47 +259,87 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
+			intersect_i = inter(dq[i], newdq[len])
+			outside = 0
+			invalid = 0
+			if(norm(intersect_i .- ri) > rho)
+				outside = 1	
+			end
+
+			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
+			if(outside(newdq[len], forward_after_inter))
+				invalid = 1
+			end
+
+			if(outside == 0 && invalid == 0)
+				push!(vq, [intersect_i, i-1, i])
+				vlen += 1
+			else
+                        	push!(vq, [b_circle_intersect_i, 0, i])
+                        	vlen += 1
+			end	
 
 		else 
-
+			push!(vq, [b_circle_intersect_i, 0, i])	
+			vlen += 1
 		end
+
+		#Add the foward intersect
+		push!(vq, [f_circle_intersect_i, i, 0])
+		vlen += 1
+
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
         end
 
         #Do a final cleanup
-        while(len > 2 && outside(dq[1], inter(dq[len], dq[len-1])))
-                pop!(dq)
-                len -= 1
+	while(vlen >= 2 && outside(newdq[1], vq[vlen][1]))
+		pop!(vq)
+		vlen -= 1
+
+		if(vq[len][3] != 0)
+			pop!(newdq)
+                	len -= 1
+		end
         end
 
-        while(len > 2 && outside(dq[len], inter(dq[1], dq[2])))
-                popfirst!(dq)
-                len -= 1
+	while(vlen >= 2 && outside(newdq[len], vq[1][1]))
+		popfirst!(vq)
+		vlen -= 1
+		
+		if(vq[1][2] != 0)
+			popfirst!(newdq)
+                	len -= 1
+		end
         end
 		
 		
+	#Finally, look at the link between the first and last half-planes, if it's valid, add it, if it's not, then the circle intersects would've already been added. 
+	if (len > 1)
+                        #Determine the intersect of hp_i with hp_(i-1)
+                        intersect_last = inter(newdq[len], newdq[1])
+                        outside = 0
+                        invalid = 0
+                        if(norm(intersect_last .- ri) > rho)
+                                outside = 1
+                        end
 
+			forward_after_inter = intersect_last .+ 1.0 .* newdq[len][2]
+                        if(outside(newdq[1], forward_after_inter))
+                                invalid = 1
+                        end
 
-				
-			i_vec = circle_intersect_i .- ri
-			ip1_vec = circle_intersect_ip1 .- ri
-			angle_i = atan(i_vec[2], i_vec[1])
-			angle_ip1 = atan(ip1_vec[2], ip1_vec[1])
-			if(outside_circle == 1)
-				bro = intersect_i .- ri
-				bruh = atan(bro[2], bro[1])
-				#print("For an original intersect outside the circle, it had an angle of $bruh. ")
-				print("The original intersect outside the circle for half planes $i and $(i%dql+1) was $intersect_i")
-			end
-			#print("Due to an invalid intersect, intersects with circle calculated instead. Intersects were (by angle, i followed by i+1) $angle_i and $angle_ip1\n")
-			print("Due to an invalid intersect between half planes $i and $(i%dql+1), intersects with circle calculated instead. Intersects were (i and i+1): $circle_intersect_i, $circle_intersect_ip1\n")
+                        if(outside == 0 && invalid == 0)
+                                push!(vq, [intersect_last, len, 1])
+                                vlen += 1
+                        end
+	end
 
-	if(length(vertices) == 2 && norm(vertices[1][1] .- vertices[2][1]) < eps)
+	if(length(vq) == 2 && norm(vq[1][1] .- vq[2][1]) < eps)
 		print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
 	end
-	return vertices
+	return vq
 
 end
 
