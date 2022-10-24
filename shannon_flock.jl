@@ -385,7 +385,7 @@ save("shannon_flock.png", figure)
 
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 72,
+    framerate = 4, frames = 120,
     title = "Shannon flock"
 )
 
