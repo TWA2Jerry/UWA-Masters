@@ -45,7 +45,7 @@ function inter(h1, h2)
 	end	
 	if(abs(m1 - m2) < abs(eps))
 		print("Parallel planes yo\n")
-		exit()
+		#exit()
 		return -1
 	end  
 	##print("m1 - m2 found to be $(m1-m2)\n")
@@ -195,7 +195,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		i += 1
 	end
 	
-
+	
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
@@ -250,6 +250,10 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1]))
 			if(vq[vlen][3] != 0)
 				#print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
+				if(len <= 0)
+                                        print("Tried to delete a half plane from dequeue when there wasn't one\n")
+                                        exit()
+                                end
 				pop!(newdq)
 				len -= 1
 			end
@@ -260,6 +264,10 @@ function voronoi_cell(ri, neighbouring_points, rho)
                 #Remove any half planes from the back of the queue, again, don't do it if 
 		while(vlen >= 1 && outside(dq[i], vq[1][1]))
 			if(vq[1][2] != 0)
+				if(len <= 0)
+					print("Tried to delete a half plane from dequeue when there wasn't one\n")
+					exit()
+				end
 				popfirst!(newdq)
 				len -= 1
 			end
@@ -268,7 +276,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
                 end
 
 		#Check for parallel half planes is no longer needed as far as I'm aware, because we...okay maybe it is...because if you cut out none, you'll still end up trying to compute parallel plane intersects
-		if(len > 0 && norm(cross(dq[i][2], newdq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
+		if(len > 0 && norm(cross(dq[i][2], newdq[len][2]))< eps && outside(newdq[len], dq[i][3])) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
                         continue
                 end
 
@@ -278,49 +286,54 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			intersect_i = inter(dq[i], newdq[len])
 			is_outside = 0
 			invalid = 0
-			if(norm(intersect_i .- ri) > rho)
+			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
 				is_outside = 1	
 			end
 
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
-			if(outside(newdq[len], forward_after_inter))
+			if(intersect_i == -1 || outside(newdq[len], forward_after_inter))
 				invalid = 1
 			end
 
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
-				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			else
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			end	
 
 		else 
 			push!(vq, [b_circle_intersect_i, 0, i])	
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 
 		#Add the foward intersect
 		push!(vq, [f_circle_intersect_i, i, 0])
 		vlen += 1
-		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
-		#print("Half plane $i added. The dequeues vq and dq are now \n")
-		#print("$vq\n")
-		#print("$newdq\n")
+		print("Half plane $i added. The dequeues vq and dq are now \n")
+		print("$vq\n")
+		print("$newdq\n")
         end
 
-	print("Commencing final cleanup\n")
+	#print("Commencing final cleanup\n")
         #Do a final cleanup
 	while(vlen >= 2 && outside(newdq[1], vq[vlen][1]))
 
 		if(vq[vlen][3] != 0)
-			#print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
+			print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
+			if(len <= 0)
+                                print("Tried to delete a half plane from dequeue when there wasn't one\n")
+                        	exit()
+                        end
+
 			pop!(newdq)
                 	len -= 1
 		end
@@ -331,7 +344,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 	while(vlen >= 2 && outside(newdq[len], vq[1][1]))
 		if(vq[1][2] != 0)
-			#print("Popping from the front of newdq. The front is $(vq[1])\n")
+			print("Popping from the front of newdq. The front is $(vq[1])\n")
+			if(len <= 0)
+                                print("Tried to delete a half plane from dequeue when there wasn't one\n")
+                        	exit()
+                        end
 			popfirst!(newdq)
                 	len -= 1
 		end
@@ -340,15 +357,15 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
         end
 		
-	#=	
+		
 	print("After cleanup, the final half planes were\n")
 	for hp in newdq
 		print("$hp\n")
 	end
-	=#
+	
 
 	#Finally, look at the link between the first and last half-planes, if it's valid, add it, if it's not, then the circle intersects would've already been added. 
-	print("Commencing link between first and last planes\n")
+	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
                         intersect_last = inter(newdq[len], newdq[1])
@@ -387,13 +404,13 @@ end
 #
 
 #Weird triangle test case
-#neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
+neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
 
 
 #Only two neighbours, parallel planes
 #neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
 
-#=
+
 agent_pos = [50.0, 50.0]
 rho = 10.0
 vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
@@ -401,4 +418,4 @@ print("\n\nNow displaying the vertices\n")
 for vertex in vertices
 	print(vertex[1])
 end
-=#
+

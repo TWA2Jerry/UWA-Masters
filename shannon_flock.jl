@@ -20,8 +20,8 @@ rect = Rectangle(Point2(0,0), Point2(100, 100))
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
-
-
+D = 0.5
+sigma = 1
 
 ###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
 function voronoi_area(ri, cell, rho)
@@ -72,7 +72,7 @@ function voronoi_area(ri, cell, rho)
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
 			if(abs(alt_circle_segment_area - circle_segment_area) > 0.001)
 				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area")
-				#exit()
+				exit()
 			end
 
 			#Check, if the agent position is inside the chord half plane. 
@@ -197,7 +197,14 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
 	kn[2] = (min_direction .* agent_speed)[2]
-	new_pos[agent.id] = min_direction .* agent_speed .* model.dt .+ agent.pos
+	
+	#Create the noise addition
+	epsilon = randn(model.rng, Float64, 2)
+	epsilon_prime = randn(model.rng, Float64, 2)
+	dW = sqrt(2*D*model.dt) .* (epsilon .- epsilon_prime)
+
+	#Store the new position for updating in model step
+	new_pos[agent.id] = min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW
 	return move_made
 end
 
@@ -242,7 +249,7 @@ function initialise(; seed = 123, no_birds = 100)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
-		rand_position = Tuple(100*rand(Float64, 2)) 
+		rand_position = Tuple(90*rand(Float64, 2)) .+ (5.0, 5.0) 
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
