@@ -1,7 +1,11 @@
+include("./half_plane_alt.jl")
+#=
 function cross(v1, v2)
         return v1[1] * v2[2] - v1[2]*v2[1]
 end
+=#
 
+###Function that calculates the convex hull of a set of points P
 function convex_hull(P)
 	#Create the vector H which will contain the points of the convex hull
 	H = []
@@ -19,7 +23,7 @@ function convex_hull(P)
 	sort(P) 
 	
 	for i in 1:n
-		while (k >= 2 && cross(H[k-1] .- H[k-2], P[i] .- H[k-2]) <= 0)
+		while (k >= 2 && cross(H[k] .- H[k-1], P[i] .- H[k-1]) <= 0)
 			k -= 1
 			pop!(H)
 		end
@@ -28,14 +32,26 @@ function convex_hull(P)
 	end
 	t = k+1
 	for i in reverse(1:n)
-		while (k >= t && cross(H[k-1] .- H[k-2], P[i] .- H[k-2]) <= 0)
+		if(i < 2)
+			break
+		end
+		while (k >= t && cross(H[k] .- H[k-1], P[i-1] .- H[k-1]) <= 0)
                         k -= 1
                         pop!(H)
                 end
-                push!(H, P[i])
+                push!(H, P[i-1])
                 k += 1
 	end
 
 	return H
 end
 
+#=
+#Test set, simple square
+points = [[40, 40], [60, 40], [60, 60], [40, 60]]
+CH = convex_hull(points)
+print("The points are given by")
+for point in CH
+	print(point)
+end
+=#

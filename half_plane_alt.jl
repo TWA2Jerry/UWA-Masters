@@ -195,13 +195,13 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		i += 1
 	end
 	
-	
+	#=
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
 		print("The half plane angle is $half_plane\n")
 	end
-	
+	=#
 
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vq = []
@@ -298,29 +298,29 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
-				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			else
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
-				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			end	
 
 		else 
 			push!(vq, [b_circle_intersect_i, 0, i])	
 			vlen += 1
-			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 
 		#Add the foward intersect
 		push!(vq, [f_circle_intersect_i, i, 0])
 		vlen += 1
-		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
-		print("Half plane $i added. The dequeues vq and dq are now \n")
-		print("$vq\n")
-		print("$newdq\n")
+		#print("Half plane $i added. The dequeues vq and dq are now \n")
+		#print("$vq\n")
+		#print("$newdq\n")
         end
 
 	#print("Commencing final cleanup\n")
@@ -328,7 +328,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	while(vlen >= 2 && outside(newdq[1], vq[vlen][1]))
 
 		if(vq[vlen][3] != 0)
-			print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
+			#print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
 			if(len <= 0)
                                 print("Tried to delete a half plane from dequeue when there wasn't one\n")
                         	exit()
@@ -344,7 +344,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 	while(vlen >= 2 && outside(newdq[len], vq[1][1]))
 		if(vq[1][2] != 0)
-			print("Popping from the front of newdq. The front is $(vq[1])\n")
+			#print("Popping from the front of newdq. The front is $(vq[1])\n")
 			if(len <= 0)
                                 print("Tried to delete a half plane from dequeue when there wasn't one\n")
                         	exit()
@@ -358,9 +358,9 @@ function voronoi_cell(ri, neighbouring_points, rho)
         end
 		
 		
-	print("After cleanup, the final half planes were\n")
+	#print("After cleanup, the final half planes were\n")
 	for hp in newdq
-		print("$hp\n")
+		#print("$hp\n")
 	end
 	
 
@@ -387,7 +387,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	end
 
 	if(length(vq) == 2 && norm(vq[1][1] .- vq[2][1]) < eps)
-		print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
+		#print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
 	end
 
 	
@@ -404,13 +404,13 @@ end
 #
 
 #Weird triangle test case
-neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
+#neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
 
 
 #Only two neighbours, parallel planes
 #neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
 
-
+#=
 agent_pos = [50.0, 50.0]
 rho = 10.0
 vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
@@ -418,4 +418,4 @@ print("\n\nNow displaying the vertices\n")
 for vertex in vertices
 	print(vertex[1])
 end
-
+=#

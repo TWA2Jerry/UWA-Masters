@@ -21,9 +21,10 @@ moves_areas = [] #This is an array which will allow us to record all the areas a
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 D = 0.5
-sigma = 1
+sigma = 0
 
-###Function that calculates the area of a voronoi cell given the vertices that comprise the cell.
+###Function that calculates the area of a voronoi cell given the vertices that
+#comprise the cell.
 function voronoi_area(ri, cell, rho)
        	Area = 0.0
 	circle_area = 0.0
@@ -35,7 +36,8 @@ function voronoi_area(ri, cell, rho)
 		Area = pi*rho^2
 		return Area
 	end
-
+	
+	#=
 	print(" The vertices for the cell are ")
 	for i in 1:num_points
                                     vector_to_vertex = cell[i][1] .- ri
@@ -44,7 +46,7 @@ function voronoi_area(ri, cell, rho)
                                         #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
                                 end
                                 print("\n")
-
+	=#
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
@@ -249,7 +251,7 @@ function initialise(; seed = 123, no_birds = 100)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
-		rand_position = Tuple(90*rand(Float64, 2)) .+ (5.0, 5.0) 
+		rand_position = Tuple(100*rand(Float64, 2)) 
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
