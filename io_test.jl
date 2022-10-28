@@ -8,3 +8,10 @@ write(out_file, "$a \n")
 write(out_file, "$b \n")
 write(out_file, "$c \n")
 write(out_file, "$(c[1]) $(c[2])\n")
+
+using Random
+out_file_3 = open("io_test_2.txt", "w")
+for i in 1:20
+	write(out_file_3, "$(rand(Float64)) ")
+end
+

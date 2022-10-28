@@ -426,7 +426,8 @@ end
 using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
 
-	
+
+#=
 ###Initialise the model
 model = initialise()
 print("Number of agents is $(nagents(model))\n")
@@ -441,7 +442,7 @@ using CairoMakie # choosing a plotting backend
 figure, _ = abmplot(model)
 figure # returning the figure displays it
 save("shannon_flock.png", figure)
-	
+=#	
 
 
 ###Animate
@@ -455,7 +456,8 @@ abmvideo(
 )
 =#
 
-
+compac_frac_file = open("compaction_frac.txt", "w")
+mean_a_file = open("mean_area.txt", "w")
 for i in 1:1
 	model = initialise()
 	figure, _ = abmplot(model)
