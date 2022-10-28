@@ -46,6 +46,7 @@ function convex_hull(P)
 	return H
 end
 
+
 #=
 #Test set, simple square
 points = [[40, 40], [60, 40], [60, 60], [40, 60]]

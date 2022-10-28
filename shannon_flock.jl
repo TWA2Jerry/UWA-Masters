@@ -12,6 +12,9 @@ using Plots
 print("Packages loaded\n")
 
 include("half_plane_alt.jl")
+include("convex_hull.jl")
+
+print("Both homemade files included\n")
 
 rho = 100.0
 initialised = 0
@@ -20,6 +23,7 @@ rect = Rectangle(Point2(0,0), Point2(100, 100))
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
+convex_hull_point = zeros(Int64, 100)
 D = 0.5
 sigma = 0
 
@@ -207,7 +211,37 @@ function move_gradient(agent, model,  kn, q, m, rho)
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW
+	if(new_pos[agent.id][1] > 100.0 || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > 100.0 || new_pos[agent.id][2] < 0.0)
+		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+		exit()
+	end
 	return move_made
+end
+
+
+
+###Function for updating the convex hull, returns the points of the convex hull so the area of the convex hull can be calculated
+function update_convex_hull(model)
+	points = []
+	all_agents_iterable = allagents(model)
+	for agent in all_agents_iterable
+		push!(points, [agent.pos[1], agent.pos[2], agent.id])
+		#print("The point added was $([agent.pos[1], agent.pos[2], Int64(agent.id)]), the agent id is $(agent.id)\n")
+	end
+	
+	for i in 1:nagents(model)
+		convex_hull_point[i] = 0
+	end
+
+	CH = convex_hull(points)
+	CH_for_area = []
+	
+	for point in CH
+		convex_hull_point[Int64(point[3])] = 1
+		push!(CH_for_area, [[point[1], point[2]], 1, 1]) #Note that the points used for the CH_for_area consists of the actual point itself and 1,1 because the voronoi area calcualtor we're going to use requires a 2 and 3 index, checking them to see if the points are circular. 
+	end
+
+	return CH_for_area
 end
 
 
@@ -233,7 +267,7 @@ function initialise(; seed = 123, no_birds = 100)
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
 	
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -300,6 +334,11 @@ function initialise(; seed = 123, no_birds = 100)
 		add_agent!(agent, initial_positions[i], model)	
 	end	
 
+	#Calculate the actual area of the convex hull of the group of birds
+	convexhullbro = update_convex_hull(model)
+	initial_convex_hull_area = voronoi_area(-1, convexhullbro, rho)
+	model.CHA = initial_convex_hull_area
+
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
@@ -364,7 +403,12 @@ function model_step!(model)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
         end
-        model.t += model.dt
+        
+	#Now update the model's convex hull
+	convexhullbro = update_convex_hull(model)
+	convex_hull_area = voronoi_area(-1, convexhullbro, rho)
+	model.CHA = convex_hull_area
+	model.t += model.dt
         model.n += 1
 
 end
@@ -398,5 +442,10 @@ abmvideo(
     title = "Shannon flock"
 )
 
-	
 
+#=
+for i in 1:20
+	model = initialise()
+	step!(model, agent_step!, model_step!, 120)
+end
+=#
