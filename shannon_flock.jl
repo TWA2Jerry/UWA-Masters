@@ -343,10 +343,16 @@ function initialise(; seed = 123, no_birds = 100)
 	global initialised = 1
 	
 
-	scatter(pack_positions, markersize = 6, label = "generators")
+	Plots.scatter(pack_positions, markersize = 6, label = "generators")
 annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
-display(plot!(init_tess, legend=:topleft))
+display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
+
+	#Finally, plot the figure
+	#=
+	figure, _ = abmplot(model)	
+	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
+	=#
 
 	return model
 end  
@@ -411,19 +417,25 @@ function model_step!(model)
 	model.t += model.dt
         model.n += 1
 
+	#Finally, plot the model after the step
+	figure, _ = abmplot(model)
+	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 end
 
+###Test the model has been initialised and works
+using InteractiveDynamics
+using CairoMakie # choosing a plotting backend
 
 	
 ###Initialise the model
 model = initialise()
 print("Number of agents is $(nagents(model))\n")
 
-
+#=
 ###Test the model has been initialised and works
 using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
-
+=#
 
 
 figure, _ = abmplot(model)
@@ -435,17 +447,19 @@ save("shannon_flock.png", figure)
 ###Animate
 #model = initialise();
 
-
+#=
 abmvideo(
     "Shannon_flock.mp4", model, agent_step!, model_step!;
     framerate = 4, frames = 120,
     title = "Shannon flock"
 )
+=#
 
 
-#=
-for i in 1:20
+for i in 1:1
 	model = initialise()
+	figure, _ = abmplot(model)
+        save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, 120)
 end
-=#
+
