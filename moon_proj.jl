@@ -127,6 +127,7 @@ figure # returning the figure displays it
 save("moon_planet.png", figure)
 	
 ###Animate
+
 model = initialise();
 period_time = 2*pi*19.0^1.5
 dt = 0.001
