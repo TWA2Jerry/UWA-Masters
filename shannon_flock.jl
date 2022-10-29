@@ -24,8 +24,8 @@ moves_areas = [] #This is an array which will allow us to record all the areas a
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
-D = 0.5
-sigma = 0
+D = 9
+sigma = 0.1
 
 ###Function that calculates the area of a voronoi cell given the vertices that
 #comprise the cell.
@@ -285,7 +285,7 @@ function initialise(; seed = 123, no_birds = 100)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
-		rand_position = Tuple(100*rand(Float64, 2)) 
+		rand_position = Tuple(80*rand(Float64, 2)) .+ (10.0, 10.0)
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
@@ -327,18 +327,24 @@ function initialise(; seed = 123, no_birds = 100)
 			
 
 	#Now make the agents with their respective DoDs and add to the model
+	total_area = 0.0
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("Initial velocity of $(agent.vel) \n")
-		add_agent!(agent, initial_positions[i], model)	
+		add_agent!(agent, initial_positions[i], model)
+		total_area += initial_dods[i]
 	end	
 
 	#Calculate the actual area of the convex hull of the group of birds
 	convexhullbro = update_convex_hull(model)
 	initial_convex_hull_area = voronoi_area(-1, convexhullbro, rho)
 	model.CHA = initial_convex_hull_area
-
+	packing_fraction = nagents(model)*pi*1^2/model.CHA
+	print("Packing fraction at n = 0 is $(packing_fraction)\n")
+	write(compac_frac_file, "$packing_fraction ")
+	average_area = total_area / nagents(model)
+        write(mean_a_file, "$average_area ")
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
@@ -396,7 +402,8 @@ function model_step!(model)
         end
 
         #Now recalculate the agent DODs based off their new positions
-        for agent_i in all_agents_iterable
+        total_area = 0.0
+	for agent_i in all_agents_iterable
                 neighbour_positions = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
@@ -408,6 +415,7 @@ function model_step!(model)
                 new_cell_i = voronoi_cell(ri, neighbour_positions, rho)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
+		total_area += agent_i.A
         end
         
 	#Now update the model's convex hull
@@ -420,6 +428,11 @@ function model_step!(model)
 	#Finally, plot the model after the step
 	figure, _ = abmplot(model)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+	packing_fraction = nagents(model)*pi/model.CHA
+	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
+	write(compac_frac_file, "$packing_fraction ")
+	average_area = total_area / nagents(model)
+	write(mean_a_file, "$average_area ")
 end
 
 ###Test the model has been initialised and works
@@ -458,10 +471,12 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-for i in 1:1
+for i in 1:2
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, 120)
+	write(compac_frac_file, "\n")
+	write(mean_a_file, "\n")
 end
 
