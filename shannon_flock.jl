@@ -16,7 +16,7 @@ include("convex_hull.jl")
 
 print("Both homemade files included\n")
 
-rho = 10.0
+rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(100, 100))
@@ -90,7 +90,7 @@ function voronoi_area(ri, cell, rho)
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
 			if(abs(alt_circle_segment_area - circle_segment_area)/circle_segment_area > 0.01)
 				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area")
-				exit()
+				#exit()
 			end
 
 			#Check, if the agent position is inside the chord half plane. 
@@ -489,8 +489,8 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 0
-for i in 1:1
+no_steps = 240
+for i in 1:2
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
