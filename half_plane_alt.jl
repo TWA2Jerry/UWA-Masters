@@ -108,6 +108,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	dq = []	
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
+	
 	bottom_side = [0.0, [50.0, 0.0], [50.0, 0.0], 1]
 	right_side = [pi/2, [0.0, 50.0], [100.0, 50.0], 1]
 	top_side = [pi, [-50.0, 0.0], [50.0, 100.0], 1]
@@ -117,6 +118,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	push!(half_planes, right_side)
 	push!(half_planes, top_side)
 	push!(half_planes, left_side)
+	
 
 	sort!(half_planes)
 	#print("After sorting, half_planes is given by \n")
@@ -174,7 +176,6 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		exit()
 		return -1
 	end
-
 	#print("dq processing complete, the deqeue is given by $dq")
 	
 

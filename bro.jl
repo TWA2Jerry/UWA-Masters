@@ -12,7 +12,7 @@ print(lines[1][1])
 print(lines[1][2])
 averages_array = []
 
-for i in 1:length(lines[1])
+for i in 1:3
 	push!(averages_array, [])
 end
 

@@ -16,16 +16,28 @@ include("convex_hull.jl")
 
 print("Both homemade files included\n")
 
-rho = 100.0
+rho = 10.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(100, 100))
+rect_bound = 100.0
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 D = 9
-sigma = 0.1
+sigma = 0.0
+
+###Function that takes a vector and calculates the mean of the elements in the vector
+function mean(v)
+	total = 0.0
+	for i in 1:length(v)
+		total += v[i]
+	end
+	
+	return total/length(v)
+end
+
 
 ###Function that calculates the area of a voronoi cell given the vertices that
 #comprise the cell.
@@ -76,7 +88,7 @@ function voronoi_area(ri, cell, rho)
 			angle_to_ip1 = atan(vec_to_ip1[2], vec_to_ip1[1])
 			theta = min((angle_to_ip1 - angle_to_i + 2*pi)%(2*pi), (angle_to_i - angle_to_ip1 + 2*pi)%(2*pi))
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
-			if(abs(alt_circle_segment_area - circle_segment_area) > 0.001)
+			if(abs(alt_circle_segment_area - circle_segment_area)/circle_segment_area > 0.01)
 				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area")
 				exit()
 			end
@@ -91,14 +103,13 @@ function voronoi_area(ri, cell, rho)
 			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
-				print("Ballon segment detected, balloon area was $balloon.")
-				#=for i in 1:num_points
+				print("Ballon segment detected, balloon area was $balloon.\n")
+				for i in 1:num_points
 					vector_to_vertex = cell[i][1] .- ri
 					angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
 					print("$angle_to_vertex ")
-					#print("$(atan(cell[i][1][2], cell[i][1][1])) ")
 				end
-				=#
+				
 				print("\n")
 				circle_area += balloon
 			else 
@@ -211,7 +222,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW
-	if(new_pos[agent.id][1] > 100.0 || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > 100.0 || new_pos[agent.id][2] < 0.0)
+	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		exit()
 	end
@@ -265,7 +276,6 @@ using Random #for reproducibility
 function initialise(; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((100.0, 100.0); periodic = true)
-	
 	#Create the properties of the model
 	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0)
 	
@@ -285,7 +295,7 @@ function initialise(; seed = 123, no_birds = 100)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
-		rand_position = Tuple(80*rand(Float64, 2)) .+ (10.0, 10.0)
+		rand_position = Tuple(90*rand(Float64, 2)) .+ (5.0, 5.0) 
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
@@ -300,7 +310,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#initial_dods = voronoi_area(initial_positions, rho)
 	initial_dods = []
 	for i in 1:no_birds
-		print("\n\nCalculating initial DOD for agent $i.")
+		#print("\n\nCalculating initial DOD for agent $i.")
 		ri  = initial_positions[i]
 		neighbouring_positions = []
 		for j in 1:no_birds
@@ -311,9 +321,9 @@ function initialise(; seed = 123, no_birds = 100)
 		end
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
-		print("Initial DOD calculated to be $initial_A\n")
+		#print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
-			#print("Conventional area exceeded by agent $(i)\n")
+			print("Conventional area exceeded by agent $(i)\n")
 		elseif initial_A < eps
 			print("Effective area of 0. The cell was comprised of vertices $(initial_cell)\n")
 			
@@ -331,7 +341,7 @@ function initialise(; seed = 123, no_birds = 100)
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
-		print("Initial velocity of $(agent.vel) \n")
+		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += initial_dods[i]
 	end	
@@ -430,9 +440,17 @@ function model_step!(model)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
-	write(compac_frac_file, "$packing_fraction ")
+	if(model.n < no_steps)
+		write(compac_frac_file, "$packing_fraction ")
+	else
+		write(compac_frac_file, "$packing_fraction")
+	end
 	average_area = total_area / nagents(model)
-	write(mean_a_file, "$average_area ")
+	if(model.n < no_steps)
+		write(mean_a_file, "$average_area ")
+	else 
+		write(mean_a_file, "$average_area")
+	end
 end
 
 ###Test the model has been initialised and works
@@ -471,12 +489,57 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-for i in 1:2
+no_steps = 0
+for i in 1:1
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
-	step!(model, agent_step!, model_step!, 120)
+	step!(model, agent_step!, model_step!, no_steps)
 	write(compac_frac_file, "\n")
 	write(mean_a_file, "\n")
 end
+
+close(compac_frac_file)
+close(mean_a_file)
+
+compac_frac_file = open("compaction_frac.txt", "r")
+mean_a_file = open("mean_area.txt", "r")
+
+
+cf_array = []
+ma_array = []
+
+for i in 0:no_steps
+	push!(cf_array, [])
+	push!(ma_array, [])
+end
+
+cf_lines = readlines(compac_frac_file)
+ma_lines = readlines(mean_a_file)
+
+print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
+for line in cf_lines
+	split_line = parse.(Float64, split(line, " "))
+        for i in 1:length(split_line)
+		print("The element read was $(split_line[i])\n")
+		push!(cf_array[i], split_line[i])
+        end
+end
+
+for line in ma_lines
+        split_line = parse.(Float64, split(line, " "))
+        for i in 1:length(split_line)
+                push!(ma_array[i], split_line[i])
+        end
+end
+
+cf_ave_file = open("cf_ave.txt", "w")
+ma_ave_file = open("ma_ave.txt", "w")
+
+for i in 0:no_steps
+	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
+	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
+end
+
+
 
