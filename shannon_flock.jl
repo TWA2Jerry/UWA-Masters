@@ -490,7 +490,7 @@ abmvideo(
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 no_steps = 240
-for i in 1:2
+for i in 1:100
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
