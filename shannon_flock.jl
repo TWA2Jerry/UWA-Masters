@@ -118,9 +118,10 @@ function voronoi_area(ri, cell, rho)
 			end
 		end
 	end
-		#=
+		#=	
 		if(abs(Area)+circle_area > pi*rho^2 && initialised == 0)
-			print("Conventional area exceeded, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The number of points for this was $num_points.\n")
+			print("Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
+			exit()
 		end
 		=#
 		return  abs(Area)+circle_area
@@ -225,6 +226,10 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		exit()
+	end
+
+	if(min_area > pi*rho^2)
+		print("Conventional area exceeded by agent $(agent.id)\n")
 	end
 	return move_made
 end
@@ -426,6 +431,10 @@ function model_step!(model)
                 new_cell_i = voronoi_cell(ri, neighbour_positions, rho)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
+		if(agent_i.A > pi*rho^2)
+                        print("Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
+                        exit()
+                end
 		total_area += agent_i.A
         end
         
@@ -491,8 +500,9 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 0
-for i in 1:1
+no_steps = 120
+no_simulations = 1
+for i in 1:no_simulations
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
@@ -519,7 +529,7 @@ end
 cf_lines = readlines(compac_frac_file)
 ma_lines = readlines(mean_a_file)
 
-#=
+
 print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
 	split_line = parse.(Float64, split(line, " "))
@@ -543,6 +553,6 @@ for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
 end
-=#
+
 
 
