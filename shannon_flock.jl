@@ -19,8 +19,8 @@ print("Both homemade files included\n")
 rho = 10.0
 initialised = 0
 area_zero = zeros(Int64, 100)
-rect = Rectangle(Point2(0,0), Point2(100, 100))
-rect_bound = 100.0
+rect = Rectangle(Point2(0,0), Point2(200, 200))
+rect_bound = 200.0
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
@@ -280,7 +280,7 @@ print("Agent template created\n")
 using Random #for reproducibility
 function initialise(; seed = 123, no_birds = 100)
 	#Create the space
-	space = ContinuousSpace((100.0, 100.0); periodic = true)
+	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
 	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0)
 	
@@ -300,7 +300,7 @@ function initialise(; seed = 123, no_birds = 100)
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
-		rand_position = Tuple(90*rand(Float64, 2)) .+ (5.0, 5.0) 
+		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
