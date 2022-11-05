@@ -16,7 +16,7 @@ include("convex_hull.jl")
 
 print("Both homemade files included\n")
 
-rho = 10.0
+rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(200, 200))
