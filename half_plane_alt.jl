@@ -248,7 +248,6 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1]))
 			if(vq[vlen][3] != 0)
-				#print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
 				if(len <= 0)
                                         print("Tried to delete a half plane from dequeue when there wasn't one\n")
                                         exit()
@@ -256,6 +255,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 				pop!(newdq)
 				len -= 1
 			end
+			print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
 			pop!(vq)
                         vlen -= 1
                 end
@@ -270,6 +270,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 				popfirst!(newdq)
 				len -= 1
 			end
+			print("Popping from the front of the dequeue. The front is $(vq[1])\n")
 			popfirst!(vq)
                         vlen -= 1
                 end
@@ -279,7 +280,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
                         continue
                 end
 
-
+		invalid_half_plane = 0
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 			intersect_i = inter(dq[i], newdq[len])
@@ -298,16 +299,22 @@ function voronoi_cell(ri, neighbouring_points, rho)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
 				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
-			else
+			elseif(!outside(newdq[len], b_circle_intersect_i))
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
 				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			else 
+				invalid_half_plane = 1
 			end	
 
 		else 
 			push!(vq, [b_circle_intersect_i, 0, i])	
 			vlen += 1
 			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+		end
+		
+		if(invalid_half_plane == 1)
+			continue
 		end
 
 		#Add the foward intersect

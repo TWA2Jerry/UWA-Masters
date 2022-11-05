@@ -488,6 +488,7 @@ abmvideo(
 )
 =#
 
+
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 no_steps = 0
@@ -518,6 +519,7 @@ end
 cf_lines = readlines(compac_frac_file)
 ma_lines = readlines(mean_a_file)
 
+#=
 print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
 	split_line = parse.(Float64, split(line, " "))
@@ -541,6 +543,6 @@ for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
 end
-
+=#
 
 
