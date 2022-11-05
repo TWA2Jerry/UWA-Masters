@@ -16,7 +16,7 @@ include("convex_hull.jl")
 
 print("Both homemade files included\n")
 
-rho = 100.0
+rho = 10.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(100, 100))
@@ -310,7 +310,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#initial_dods = voronoi_area(initial_positions, rho)
 	initial_dods = []
 	for i in 1:no_birds
-		#print("\n\nCalculating initial DOD for agent $i.")
+		print("\n\nCalculating initial DOD for agent $i.")
 		ri  = initial_positions[i]
 		neighbouring_positions = []
 		for j in 1:no_birds
@@ -321,9 +321,10 @@ function initialise(; seed = 123, no_birds = 100)
 		end
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
-		#print("Initial DOD calculated to be $initial_A\n")
+		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
 			print("Conventional area exceeded by agent $(i)\n")
+			exit()
 		elseif initial_A < eps
 			print("Effective area of 0. The cell was comprised of vertices $(initial_cell)\n")
 			
@@ -489,8 +490,8 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 240
-for i in 1:100
+no_steps = 0
+for i in 1:1
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
