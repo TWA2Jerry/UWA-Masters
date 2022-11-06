@@ -156,7 +156,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
-		for j in 1:m #For every position up to m
+		for j in 1:100 #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
@@ -500,7 +500,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 200
+no_steps = 500
 no_simulations = 100
 for i in 1:no_simulations
 	model = initialise()
