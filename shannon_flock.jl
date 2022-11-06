@@ -501,7 +501,7 @@ abmvideo(
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 no_steps = 500
-no_simulations = 100
+no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
 	figure, _ = abmplot(model)
