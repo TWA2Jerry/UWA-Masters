@@ -13,6 +13,7 @@ print("Packages loaded\n")
 
 include("half_plane_alt.jl")
 include("convex_hull.jl")
+include("brute_force.jl")
 
 print("Both homemade files included\n")
 
@@ -331,6 +332,8 @@ function initialise(; seed = 123, no_birds = 100)
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
+
+		brute_A = voronoi_area_brute(ri, neighbouring_positions, rho, 10000)
 		if(abs(initial_A) > pi*rho^2)
 			print("Conventional area exceeded by agent $(i)\n")
 			exit()
@@ -341,6 +344,9 @@ function initialise(; seed = 123, no_birds = 100)
 		end
 		if(abs(initial_A-init_tess_areas[i]) > eps)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
+		end
+		if(abs(initial_A - brute_A > eps))
+			print("Difference in area calculated between our code and the brute force method. Our code calculated $initial_A, theirs $brute_A\n")
 		end
 		push!(initial_dods, initial_A)
 	end
@@ -504,7 +510,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 500
+no_steps = 0
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
