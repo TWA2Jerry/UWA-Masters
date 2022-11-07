@@ -156,8 +156,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
-		for j in 1:100 #For every position up to m
-			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed
+		for j in 1:m #For every position up to m
+			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
@@ -168,19 +168,21 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 			
 			if (conflict == 1)		
-				break
+				continue
 			end
-		end
-		
-		if (conflict == 1) #Look at another direction if there's a agent in at or close to the potential position
-			#print("Conflict detected\n")
-			continue
-                end
 
-		#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-		pot_new_pos = agent.pos .+ direction_of_move .* agent_speed .* dt
-		agent_voronoi_cell = voronoi_cell(pot_new_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
-		new_area = voronoi_area(pot_new_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
+                	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			#print("Potential new area of $new_area\n")
+			if (new_area < min_area)
+                        	min_area = new_area
+                        	#print("New min area, direction of $direction_of_move\n")
+                        	min_direction = direction_of_move
+                        	move_made = 1
+                	end
+
+		end
 		
 		#Check area calculation through voronoi package
 		#=
@@ -195,16 +197,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			print("Area check, our calculated area was $new_area, theirs was $(tess_areas[1])\n")
 		end
 		=#
-
-		#print("Potential new area of $new_area\n")
-		if (new_area < min_area)
-                	min_area = new_area
-			#print("New min area, direction of $direction_of_move\n")
-                        min_direction = direction_of_move
-			move_made = 1
-                end
-
-		push!(pos_area_array, [angle_of_move, new_area])
+		
+		push!(pos_area_array, [angle_of_move, min_area])
 	end
 
 	push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
@@ -390,7 +384,7 @@ function agent_step!(agent, model)
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 1, rho)
+        move_made = move_gradient(agent, model, k1, 8, 100, rho)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
