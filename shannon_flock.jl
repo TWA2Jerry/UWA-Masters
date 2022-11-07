@@ -103,6 +103,7 @@ function voronoi_area(ri, cell, rho)
 			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
+				#=
 				print("Ballon segment detected, balloon area was $balloon.\n")
 				for i in 1:num_points
 					vector_to_vertex = cell[i][1] .- ri
@@ -112,6 +113,7 @@ function voronoi_area(ri, cell, rho)
 				
 				print("\n")
 				circle_area += balloon
+				=#
 			else 
 				segment_detected = 1
 				circle_area += circle_segment_area
@@ -134,6 +136,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#Calculate the unit vector in the current direction of motion
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
+	theta_0 = atan(unit_v[2], unit_v[1])
 	agent_speed = 1.0
 	vix = unit_v[1]
 	viy = unit_v[2]
@@ -149,6 +152,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
 	pos_area_array = []
+	no_angles_considered = 0
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
@@ -156,6 +160,11 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
+		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
+		if(abs(rel_angle) > (1)*2*pi/q)
+			continue
+		end
+		no_angles_considered += 1
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
@@ -205,7 +214,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	if(move_made == 1)
 		no_move[agent.id] = 0
 	end
-
+	
+	print("The number of angles considered was $no_angles_considered\n")
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
 	kn[2] = (min_direction .* agent_speed)[2]
