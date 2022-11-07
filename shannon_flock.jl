@@ -215,7 +215,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		no_move[agent.id] = 0
 	end
 	
-	print("The number of angles considered was $no_angles_considered\n")
+	#print("The number of angles considered was $no_angles_considered\n")
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
 	kn[2] = (min_direction .* agent_speed)[2]
