@@ -25,8 +25,8 @@ moves_areas = [] #This is an array which will allow us to record all the areas a
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
-D = 9
-sigma = 0.0
+D = 3
+sigma = 0.1
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -384,7 +384,7 @@ function agent_step!(agent, model)
 
 	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 100, rho)
+        move_made = move_gradient(agent, model, k1, 8, 1, rho)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -494,8 +494,8 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 500
-no_simulations = 1
+no_steps = 8000
+no_simulations = 50
 for i in 1:no_simulations
 	model = initialise()
 	figure, _ = abmplot(model)
