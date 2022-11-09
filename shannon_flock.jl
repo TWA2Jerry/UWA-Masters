@@ -13,7 +13,7 @@ print("Packages loaded\n")
 
 include("half_plane_alt.jl")
 include("convex_hull.jl")
-include("brute_force.jl")
+#include("brute_force.jl")
 
 print("Both homemade files included\n")
 
@@ -184,6 +184,18 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			if(convex_hull_point[agent.id] == 1)
+				print("The angles of the vertices of the cell are ")
+				for point in agent_voronoi_cell
+					vector_to_vertex = point[1] .- new_agent_pos
+                                        angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
+                                        print("$angle_to_vertex ")
+                                        #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
+                                	print("\n")
+				end
+
+			end
+				
 			#print("Potential new area of $new_area\n")
 			if (new_area < min_area)
                         	min_area = new_area
@@ -333,7 +345,7 @@ function initialise(; seed = 123, no_birds = 100)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
 
-		brute_A = voronoi_area_brute(ri, neighbouring_positions, rho, 10000)
+		#brute_A = voronoi_area_brute(ri, neighbouring_positions, rho, 10000)
 		if(abs(initial_A) > pi*rho^2)
 			print("Conventional area exceeded by agent $(i)\n")
 			exit()
@@ -345,9 +357,10 @@ function initialise(; seed = 123, no_birds = 100)
 		if(abs(initial_A-init_tess_areas[i]) > eps)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
 		end
-		if(abs(initial_A - brute_A > eps))
+		#=if(abs(initial_A - brute_A > eps))
 			print("Difference in area calculated between our code and the brute force method. Our code calculated $initial_A, theirs $brute_A\n")
 		end
+		=#
 		push!(initial_dods, initial_A)
 	end
 			
@@ -510,7 +523,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 0
+no_steps = 50
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
