@@ -54,7 +54,7 @@ function voronoi_area(ri, cell, rho)
 		return Area
 	end
 	
-	#=
+	
 	print(" The vertices for the cell are ")
 	for i in 1:num_points
                                     vector_to_vertex = cell[i][1] .- ri
@@ -63,7 +63,7 @@ function voronoi_area(ri, cell, rho)
                                         #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
                                 end
                                 print("\n")
-	=#
+	
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
@@ -104,7 +104,7 @@ function voronoi_area(ri, cell, rho)
 			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
-				#=
+				
 				print("Ballon segment detected, balloon area was $balloon.\n")
 				for i in 1:num_points
 					vector_to_vertex = cell[i][1] .- ri
@@ -114,7 +114,7 @@ function voronoi_area(ri, cell, rho)
 				
 				print("\n")
 				circle_area += balloon
-				=#
+				
 			else 
 				segment_detected = 1
 				circle_area += circle_segment_area
@@ -135,6 +135,7 @@ end
 ###Function that determines the gradient of movement
 function move_gradient(agent, model,  kn, q, m, rho)
 	#Calculate the unit vector in the current direction of motion
+	print("\n\n\nCalculating moves for agent $(agent.id)\n")
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
 	theta_0 = atan(unit_v[2], unit_v[1])
@@ -184,6 +185,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			#=
 			if(convex_hull_point[agent.id] == 1)
 				print("The angles of the vertices of the cell are ")
 				for point in agent_voronoi_cell
@@ -193,10 +195,10 @@ function move_gradient(agent, model,  kn, q, m, rho)
                                         #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
                                 	print("\n")
 				end
-
+		
 			end
-				
-			#print("Potential new area of $new_area\n")
+			=#		
+			print("Potential new area of $new_area\n")
 			if (new_area < min_area)
                         	min_area = new_area
                         	#print("New min area, direction of $direction_of_move\n")
@@ -295,7 +297,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 100)
+function initialise(; seed = 123, no_birds = 4)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -316,6 +318,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
+	#=
 	for i in 1:no_birds
 		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		push!(initial_positions, rand_position)
@@ -323,6 +326,29 @@ function initialise(; seed = 123, no_birds = 100)
 		push!(moves_areas, [])
 		push!(new_pos, (0.0, 0.0))
 	end
+	=#
+
+	push!(initial_positions, (50.0, 50.0))
+	pack_positions[1] = Point2((50.0, 50.0))
+                push!(moves_areas, [])
+                push!(new_pos, (0.0, 0.0))
+
+	push!(initial_positions, (150.0, 50.0))
+        pack_positions[2] = Point2((150.0, 50.0))
+                push!(moves_areas, [])
+                push!(new_pos, (0.0, 0.0))
+
+	push!(initial_positions, (150.0, 150.0))
+        pack_positions[3] = Point2((150.0, 150.0))
+                push!(moves_areas, [])
+                push!(new_pos, (0.0, 0.0))
+
+	push!(initial_positions, (50.0, 150.0))
+        pack_positions[4] = Point2((50.0, 150.0))
+                push!(moves_areas, [])
+                push!(new_pos, (0.0, 0.0))
+
+
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -523,7 +549,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 50
+no_steps = 25
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

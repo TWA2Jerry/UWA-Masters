@@ -196,13 +196,13 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		i += 1
 	end
 	
-	#=
+	
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
 		print("The half plane is $half_plane\n")
 	end
-	=#	
+		
 	
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vq = []
@@ -245,7 +245,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		
 		a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
                 f_circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
-		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
+		print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1]))
@@ -300,11 +300,11 @@ function voronoi_cell(ri, neighbouring_points, rho)
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
-				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i))
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
@@ -312,7 +312,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		else 
 			push!(vq, [b_circle_intersect_i, 0, i])	
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 		
 		if(invalid_half_plane == 1)
@@ -322,7 +322,7 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		#Add the foward intersect
 		push!(vq, [f_circle_intersect_i, i, 0])
 		vlen += 1
-		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
@@ -365,12 +365,12 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
         end
 		
-	#=	
+		
 	print("After cleanup, the final half planes were\n")
 	for hp in newdq
 		print("$hp\n")
 	end
-	=#
+	
 
 	#Finally, look at the link between the first and last half-planes, if it's valid, add it, if it's not, then the circle intersects would've already been added. 
 	#print("Commencing link between first and last planes\n")
