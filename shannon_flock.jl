@@ -25,7 +25,7 @@ moves_areas = [] #This is an array which will allow us to record all the areas a
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
-D = 3
+D = 0.75
 sigma = 0.1
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
@@ -198,10 +198,10 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		=#
 		
-		push!(pos_area_array, [angle_of_move, min_area])
+		#push!(pos_area_array, [angle_of_move, min_area])
 	end
 
-	push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
+	#push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
 	if(move_made == 1)
 		no_move[agent.id] = 0
 	end
