@@ -29,6 +29,7 @@ convex_hull_point = zeros(Int64, 100)
 D = 9
 sigma = 0.0
 
+
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
 	total = 0.0
@@ -54,7 +55,7 @@ function voronoi_area(ri, cell, rho)
 		return Area
 	end
 	
-	
+	#=
 	print(" The vertices for the cell are ")
 	for i in 1:num_points
                                     vector_to_vertex = cell[i][1] .- ri
@@ -63,7 +64,7 @@ function voronoi_area(ri, cell, rho)
                                         #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
                                 end
                                 print("\n")
-	
+	=#
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
@@ -185,7 +186,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
-			#=
+				
 			if(convex_hull_point[agent.id] == 1)
 				print("The angles of the vertices of the cell are ")
 				for point in agent_voronoi_cell
@@ -197,7 +198,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 				end
 		
 			end
-			=#		
+					
 			print("Potential new area of $new_area\n")
 			if (new_area < min_area)
                         	min_area = new_area
@@ -297,7 +298,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 4)
+function initialise(; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -318,7 +319,7 @@ function initialise(; seed = 123, no_birds = 4)
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
-	#=
+	
 	for i in 1:no_birds
 		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		push!(initial_positions, rand_position)
@@ -326,8 +327,9 @@ function initialise(; seed = 123, no_birds = 4)
 		push!(moves_areas, [])
 		push!(new_pos, (0.0, 0.0))
 	end
-	=#
+	
 
+	#=
 	push!(initial_positions, Tuple([50.0, 50.0]))
 	pack_positions[1] = Point2((50.0, 50.0))
                 push!(moves_areas, [])
@@ -347,7 +349,7 @@ function initialise(; seed = 123, no_birds = 4)
         pack_positions[4] = Point2((50.0, 150.0))
                 push!(moves_areas, [])
                 push!(new_pos, (0.0, 0.0))
-
+	=#
 
 
 	#Calculate the DOD based off the initial positions
@@ -415,7 +417,7 @@ function initialise(; seed = 123, no_birds = 4)
 	
 
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
-annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:100])
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 
@@ -496,6 +498,7 @@ function model_step!(model)
 
 	#Finally, plot the model after the step
 	figure, _ = abmplot(model)
+	annotate!([(new_pos[n][1] + 0.02, new_pos[n][2] + 0.03, Plots.text(n)) for n in 1:100])
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
