@@ -163,7 +163,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (3)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -328,22 +328,22 @@ function initialise(; seed = 123, no_birds = 4)
 	end
 	=#
 
-	push!(initial_positions, (50.0, 50.0))
+	push!(initial_positions, Tuple([50.0, 50.0]))
 	pack_positions[1] = Point2((50.0, 50.0))
                 push!(moves_areas, [])
                 push!(new_pos, (0.0, 0.0))
 
-	push!(initial_positions, (150.0, 50.0))
+		push!(initial_positions, Tuple([150.0, 50.0]))
         pack_positions[2] = Point2((150.0, 50.0))
                 push!(moves_areas, [])
                 push!(new_pos, (0.0, 0.0))
 
-	push!(initial_positions, (150.0, 150.0))
+		push!(initial_positions, Tuple([150.0, 150.0]))
         pack_positions[3] = Point2((150.0, 150.0))
                 push!(moves_areas, [])
                 push!(new_pos, (0.0, 0.0))
 
-	push!(initial_positions, (50.0, 150.0))
+		push!(initial_positions, Tuple([50.0, 150.0]))
         pack_positions[4] = Point2((50.0, 150.0))
                 push!(moves_areas, [])
                 push!(new_pos, (0.0, 0.0))
@@ -396,7 +396,7 @@ function initialise(; seed = 123, no_birds = 4)
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
-		#print("Initial velocity of $(agent.vel) \n")
+		print("Initial velocity of $(agent.id) was $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += initial_dods[i]
 	end	
