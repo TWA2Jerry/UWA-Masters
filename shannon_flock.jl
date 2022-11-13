@@ -25,6 +25,7 @@ moves_areas = [] #This is an array which will allow us to record all the areas a
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
+temp_hp = []
 D = 9
 sigma = 0.0
 
@@ -103,7 +104,7 @@ function voronoi_area(ri, cell, rho)
 			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
-				#=
+				
 				print("Ballon segment detected, balloon area was $balloon.\n")
 				for i in 1:num_points
 					vector_to_vertex = cell[i][1] .- ri
@@ -113,7 +114,7 @@ function voronoi_area(ri, cell, rho)
 				
 				print("\n")
 				circle_area += balloon
-				=#
+				#exit()
 			else 
 				segment_detected = 1
 				circle_area += circle_segment_area
@@ -161,7 +162,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (3)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -181,9 +182,25 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			print("\n\n\nThe dq for this position was \n")
+			for i in 1:length(temp_hp)
+				print("$(temp_hp[i])\n")
+			end
 			#print("Potential new area of $new_area\n")
+			#=
+			#print("The vertices of this convex hull point are\n")
+			if(convex_hull_point[agent.id] == 1)
+				for i in 1:length(agent_voronoi_cell)
+				 vector_to_vertex = agent_voronoi_cell[i][1] .- new_agent_pos
+                                 angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
+                                 print("$angle_to_vertex ")
+                                 #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
+				end
+			end
+			print("\n")
+			=#
 			if (new_area < min_area)
                         	min_area = new_area
                         	#print("New min area, direction of $direction_of_move\n")
@@ -226,7 +243,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	dW = sqrt(2*D*model.dt) .* (epsilon .- epsilon_prime)
 
 	#Store the new position for updating in model step
-	new_pos[agent.id] = min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW
+	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		exit()
@@ -328,7 +345,7 @@ function initialise(; seed = 123, no_birds = 100)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = voronoi_cell(ri, neighbouring_positions, rho)
+		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
@@ -432,7 +449,7 @@ function model_step!(model)
                         push!(neighbour_positions, agent_j.pos)
                 end
                 ri = agent_i.pos
-                new_cell_i = voronoi_cell(ri, neighbour_positions, rho)
+                new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
@@ -450,7 +467,15 @@ function model_step!(model)
         model.n += 1
 
 	#Finally, plot the model after the step
-	figure, _ = abmplot(model)
+	#scatterkwargs = (series_annotations = [Plots.text(n) for n in 1:100])
+	#figure, _ = abmplot(model)
+	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+	figure = Makie.scatter([Tuple(point) for point in new_pos])
+	for i in 1:nagents(model)
+		text!(new_pos[i], text = "$i", align = (:center, :top))
+	end
+	#Plots.scatter!(new_pos, markersize = 6, label = "agents")
+	#Plots.annotate!([(new_pos[n][1] + 0.02, new_pos[n][2] + 0.03, Plots.text(n)) for n in 1:100])
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
@@ -504,7 +529,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 500
+no_steps = 25
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

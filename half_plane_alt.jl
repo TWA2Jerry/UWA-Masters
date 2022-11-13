@@ -83,7 +83,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(ri, neighbouring_points, rho)
+function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -109,10 +109,10 @@ function voronoi_cell(ri, neighbouring_points, rho)
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
 	
-	bottom_side = [0.0, [50.0, 0.0], [500.0, 0.0], 1]
-	right_side = [pi/2, [0.0, 50.0], [1000.0, 500.0], 1]
-	top_side = [pi, [-50.0, 0.0], [500.0, 1000.0], 1]
-	left_side = [-pi/2, [0.0, -50.0], [0.0, 500.0], 1]
+	bottom_side = [0.0, [50.0, 0.0], [0.0, -1000.0], 1]
+	right_side = [pi/2, [0.0, 50.0], [1000.0, 0.0], 1]
+	top_side = [pi, [-50.0, 0.0], [0.0, 1000.0], 1]
+	left_side = [-pi/2, [0.0, -50.0], [-1000.0, 0.0], 1]
 
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
@@ -196,14 +196,16 @@ function voronoi_cell(ri, neighbouring_points, rho)
 		i += 1
 	end
 	
-	#=
+	
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
 		print("The half plane is $half_plane\n")
 	end
-	=#	
+		
 	
+	#print("In the voronoi function, a was modified to a value of $a\n")
+	replace_vector(temp_half_planes, dq)
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vq = []
 	newdq = []
@@ -213,6 +215,10 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	for i in 1:dql
 		#print("Single fence agent detected\n")
 		m = 0.0
+		if(dq[i][4] == 1)
+			print("Bounding box fence detected\n")
+			exit()
+		end
 		if(abs(dq[i][2][1]) > eps) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
@@ -401,6 +407,16 @@ function voronoi_cell(ri, neighbouring_points, rho)
 	
 	return vq
 
+end
+
+function replace_vector(a, b)
+	for i in 1:length(a)
+		pop!(a)
+	end
+
+	for i in 1:length(b)
+		push!(a, b[i])
+	end
 end
 
 #Square test case
