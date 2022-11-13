@@ -26,6 +26,7 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 temp_hp = []
+last_half_planes = []
 D = 9
 sigma = 0.0
 
@@ -206,6 +207,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         	#print("New min area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
+				replace_vector(last_half_planes[agent.id], [agent_voronoi_cell, temp_hp])
                 	end
 
 		end
@@ -325,6 +327,7 @@ function initialise(; seed = 123, no_birds = 100)
 		push!(initial_positions, rand_position)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
+		push!(last_half_planes, [])
 		push!(new_pos, (0.0, 0.0))
 	end
 
@@ -467,15 +470,12 @@ function model_step!(model)
         model.n += 1
 
 	#Finally, plot the model after the step
-	#scatterkwargs = (series_annotations = [Plots.text(n) for n in 1:100])
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	figure = Makie.scatter([Tuple(point) for point in new_pos])
+	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
 	for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end
-	#Plots.scatter!(new_pos, markersize = 6, label = "agents")
-	#Plots.annotate!([(new_pos[n][1] + 0.02, new_pos[n][2] + 0.03, Plots.text(n)) for n in 1:100])
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
@@ -490,6 +490,17 @@ function model_step!(model)
 	else 
 		write(mean_a_file, "$average_area")
 	end
+
+	last_hp_vert = open("Last_hp_vert.txt", "w")
+	for i in 1:nagents(model)
+		write(last_hp_vert, "Agent $i\n")
+		if length(last_half_planes[i]) > 0
+			write(last_hp_vert, "$(last_half_planes[i][1])\n")
+			write(last_hp_vert, "$(last_half_planes[i][2])\n")
+		end
+		print("\n\n")
+	end
+	close(last_hp_vert)
 end
 
 ###Test the model has been initialised and works

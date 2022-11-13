@@ -15,3 +15,8 @@ for i in 1:20
 	write(out_file_3, "$(rand(Float64)) ")
 end
 
+for i in 1:3
+	bro = open("rewrite_test.txt", "w")
+	write(bro, "$i\n")
+	close(bro)
+end
