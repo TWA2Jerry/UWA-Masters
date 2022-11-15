@@ -25,7 +25,6 @@ moves_areas = [] #This is an array which will allow us to record all the areas a
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
-temp_hp = []
 last_half_planes = []
 D = 9
 sigma = 0.0
@@ -105,7 +104,7 @@ function voronoi_area(ri, cell, rho)
 			if(outside(chord_half_plane, ri))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
-				
+				#=	
 				print("Ballon segment detected, balloon area was $balloon.\n")
 				for i in 1:num_points
 					vector_to_vertex = cell[i][1] .- ri
@@ -114,6 +113,8 @@ function voronoi_area(ri, cell, rho)
 				end
 				
 				print("\n")
+				=#
+				
 				circle_area += balloon
 				#exit()
 			else 
@@ -158,6 +159,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
+	temp_hp = []
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
@@ -185,10 +187,13 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			#=		
 			print("\n\n\nThe dq for this position was \n")
 			for i in 1:length(temp_hp)
 				print("$(temp_hp[i])\n")
 			end
+			=#
+
 			#print("Potential new area of $new_area\n")
 			#=
 			#print("The vertices of this convex hull point are\n")
@@ -207,7 +212,13 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         	#print("New min area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
-				replace_vector(last_half_planes[agent.id], [agent_voronoi_cell, temp_hp])
+				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp])
+				if(convex_hull_point[agent.id] == 1)
+					print("Min area was lowered for agent $(agent.id), here is the temp_hp\n")
+					for i in 1:length(temp_hp)
+                                		print("$(temp_hp[i])\n")
+                        		end
+				end
                 	end
 
 		end
@@ -226,10 +237,10 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		=#
 		
-		push!(pos_area_array, [angle_of_move, min_area])
+		#push!(pos_area_array, [angle_of_move, min_area])
 	end
 
-	push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
+	#push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
 	if(move_made == 1)
 		no_move[agent.id] = 0
 	end
@@ -321,6 +332,7 @@ function initialise(; seed = 123, no_birds = 100)
 
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
+	temp_hp = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	for i in 1:no_birds
 		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
@@ -350,6 +362,9 @@ function initialise(; seed = 123, no_birds = 100)
 		end
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
+		
+		replace_vector(last_half_planes[i], [initial_cell, temp_hp])
+			
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
 			print("Conventional area exceeded by agent $(i)\n")
@@ -363,9 +378,14 @@ function initialise(; seed = 123, no_birds = 100)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
 		end
 		push!(initial_dods, initial_A)
-	end
+	
 			
+		print("The initial half planes for agent $(i) is \n")
+		for j in 1:length(last_half_planes[i][2])
+			print("$(last_half_planes[i][2])\n")
+        	end
 
+	end
 	#Now make the agents with their respective DoDs and add to the model
 	total_area = 0.0
 	for i in 1:no_birds
@@ -443,6 +463,7 @@ function model_step!(model)
 
         #Now recalculate the agent DODs based off their new positions
         total_area = 0.0
+	temp_hp = []
 	for agent_i in all_agents_iterable
                 neighbour_positions = []
                 for agent_j in all_agents_iterable
@@ -493,12 +514,10 @@ function model_step!(model)
 
 	last_hp_vert = open("Last_hp_vert.txt", "w")
 	for i in 1:nagents(model)
-		write(last_hp_vert, "Agent $i\n")
-		if length(last_half_planes[i]) > 0
-			write(last_hp_vert, "$(last_half_planes[i][1])\n")
-			write(last_hp_vert, "$(last_half_planes[i][2])\n")
-		end
-		print("\n\n")
+		write(last_hp_vert, "Agent $i, position of $(new_pos[i])\n")
+		write(last_hp_vert, "$(last_half_planes[i][1])\n")
+		write(last_hp_vert, "$(last_half_planes[i][2])\n")
+		write(last_hp_vert, "\n\n")
 	end
 	close(last_hp_vert)
 end

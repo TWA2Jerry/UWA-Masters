@@ -196,13 +196,13 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		i += 1
 	end
 	
-	
+	#=		
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
 		print("The half plane is $half_plane\n")
 	end
-		
+	=#	
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	replace_vector(temp_half_planes, dq)
