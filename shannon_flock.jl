@@ -212,7 +212,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         	#print("New min area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
-				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp])
+				replace_vector(last_half_planes[Int64(agent.id)], [new_agent_pos, agent_voronoi_cell, temp_hp])
 				if(convex_hull_point[agent.id] == 1)
 					print("Min area was lowered for agent $(agent.id), here is the temp_hp\n")
 					for i in 1:length(temp_hp)
@@ -351,7 +351,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#initial_dods = voronoi_area(initial_positions, rho)
 	initial_dods = []
 	for i in 1:no_birds
-		print("\n\nCalculating initial DOD for agent $i.")
+		print("\n\nCalculating initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri  = initial_positions[i]
 		neighbouring_positions = []
 		for j in 1:no_birds
@@ -381,9 +381,11 @@ function initialise(; seed = 123, no_birds = 100)
 	
 			
 		print("The initial half planes for agent $(i) is \n")
-		for j in 1:length(last_half_planes[i][2])
-			print("$(last_half_planes[i][2])\n")
-        	end
+		print("$(last_half_planes[i][2])\n")
+
+		print("The initial vertices for agent $i is \n")
+		print("$(last_half_planes[i][1])\n")
+
 
 	end
 	#Now make the agents with their respective DoDs and add to the model
@@ -408,17 +410,23 @@ function initialise(; seed = 123, no_birds = 100)
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
-
+	#=
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
 annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
-
+	=#
 	#Finally, plot the figure
-	#=
+	#=	
 	figure, _ = abmplot(model)	
 	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
 	=#
+	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
+        for i in 1:nagents(model)
+                text!(initial_positions[i], text = "$i", align = (:center, :top))
+        end
+        save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
+
 
 	return model
 end  
@@ -514,9 +522,9 @@ function model_step!(model)
 
 	last_hp_vert = open("Last_hp_vert.txt", "w")
 	for i in 1:nagents(model)
-		write(last_hp_vert, "Agent $i, position of $(new_pos[i])\n")
-		write(last_hp_vert, "$(last_half_planes[i][1])\n")
+		write(last_hp_vert, "Agent $i, position of $(new_pos[i]), considering position of $(last_half_planes[i][1])\n")
 		write(last_hp_vert, "$(last_half_planes[i][2])\n")
+		write(last_hp_vert, "$(last_half_planes[i][3])\n")
 		write(last_hp_vert, "\n\n")
 	end
 	close(last_hp_vert)
@@ -559,12 +567,12 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 25
+no_steps = 0
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
-	figure, _ = abmplot(model)
-        save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
+	#figure, _ = abmplot(model)
+        #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
 	write(compac_frac_file, "\n")
 	write(mean_a_file, "\n")
