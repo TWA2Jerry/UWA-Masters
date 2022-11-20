@@ -212,7 +212,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         	#print("New min area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
-				replace_vector(last_half_planes[Int64(agent.id)], [new_agent_pos, agent_voronoi_cell, temp_hp])
+				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
 					print("Min area was lowered for agent $(agent.id), here is the temp_hp\n")
 					for i in 1:length(temp_hp)
@@ -363,7 +363,7 @@ function initialise(; seed = 123, no_birds = 100)
 		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
-		replace_vector(last_half_planes[i], [initial_cell, temp_hp])
+		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
 			
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
@@ -522,9 +522,9 @@ function model_step!(model)
 
 	last_hp_vert = open("Last_hp_vert.txt", "w")
 	for i in 1:nagents(model)
-		write(last_hp_vert, "Agent $i, position of $(new_pos[i]), considering position of $(last_half_planes[i][1])\n")
+		write(last_hp_vert, "Agent $i, position of $(new_pos[i]), considering position of $(last_half_planes[i][3])\n")
+		write(last_hp_vert, "$(last_half_planes[i][1])\n")
 		write(last_hp_vert, "$(last_half_planes[i][2])\n")
-		write(last_hp_vert, "$(last_half_planes[i][3])\n")
 		write(last_hp_vert, "\n\n")
 	end
 	close(last_hp_vert)
@@ -567,7 +567,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 0
+no_steps = 100
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
