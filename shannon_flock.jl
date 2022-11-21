@@ -165,9 +165,11 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
+		#=
 		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
+		=#
 		no_angles_considered += 1
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
@@ -185,7 +187,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			#=		
 			print("\n\n\nThe dq for this position was \n")
@@ -312,7 +314,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 4)
+function initialise(; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -334,7 +336,7 @@ function initialise(; seed = 123, no_birds = 4)
 	initial_positions = []
 	temp_hp = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
-	#=
+	initial_vels = []
 	for i in 1:no_birds
 		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		push!(initial_positions, rand_position)
@@ -342,37 +344,8 @@ function initialise(; seed = 123, no_birds = 4)
 		push!(moves_areas, [])
 		push!(last_half_planes, [])
 		push!(new_pos, (0.0, 0.0))
+		push!(initial_vels, rand(Float64, 2))
 	end
-	=#
-
-	rand_position = (50.0, 50.0)
-	push!(initial_positions, rand_position)
-        pack_positions[1] = Point2(rand_position)
-        push!(moves_areas, [])
-        push!(last_half_planes, [])
-        push!(new_pos, (50.0, 50.0))
-
-	rand_position = (150.0, 50.0)
-        push!(initial_positions, rand_position)
-        pack_positions[2] = Point2(rand_position)
-        push!(moves_areas, [])
-        push!(last_half_planes, [])
-        push!(new_pos, (150.0, 50.0))
-
-	rand_position = (150.0, 150.0)
-        push!(initial_positions, rand_position)
-        pack_positions[3] = Point2(rand_position)
-        push!(moves_areas, [])
-        push!(last_half_planes, [])
-        push!(new_pos, (150.0, 150.0))
-
-	rand_position = (50.0, 150.0)
-        push!(initial_positions, rand_position)
-        pack_positions[4] = Point2(rand_position)
-        push!(moves_areas, [])
-        push!(last_half_planes, [])
-        push!(new_pos, (50.0, 150.0))
-
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -391,7 +364,7 @@ function initialise(; seed = 123, no_birds = 4)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
+		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i])
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -421,41 +394,13 @@ function initialise(; seed = 123, no_birds = 4)
 	end
 	#Now make the agents with their respective DoDs and add to the model
 	total_area = 0.0
-	#=
 	for i in 1:no_birds
-		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
+		agent = bird(i, initial_positions[i], Tuple(initial_vels[i]), initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += initial_dods[i]
 	end	
-	=#
-
-	agent = bird(1, initial_positions[1], (-1.0, -1.0), initial_dods[1])
-        agent.vel = agent.vel ./ norm(agent.vel)
-        #print("Initial velocity of $(agent.vel) \n")
-        add_agent!(agent, initial_positions[1], model)
-        total_area += initial_dods[1]
-
-	agent = bird(2, initial_positions[2], (1.0, -1.0), initial_dods[2])
-        agent.vel = agent.vel ./ norm(agent.vel)
-        #print("Initial velocity of $(agent.vel) \n")
-        add_agent!(agent, initial_positions[2], model)
-        total_area += initial_dods[2]
-
-	agent = bird(3, initial_positions[3], (1.0, 1.0), initial_dods[3])
-        agent.vel = agent.vel ./ norm(agent.vel)
-        #print("Initial velocity of $(agent.vel) \n")
-        add_agent!(agent, initial_positions[3], model)
-        total_area += initial_dods[3]
-
-
-	agent = bird(4, initial_positions[4], (-1.0, 1.0), initial_dods[4])
-        agent.vel = agent.vel ./ norm(agent.vel)
-        #print("Initial velocity of $(agent.vel) \n")
-        add_agent!(agent, initial_positions[4], model)
-        total_area += initial_dods[4]
-
 
 	#Calculate the actual area of the convex hull of the group of birds
 	convexhullbro = update_convex_hull(model)
@@ -626,7 +571,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 10
+no_steps = 100
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

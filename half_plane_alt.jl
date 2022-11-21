@@ -83,7 +83,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
+function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -114,12 +114,21 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 	right_side = [pi/2, [0.0, 50.0], Tuple([1000.0, 0.0]), 1]
 	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 1000.0]), 1]
 	left_side = [-pi/2, [0.0, -50.0], Tuple([-1000.0, 0.0]), 1]
-
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
 	push!(half_planes, top_side)
 	push!(half_planes, left_side)
 	
+	#Add the half plane that bounds the area to the area in front of the agent
+        fw_point = ri
+        fw_x = -1.0*(-vel[2])
+        fw_y = -vel[1]
+        fw_pq = [fw_x, fw_y]
+        angle = atan(fw_y, fw_x)
+        fw_is_box = 0
+        fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
+        push!(half_planes, fw_half_plane)
+
 
 	sort!(half_planes)
 	#print("After sorting, half_planes is given by \n")
