@@ -98,9 +98,10 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		v_jix = -1.0 * (0.5 * r_ji[2])
 		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
 		pq = [v_jix, v_jiy]
+		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
 		is_box = 0 #This is just to differentiate between the box and actual line segments later
-                half_plane = [angle, pq, half_plane_point, is_box]
+		half_plane = [angle, pq, Tuple(half_plane_point), is_box]
 		push!(half_planes, half_plane)
 	end
 
@@ -109,10 +110,10 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
 	
-	bottom_side = [0.0, [50.0, 0.0], [0.0, -1000.0], 1]
-	right_side = [pi/2, [0.0, 50.0], [1000.0, 0.0], 1]
-	top_side = [pi, [-50.0, 0.0], [0.0, 1000.0], 1]
-	left_side = [-pi/2, [0.0, -50.0], [-1000.0, 0.0], 1]
+	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -1000.0]), 1]
+	right_side = [pi/2, [0.0, 50.0], Tuple([1000.0, 0.0]), 1]
+	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 1000.0]), 1]
+	left_side = [-pi/2, [0.0, -50.0], Tuple([-1000.0, 0.0]), 1]
 
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
@@ -189,7 +190,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		
 	i = 1
 	while (i <= length(dq))
-		if(dq[i][4]==1 || norm(dq[i][3] .- ri) > rho)
+		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
 			deleteat!(dq, i)
 			continue
 		end
@@ -233,6 +234,10 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		if(abs(m-inf) < eps)
 			x1 = dq[i][3][1]
 			x2 = dq[i][3][1]
+			if(rho^2 - (x1 - ri[1])^2 <0)
+				print("Circle intercept negative\n")
+				exit()
+			end
 			y1 = -sqrt(rho^2 - (x1 - ri[1])^2) + ri[2]
 			y2 = sqrt(rho^2 - (x2 - ri[1])^2) + ri[2]
 		else
@@ -241,7 +246,11 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
                 	a = 1+m^2
                 	b = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
-                	x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+			if((b)^2 - 4*(a)*(d) < 0)
+				print("Circle intercept negative\n")
+				exit()
+			end
+			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
                 	y1 = m*x1 + c
 
                 	x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))

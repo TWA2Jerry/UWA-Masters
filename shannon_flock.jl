@@ -312,7 +312,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 100)
+function initialise(; seed = 123, no_birds = 4)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -334,6 +334,7 @@ function initialise(; seed = 123, no_birds = 100)
 	initial_positions = []
 	temp_hp = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
+	#=
 	for i in 1:no_birds
 		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		push!(initial_positions, rand_position)
@@ -342,6 +343,36 @@ function initialise(; seed = 123, no_birds = 100)
 		push!(last_half_planes, [])
 		push!(new_pos, (0.0, 0.0))
 	end
+	=#
+
+	rand_position = (50.0, 50.0)
+	push!(initial_positions, rand_position)
+        pack_positions[1] = Point2(rand_position)
+        push!(moves_areas, [])
+        push!(last_half_planes, [])
+        push!(new_pos, (50.0, 50.0))
+
+	rand_position = (150.0, 50.0)
+        push!(initial_positions, rand_position)
+        pack_positions[2] = Point2(rand_position)
+        push!(moves_areas, [])
+        push!(last_half_planes, [])
+        push!(new_pos, (150.0, 50.0))
+
+	rand_position = (150.0, 150.0)
+        push!(initial_positions, rand_position)
+        pack_positions[3] = Point2(rand_position)
+        push!(moves_areas, [])
+        push!(last_half_planes, [])
+        push!(new_pos, (150.0, 150.0))
+
+	rand_position = (50.0, 150.0)
+        push!(initial_positions, rand_position)
+        pack_positions[4] = Point2(rand_position)
+        push!(moves_areas, [])
+        push!(last_half_planes, [])
+        push!(new_pos, (50.0, 150.0))
+
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -390,6 +421,7 @@ function initialise(; seed = 123, no_birds = 100)
 	end
 	#Now make the agents with their respective DoDs and add to the model
 	total_area = 0.0
+	#=
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
@@ -397,6 +429,33 @@ function initialise(; seed = 123, no_birds = 100)
 		add_agent!(agent, initial_positions[i], model)
 		total_area += initial_dods[i]
 	end	
+	=#
+
+	agent = bird(1, initial_positions[1], (-1.0, -1.0), initial_dods[1])
+        agent.vel = agent.vel ./ norm(agent.vel)
+        #print("Initial velocity of $(agent.vel) \n")
+        add_agent!(agent, initial_positions[1], model)
+        total_area += initial_dods[1]
+
+	agent = bird(2, initial_positions[2], (1.0, -1.0), initial_dods[2])
+        agent.vel = agent.vel ./ norm(agent.vel)
+        #print("Initial velocity of $(agent.vel) \n")
+        add_agent!(agent, initial_positions[2], model)
+        total_area += initial_dods[2]
+
+	agent = bird(3, initial_positions[3], (1.0, 1.0), initial_dods[3])
+        agent.vel = agent.vel ./ norm(agent.vel)
+        #print("Initial velocity of $(agent.vel) \n")
+        add_agent!(agent, initial_positions[3], model)
+        total_area += initial_dods[3]
+
+
+	agent = bird(4, initial_positions[4], (-1.0, 1.0), initial_dods[4])
+        agent.vel = agent.vel ./ norm(agent.vel)
+        #print("Initial velocity of $(agent.vel) \n")
+        add_agent!(agent, initial_positions[4], model)
+        total_area += initial_dods[4]
+
 
 	#Calculate the actual area of the convex hull of the group of birds
 	convexhullbro = update_convex_hull(model)
@@ -567,7 +626,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 100
+no_steps = 10
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
