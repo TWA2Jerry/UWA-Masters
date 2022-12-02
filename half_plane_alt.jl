@@ -173,7 +173,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 
 	#Report empty intersection (if number of edges is less than 3?)
 	if(len < 3)
-		print("Yo this intersection be empty, the position considered was $ri\n")
+		print("Yo this intersection be empty even with bounding rectangle, the position considered was $ri\n")
 		exit()
 		return -1
 	end
