@@ -15,8 +15,8 @@ end
 tess = voronoicells(points, rect)
 
 print(tess.Cells[1])
-scatter(points, markersize = 6, label = "generators")
-annotate!([(points[n][1] + 0.02, points[n][2] + 0.03, Plots.text(n)) for n in 1:10])
+scatter(points, markersize = 6, label = "Agents")
+#annotate!([(points[n][1] + 0.02, points[n][2] + 0.03, Plots.text(n)) for n in 1:10])
 display(plot!(tess, legend=:topleft))
 savefig("voronoi_pack_test.png")
 
