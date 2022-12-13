@@ -441,7 +441,7 @@ function model_step!(model)
 
 	#Finally, plot the model after the step
 	figure, _ = abmplot(model)
-	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+	#save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	if(model.n < no_steps)
@@ -500,6 +500,7 @@ for i in 1:no_simulations
 	model = initialise()
 	figure, _ = abmplot(model)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
+	print("Now starting iteration $i\n")
 	step!(model, agent_step!, model_step!, no_steps)
 	write(compac_frac_file, "\n")
 	write(mean_a_file, "\n")
