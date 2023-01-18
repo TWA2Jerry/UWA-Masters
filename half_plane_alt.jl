@@ -30,16 +30,16 @@ function inter(h1, h2)
 	#m2 = h2[2][2]/h2[2][1]
 	#m1 = 0.0
 	#m2 = 0.0
-	if(h1[2][1] == 0.0)
-		#print("Infinite gradient detected for m1\n")
-		m1 = inf
+	if(abs(h1[2][1]) < eps)
+		print("Infinite gradient detected for m1\n")
+		m1 = ((h1[2][1] < 0 && h1[2][2] < 0) || (h1[2][1] > 0 && h1[2][1] > 0)) ? inf : -inf 
 	else 
 		m1 = h1[2][2]/h1[2][1]
 	end
 	#print("m1 found to be $m1\n")
-	if(h2[2][1] == 0.0)
-		m2 = inf
-		#print("Infinite gradient detected for m2\n")
+	if(abs(h2[2][1]) < eps)
+		m2 = ((h2[2][1] < 0 && h2[2][2] < 0) || (h2[2][1] > 0 && h2[2][1] > 0)) ? inf : -inf
+		print("Infinite gradient detected for m2\n")
 	else
 		m2 = h2[2][2]/h2[2][1]
 	end	
@@ -58,7 +58,7 @@ function inter(h1, h2)
 	else 
 		yint = m1 * xint + c1
 	end
-	#print("Intersect calculated as $([xint, yint])\n")
+	print("Intersect calculated as $([xint, yint])\n")
 	return [xint, yint]
 end
 
@@ -187,7 +187,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 ###
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-		
+	print("\n")	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
@@ -225,7 +225,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		else 
 			m = inf
 		end
-                #print("Gradient for i is $m \n")
+                print("Gradient for i is $m \n")
 		x1 = 0.0
 		y1 = 0.0
 		x2 = 0.0
@@ -272,7 +272,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 				pop!(newdq)
 				len -= 1
 			end
-			#print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
+			print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
 			pop!(vq)
                         vlen -= 1
                 end
@@ -287,7 +287,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 				popfirst!(newdq)
 				len -= 1
 			end
-			#print("Popping from the front of the dequeue. The front is $(vq[1])\n")
+			print("Popping from the front of the dequeue. The front is $(vq[1])\n")
 			popfirst!(vq)
                         vlen -= 1
                 end
@@ -301,6 +301,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 			intersect_i = inter(dq[i], newdq[len])
+			print("The intersect between the latest half plane and last non-redundant half plane was $intersect_i\n")
 			is_outside = 0
 			invalid = 0
 			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
@@ -315,11 +316,11 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
-				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i))
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
@@ -327,17 +328,18 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		else 
 			push!(vq, [b_circle_intersect_i, 0, i])	
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 		
 		if(invalid_half_plane == 1)
+			print("Invalid half plane\n")
 			continue
 		end
 
 		#Add the foward intersect
 		push!(vq, [f_circle_intersect_i, i, 0])
 		vlen += 1
-		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
