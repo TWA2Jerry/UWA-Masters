@@ -13,8 +13,8 @@ print("Packages loaded\n")
 
 include("half_plane_alt.jl")
 include("convex_hull.jl")
-
-print("Both homemade files included\n")
+include("rot_ord.jl")
+print("All homemade files included\n")
 
 rho = 100.0
 initialised = 0
@@ -166,7 +166,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -210,17 +210,19 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			=#
 			if (new_area < min_area)
                         	min_area = new_area
-				print("New min area of $min_area, direction of $direction_of_move\n")
+				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
 				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
-					print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
+					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
+					#=
 					for i in 1:length(temp_hp)
-                                		print("$(temp_hp[i])\n")
+                                		#print("$(temp_hp[i])\n")
 					end
-					print("Also, here's the vertices of the cell\n")
-					print("$(agent_voronoi_cell)\n")
+					=#
+					#print("Also, here's the vertices of the cell\n")
+					#print("$(agent_voronoi_cell)\n")
 				end
                 	end
 
@@ -248,7 +250,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		no_move[agent.id] = 0
 	end
 	
-	print("The number of angles considered was $no_angles_considered\n")
+	#print("The number of angles considered was $no_angles_considered\n")
 	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
 	kn[1] = (min_direction .* agent_speed)[1]
 	kn[2] = (min_direction .* agent_speed)[2]
@@ -304,6 +306,7 @@ mutable struct bird <: AbstractAgent
 	id::Int
 	pos::NTuple{2, Float64}
 	vel::NTuple{2, Float64}
+	speed::Float64
 	A::Float64 #The area of the agent's DOD
 end
 	
@@ -315,7 +318,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 10)
+function initialise(; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -384,22 +387,22 @@ function initialise(; seed = 123, no_birds = 10)
 		push!(initial_dods, initial_A)
 	
 			
-		print("The initial half planes for agent $(i) is \n")
-		print("$(last_half_planes[i][2])\n")
+		#print("The initial half planes for agent $(i) is \n")
+		#print("$(last_half_planes[i][2])\n")
 
-		print("The initial vertices for agent $i is \n")
-		print("$(last_half_planes[i][1])\n")
+		#print("The initial vertices for agent $i is \n")
+		#print("$(last_half_planes[i][1])\n")
 
 
 	end
 	#Now make the agents with their respective DoDs and add to the model
 	total_area = 0.0
 	for i in 1:no_birds
-		agent = bird(i, initial_positions[i], Tuple(rand(Float64, 2)), initial_dods[i])
+		agent = bird(i, initial_positions[i], 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0), 1.0, initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
-		total_area += initial_dods[i]
+		total_area += initial_dods[i]/(pi*rho^2)
 	end	
 
 	#Calculate the actual area of the convex hull of the group of birds
@@ -407,10 +410,12 @@ function initialise(; seed = 123, no_birds = 10)
 	initial_convex_hull_area = voronoi_area(-1, convexhullbro, rho)
 	model.CHA = initial_convex_hull_area
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
+	init_rot_ord = rot_ord(allagents(model))
 	print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	write(compac_frac_file, "$packing_fraction ")
 	average_area = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
+	write(rot_o_file, "$init_rot_ord ")
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
@@ -454,8 +459,10 @@ function agent_step!(agent, model)
 	change_in_position = new_agent_pos .- (agent.pos)
 	if(move_made==1)
 		agent.vel = new_agent_vel
+		agent.speed = 1.0
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
+		agent.speed = 0.0
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -492,7 +499,7 @@ function model_step!(model)
                         print("Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
                         exit()
                 end
-		total_area += agent_i.A
+		total_area += agent_i.A/(pi*rho^2)
         end
         
 	#Now update the model's convex hull
@@ -510,12 +517,17 @@ function model_step!(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+	
+	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
+	rot_order = rot_ord(allagents(model))
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	if(model.n < no_steps)
 		write(compac_frac_file, "$packing_fraction ")
+		write(rot_o_file, "$rot_order ")
 	else
 		write(compac_frac_file, "$packing_fraction")
+		write(rot_o_file, "$rot_order")
 	end
 	average_area = total_area / nagents(model)
 	if(model.n < no_steps)
@@ -532,6 +544,8 @@ function model_step!(model)
 		write(last_hp_vert, "\n\n")
 	end
 	close(last_hp_vert)
+
+	print("Finished step $(model.n)\n\n\n")
 end
 
 ###Test the model has been initialised and works
@@ -571,7 +585,8 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 10
+rot_o_file = open("rot_order.txt", "w")
+no_steps = 200
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
@@ -580,26 +595,30 @@ for i in 1:no_simulations
 	step!(model, agent_step!, model_step!, no_steps)
 	write(compac_frac_file, "\n")
 	write(mean_a_file, "\n")
+	write(rot_o_file, "\n")
 end
 
 close(compac_frac_file)
 close(mean_a_file)
+close(rot_o_file)
 
 compac_frac_file = open("compaction_frac.txt", "r")
 mean_a_file = open("mean_area.txt", "r")
-
+rot_o_file = open("rot_order.txt", "r")
 
 cf_array = []
 ma_array = []
+rot_o_array = []
 
 for i in 0:no_steps
 	push!(cf_array, [])
 	push!(ma_array, [])
+	push!(rot_o_array, [])
 end
 
 cf_lines = readlines(compac_frac_file)
 ma_lines = readlines(mean_a_file)
-
+rot_o_lines = readlines(rot_o_file)
 
 print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
@@ -617,12 +636,22 @@ for line in ma_lines
         end
 end
 
+for line in rot_o_lines
+        split_line = parse.(Float64, split(line, " "))
+        for i in 1:length(split_line)
+                push!(rot_o_array[i], split_line[i])
+        end
+end
+
+
 cf_ave_file = open("cf_ave.txt", "w")
 ma_ave_file = open("ma_ave.txt", "w")
+rot_o_ave_file = open("rot_o_ave.txt", "w")
 
 for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
+	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
 end
 
 
