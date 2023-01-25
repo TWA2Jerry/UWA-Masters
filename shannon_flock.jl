@@ -449,7 +449,6 @@ function agent_step!(agent, model)
 	dt = model.dt
 	k1 = [0.0, 0.0, 0.0, 0.0]
 
-	#Update the slopes, note that technically we should be using the vectorised dot operators, but Julia seems to allow us to be lazy when working with vectors
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
         move_made = move_gradient(agent, model, k1, 8, 100, rho)
 	

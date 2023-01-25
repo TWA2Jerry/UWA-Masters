@@ -22,18 +22,18 @@ function convex_hull(P)
 	#Sort the list of points, pretty sure that Julia automatically checks second coordinate if first are equal, and sorts in ascending order
 	sort!(P) 
 	
-	print("After sorting, P, the list of all points, is given by\n")
-	print(P)
-	print("Now commencing calculation\n")
+	#print("After sorting, P, the list of all points, is given by\n")
+	#print(P)
+	#print("Now commencing calculation\n")
 	
 	for i in 1:n
 		while (k >= 2 && cross(H[k] .- H[k-1], P[i] .- H[k-1]) <= 0)
 			k -= 1
 			pop!(H)
-			print("Popped point. ")
+			#print("Popped point. ")
 		end
 		push!(H, P[i])
-		print("Added point $(P[i]), Hull is now $H\n")
+		#print("Added point $(P[i]), Hull is now $H\n")
 		k += 1
 	end
 	t = k+1 #As far as I'm aware, t is a marker between the construction of the lower and upper hull so that we don't remove points from the already constructed lower hull.
@@ -44,10 +44,10 @@ function convex_hull(P)
 		while (k >= t && cross(H[k] .- H[k-1], P[i-1] .- H[k-1]) <= 0)
                         k -= 1
                         pop!(H)
-			print("Popped point. ")
+			#print("Popped point. ")
                 end
                 push!(H, P[i-1])
-		print("Added point $(P[i-1]), Hull is now $H\n")
+		#print("Added point $(P[i-1]), Hull is now $H\n")
                 k += 1
 	end
 
