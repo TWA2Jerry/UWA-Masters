@@ -78,6 +78,10 @@ function voronoi_area(ri, cell, rho)
 			#print("Circle segments detected\n")
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
+			if 0.5*chord_length > rho
+				print("Chord length longer than rho, the offending vertices were $(cell[i][1]) and $(cell[j][1]) for a agent position ri of $ri\n")
+				exit()
+			end
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
