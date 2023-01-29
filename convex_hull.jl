@@ -20,7 +20,7 @@ function convex_hull(P)
 	end
 	
 	#Sort the list of points, pretty sure that Julia automatically checks second coordinate if first are equal, and sorts in ascending order
-	sort(P) 
+	sort!(P) 
 	
 	for i in 1:n
 		while (k >= 2 && cross(H[k] .- H[k-1], P[i] .- H[k-1]) <= 0)

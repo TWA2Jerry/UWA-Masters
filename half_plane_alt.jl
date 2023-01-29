@@ -30,14 +30,14 @@ function inter(h1, h2)
 	#m2 = h2[2][2]/h2[2][1]
 	#m1 = 0.0
 	#m2 = 0.0
-	if(h1[2][1] == 0.0)
+	if(abs(h1[2][1]) < eps)
 		#print("Infinite gradient detected for m1\n")
 		m1 = inf
 	else 
 		m1 = h1[2][2]/h1[2][1]
 	end
 	#print("m1 found to be $m1\n")
-	if(h2[2][1] == 0.0)
+	if(abs(h2[2][1]) < eps)
 		m2 = inf
 		#print("Infinite gradient detected for m2\n")
 	else
@@ -83,7 +83,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0])
+function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -105,7 +105,18 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 		push!(half_planes, half_plane)
 	end
 
+	#Add the artificial bounding line
+	vr = ri #The point defining the forward bounding half plane is just the position of the agent
+	v_fx = 1.0*(0.5*vi[2])
+	v_fy = -0.5*vi[1]
+	pq = [v_fx, v_fy]
+	angle = atan(v_fy, v_fx)
+	is_box = 0
+	half_plane_forward = [angle, pq, vr, is_box]
+	push!(half_planes, half_plane_forward)
+
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
+	
 	dq = []	
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later

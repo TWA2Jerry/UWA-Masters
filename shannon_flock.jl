@@ -26,7 +26,6 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-D = 9
 sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
@@ -187,7 +186,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, direction_of_move, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			#=		
 			print("\n\n\nThe dq for this position was \n")
@@ -215,12 +214,14 @@ function move_gradient(agent, model,  kn, q, m, rho)
                         	min_direction = direction_of_move
                         	move_made = 1
 				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
+				#=
 				if(convex_hull_point[agent.id] == 1)
 					print("Min area was lowered for agent $(agent.id), here is the temp_hp\n")
 					for i in 1:length(temp_hp)
                                 		print("$(temp_hp[i])\n")
                         		end
 				end
+				=#
                 	end
 
 		end
@@ -255,7 +256,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#Create the noise addition
 	epsilon = randn(model.rng, Float64, 2)
 	epsilon_prime = randn(model.rng, Float64, 2)
-	dW = sqrt(2*D*model.dt) .* (epsilon .- epsilon_prime)
+	dW = (epsilon .- epsilon_prime)
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
@@ -364,7 +365,7 @@ function initialise(; seed = 123, no_birds = 100)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i])
+		initial_cell = voronoi_cell(ri, initial_vels[i], neighbouring_positions, rho, temp_hp, initial_vels[i])
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -485,7 +486,8 @@ function model_step!(model)
                         push!(neighbour_positions, agent_j.pos)
                 end
                 ri = agent_i.pos
-                new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp)
+		vi = agent_i.vel
+                new_cell_i = voronoi_cell(ri, vi, neighbour_positions, rho, temp_hp)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
@@ -571,7 +573,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 100
+no_steps = 200
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
