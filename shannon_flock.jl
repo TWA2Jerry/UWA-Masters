@@ -53,16 +53,15 @@ function voronoi_area(ri, cell, rho)
 		return Area
 	end
 	
-	#=
 	print(" The vertices for the cell are ")
 	for i in 1:num_points
                                     vector_to_vertex = cell[i][1] .- ri
                                         angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
-                                        print("$angle_to_vertex ")
+                                        #print("$angle_to_vertex ")
+					print("$(cell[i])\n")
                                         #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
                                 end
                                 print("\n")
-	=#
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
@@ -76,10 +75,14 @@ function voronoi_area(ri, cell, rho)
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
 		if(cell[i][3] == 0 && cell[j][2] == 0) #If the forward line segment for intersect i aand the backward lines segment for intersect j is a circle, then we have a chord
 			#print("Circle segments detected\n")
+			if(cell[i][2] == -1 && cell[j][3] == -1)
+				circle_area += 0.5*pi*rho^2
+				continue
+			end
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
 			if 0.5*chord_length > rho
-				print("Chord length longer than rho, the offending vertices were $(cell[i][1]) and $(cell[j][1]) for a agent position ri of $ri\n")
+				print("Chord length longer than rho, the offending vertices were $(cell[i]) and $(cell[j]) for a agent position ri of $ri\n")
 				exit()
 			end
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
@@ -577,7 +580,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 200
+no_steps = 300
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

@@ -105,15 +105,6 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		push!(half_planes, half_plane)
 	end
 
-	#Add the artificial bounding line
-	vr = ri #The point defining the forward bounding half plane is just the position of the agent
-	v_fx = 1.0*(0.5*vi[2])
-	v_fy = -0.5*vi[1]
-	pq = [v_fx, v_fy]
-	angle = atan(v_fy, v_fx)
-	is_box = 0
-	half_plane_forward = [angle, pq, vr, is_box]
-	push!(half_planes, half_plane_forward)
 
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
 	
@@ -136,7 +127,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
         fw_y = -vel[1]
         fw_pq = [fw_x, fw_y]
         angle = atan(fw_y, fw_x)
-        fw_is_box = 0
+        fw_is_box = 2
         fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
         push!(half_planes, fw_half_plane)
 
@@ -207,7 +198,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 ###
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-		
+	print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
@@ -217,13 +208,12 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		i += 1
 	end
 	
-	#=		
+			
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
-		#print("The half plane is $half_plane\n")
 		print("The half plane is $half_plane\n")
 	end
-	=#	
+		
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	replace_vector(temp_half_planes, dq)
@@ -337,17 +327,26 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i))
-                        	push!(vq, [b_circle_intersect_i, 0, i])
-                        	vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				if(dq[i][4] == 2)
+					push!(vq, [b_circle_intersect_i, 0, -1])
+				else
+					push!(vq, [b_circle_intersect_i, 0, i])
+				end
+				vlen += 1
+				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
 
-		else 
-			push!(vq, [b_circle_intersect_i, 0, i])	
+		else #Note that we've changed the format to account for what to label the forwards half plane is if it was the artifical bounding half plane
+			if(dq[i][4] == 2)
+                                        push!(vq, [b_circle_intersect_i, 0, -1])
+                        else
+                                        push!(vq, [b_circle_intersect_i, 0, i])                                
+			end
+
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 		
 		if(invalid_half_plane == 1)
@@ -355,9 +354,14 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		end
 
 		#Add the foward intersect
-		push!(vq, [f_circle_intersect_i, i, 0])
+		if(dq[i][4] == 2)
+			push!(vq, [f_circle_intersect_i, -1, 0])
+                else
+                       	push!(vq, [f_circle_intersect_i, i, 0])
+                end
+
 		vlen += 1
-		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
