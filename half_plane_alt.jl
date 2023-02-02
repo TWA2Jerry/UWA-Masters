@@ -87,7 +87,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
-	#print(outside([1, [1,2], [3,4]], [5,6]))
+	#print("\n\n")
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
@@ -187,7 +187,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 ###
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-	#print("\n")	
+	print("\n\n")	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
@@ -197,13 +197,11 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		i += 1
 	end
 	
-	#=		
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
 		print("The half plane is $half_plane\n")
 	end
-	=#	
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	replace_vector(temp_half_planes, dq)
@@ -316,11 +314,11 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
-				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i))
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
@@ -328,7 +326,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		else 
 			push!(vq, [b_circle_intersect_i, 0, i])	
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 		
 		if(invalid_half_plane == 1)
@@ -339,7 +337,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		#Add the foward intersect
 		push!(vq, [f_circle_intersect_i, i, 0])
 		vlen += 1
-		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1

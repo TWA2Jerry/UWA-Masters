@@ -41,7 +41,7 @@ end
 
 ###Function that calculates the area of a voronoi cell given the vertices that
 #comprise the cell.
-function voronoi_area(ri, cell, rho)
+function voronoi_area(ri, cell, rho, agent = -1)
        	Area = 0.0
 	circle_area = 0.0
 	circle_detected = 0
@@ -78,6 +78,10 @@ function voronoi_area(ri, cell, rho)
 			#print("Circle segments detected\n")
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
+			if(chord_length*0.5 > rho)
+				print("Chord length longer than rho, offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri.\n")
+				#exit()
+			end
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
@@ -165,7 +169,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (3)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -186,7 +190,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
-                	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			#replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
+			new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			#=		
 			print("\n\n\nThe dq for this position was \n")
 			for i in 1:length(temp_hp)
@@ -212,7 +217,6 @@ function move_gradient(agent, model,  kn, q, m, rho)
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
-				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
 					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
 					#=
@@ -224,7 +228,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 					#print("$(agent_voronoi_cell)\n")
 				end
                 	end
-
+			
 		end
 		
 		#Check area calculation through voronoi package
@@ -584,7 +588,7 @@ abmvideo(
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
-no_steps = 800
+no_steps = 400
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

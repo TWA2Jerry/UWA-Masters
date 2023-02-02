@@ -26,7 +26,6 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-D = 9
 sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
@@ -79,6 +78,9 @@ function voronoi_area(ri, cell, rho)
 			#print("Circle segments detected\n")
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
+			if(rho^2 < (0.5*chord_length)^2)
+				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of ri\n")
+			end
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
@@ -166,7 +168,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -253,7 +255,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#Create the noise addition
 	epsilon = randn(model.rng, Float64, 2)
 	epsilon_prime = randn(model.rng, Float64, 2)
-	dW = sqrt(2*D*model.dt) .* (epsilon .- epsilon_prime)
+	dW = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
