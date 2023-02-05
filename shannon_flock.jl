@@ -157,7 +157,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		pushfirst!(positions, neighbour.pos)	
 	end		
-	min_area = agent.A #The agent's current DOD area
+	min_area = inf #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
 	pos_area_array = []
