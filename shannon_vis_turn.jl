@@ -168,7 +168,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (2)*2*pi/q + eps)
+		if(abs(rel_angle) > (3)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -375,7 +375,7 @@ function initialise(; seed = 123, no_birds = 100)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
+		initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -594,7 +594,7 @@ abmvideo(
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
-no_steps = 400
+no_steps = 500
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

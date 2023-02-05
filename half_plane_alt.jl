@@ -88,6 +88,8 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
 	#print("\n\n")
+	no_ints = 0
+
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
@@ -120,7 +122,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 	push!(half_planes, top_side)
 	push!(half_planes, left_side)
 	
-
+	print("About to sort\n")
 	sort!(half_planes)
 	#print("After sorting, half_planes is given by \n")
 	#=for i in 1:length(half_planes)
@@ -134,12 +136,14 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		while(len > 1 && outside(half_planes[i], inter(dq[len], dq[len-1])))
 			pop!(dq)
 			len -= 1
+			no_ints += 1
 		end
 		
 		#Remove any half planes from the back of the queue, again, don't do it if 
 		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
 			popfirst!(dq)
 			len -= 1
+			no_ints += 1
 		end
 	
 		#Check for parallel half planes
@@ -164,11 +168,13 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 	while(len > 2 && outside(dq[1], inter(dq[len], dq[len-1])))
 		pop!(dq)
 		len -= 1
+		no_ints += 1
 	end
 
 	while(len > 2 && outside(dq[len], inter(dq[1], dq[2])))
 		popfirst!(dq)
 		len -= 1
+		no_ints += 1
 	end
 
 	#Report empty intersection (if number of edges is less than 3?)
@@ -197,12 +203,14 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		i += 1
 	end
 	
+	
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		#print("The half plane is $half_plane\n")
 		print("The half plane is $half_plane\n")
 	end
 	
+
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	replace_vector(temp_half_planes, dq)
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
@@ -298,7 +306,9 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		invalid_half_plane = 0
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
+			print("About to calculate intersect\n")
 			intersect_i = inter(dq[i], newdq[len])
+			no_ints += 1
 			#print("The intersect between the latest half plane and last non-redundant half plane was $intersect_i\n")
 			is_outside = 0
 			invalid = 0
@@ -314,7 +324,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
-				print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i))
                         	push!(vq, [b_circle_intersect_i, 0, i])
                         	vlen += 1
@@ -413,7 +423,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 		#print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
 	end
 
-	
+	print("The number of intersects calculated was $no_ints\n\n")
 	return vq
 
 end
