@@ -26,7 +26,7 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-sigma = 0.0
+sigma = 0.1
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -79,7 +79,7 @@ function voronoi_area(ri, cell, rho)
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
 			if(rho^2 < (0.5*chord_length)^2)
-				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of ri\n")
+				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri. Chord length calculated to be $chord_length, against a rho value of $rho\n")
 			end
 			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
