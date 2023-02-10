@@ -146,7 +146,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		#For all previous intersections, if the intersection is outside the about-to-be added half-plane, remove that corresponding half-plane from the front of the queue. Of course, if it was an intersection with the circle, don't remove the corresponding half plane just yet
 		while(len > 1 && outside(half_planes[i], inter(dq[len], dq[len-1])))
 			if(dq[len][4] == 2 || half_planes[i][4] == 2)
-				print("Popping the artificial half plane. Vertex was $(inter(dq[len], dq[len-1])), it was outside $(half_planes[i])\n")
+				#print("Popping the artificial half plane. Vertex was $(inter(dq[len], dq[len-1])), it was outside $(half_planes[i])\n")
 			end
 			pop!(dq)
 			len -= 1
@@ -155,7 +155,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		#Remove any half planes from the back of the queue, again, don't do it if 
 		while(len > 1 && outside(half_planes[i], inter(dq[1], dq[2])))
 			if(dq[1][4] == 2 || half_planes[i][4] == 2)
-                                print("Popping the artificial half plane. Vertex was $(inter(dq[1], dq[2])), it was outside $(half_planes[i])\n")
+                                #print("Popping the artificial half plane. Vertex was $(inter(dq[1], dq[2])), it was outside $(half_planes[i])\n")
                         end
 			popfirst!(dq)
 			#print("Popping\n")
@@ -165,16 +165,18 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		#Check for parallel half planes
 		if(len > 0 && norm(cross(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
 			if(half_planes[len][4] == 2)
-				print("parallel planes thing\n")
+				#print("parallel planes thing\n")
 			end
 			if(dot(half_planes[i][2], dq[len][2]) < 0.0)
 				#print("Uh, Houston, we may have a anti-parallel pair")
 				return -1
 			end
 			if (outside(half_planes[i], dq[len][3])) #Check if the last line in the dq is outside the half plane we're about to add 
+				#=
 				if(half_planes[i][4] == 2)
-					print("Artifical half plane\n")
+					#print("Artifical half plane\n")
 				end
+				=#
 				pop!(dq)
 				len -= 1
 			else continue
@@ -188,17 +190,17 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 
 	#Do a final cleanup
 	while(len > 2 && outside(dq[1], inter(dq[len], dq[len-1])))
-		if(dq[len][4] == 2 || dq[1][4] == 2)
+		#=if(dq[len][4] == 2 || dq[1][4] == 2)
 			print("Popping the artificial half plane. Vertex was $(inter(dq[len], dq[len-1])), it was outside $(dq[1])\n")
-                end
+                end =#
 		pop!(dq)
 		len -= 1
 	end
 
 	while(len > 2 && outside(dq[len], inter(dq[1], dq[2])))
-		if(dq[len][4] == 2 || dq[1][4] == 2)
+		#=if(dq[len][4] == 2 || dq[1][4] == 2)
 			print("Popping artificial half plane\n")
-		end
+		end=#
 		popfirst!(dq)
 		len -= 1
 	end
@@ -358,7 +360,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 					push!(vq, [b_circle_intersect_i, 0, i])
 				end
 				vlen += 1
-				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
@@ -371,7 +373,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 			end
 
 			vlen += 1
-			print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 		
 		if(invalid_half_plane == 1)
@@ -386,7 +388,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
                 end
 
 		vlen += 1
-		print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1

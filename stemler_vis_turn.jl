@@ -196,14 +196,15 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			print("Commencing agent step voronoi cell calculation\n")
 			agent_voronoi_cell = voronoi_cell(new_agent_pos, direction_of_move, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
-			#=		
-			print("\n\n\nThe dq for this position was \n")
+			
+			if(no_move[Int64(agent.id)] == 1)
+				print("\n\n\nThe dq for this position of $(new_agent_pos) was \n")
 			for i in 1:length(temp_hp)
 				print("$(temp_hp[i])\n")
 			end
-			=#
 
-			#print("Potential new area of $new_area\n")
+			print("Potential new area of $new_area\n")
+			end
 			#=
 			#print("The vertices of this convex hull point are\n")
 			if(convex_hull_point[agent.id] == 1)
@@ -443,11 +444,11 @@ savefig("voronoi_pack_init_tess.png")
 	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
 	=#
 	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
-        #=
+        
 	for i in 1:nagents(model)
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end
-	=#
+	
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 
 
@@ -530,11 +531,11 @@ function model_step!(model)
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
-	#=
+	
 	for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end
-	=#
+
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
