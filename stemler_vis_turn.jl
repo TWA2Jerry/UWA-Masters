@@ -193,7 +193,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, direction_of_move, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
+			print("Commencing agent step voronoi cell calculation\n")
+			agent_voronoi_cell = voronoi_cell(new_agent_pos, direction_of_move, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			#=		
 			print("\n\n\nThe dq for this position was \n")
@@ -256,9 +257,6 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	end
 	
 	print("The number of angles considered was $no_angles_considered\n")
-	#It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
-	kn[1] = (min_direction .* agent_speed)[1]
-	kn[2] = (min_direction .* agent_speed)[2]
 	
 	#Create the noise addition
 	epsilon = randn(model.rng, Float64, 2)
@@ -275,6 +273,16 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	if(min_area > pi*rho^2)
 		print("Conventional area exceeded by agent $(agent.id)\n")
 	end
+
+	if(move_made == 0)
+                turn = rand([-1, 1])
+                min_direction = [cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy]
+        end
+	
+        #It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
+        kn[1] = (min_direction .* agent_speed)[1]
+        kn[2] = (min_direction .* agent_speed)[2]
+
 	return move_made
 end
 
@@ -311,6 +319,7 @@ mutable struct bird <: AbstractAgent
 	id::Int
 	pos::NTuple{2, Float64}
 	vel::NTuple{2, Float64}
+	speed::Float64
 	A::Float64 #The area of the agent's DOD
 end
 	
@@ -403,7 +412,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#Now make the agents with their respective DoDs and add to the model
 	total_area = 0.0
 	for i in 1:no_birds
-		agent = bird(i, initial_positions[i], Tuple(initial_vels[i]), initial_dods[i])
+		agent = bird(i, initial_positions[i], 2.0 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0), 1.0, initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
@@ -434,9 +443,11 @@ savefig("voronoi_pack_init_tess.png")
 	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
 	=#
 	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
-        for i in 1:nagents(model)
+        #=
+	for i in 1:nagents(model)
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end
+	=#
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 
 
@@ -462,8 +473,11 @@ function agent_step!(agent, model)
 	change_in_position = new_agent_pos .- (agent.pos)
 	if(move_made==1)
 		agent.vel = new_agent_vel
+		agent.speed = 1.0
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
+		agent.vel = new_agent_vel
+                agent.speed = 0.0
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -494,7 +508,8 @@ function model_step!(model)
                 end
                 ri = agent_i.pos
 		vi = agent_i.vel
-                new_cell_i = voronoi_cell(ri, vi, neighbour_positions, rho, temp_hp)
+		print("Commencing model step voronoi cell calculation\n")
+		new_cell_i = voronoi_cell(ri, vi, neighbour_positions, rho, temp_hp, agent_i.vel)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
@@ -515,9 +530,11 @@ function model_step!(model)
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
+	#=
 	for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end
+	=#
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
