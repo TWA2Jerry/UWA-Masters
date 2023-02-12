@@ -52,7 +52,7 @@ function voronoi_area(ri, cell, rho)
 		Area = pi*rho^2
 		return Area
 	end
-	
+	#=
 	print(" The vertices for the cell are ")
 	for i in 1:num_points
                                     vector_to_vertex = cell[i][1] .- ri
@@ -62,7 +62,7 @@ function voronoi_area(ri, cell, rho)
                                         #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
                                 end
                                 print("\n")
-
+	=#
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
 		#Use the shoestring formula to calcualte the area
@@ -162,10 +162,13 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	move_made = 0
 	pos_area_array = []
 	no_angles_considered = 0
-
+	if(no_move[agent.id] == 1)
+		print("Agent detected to not have moved. Agent $(agent.id). Velocity is $unit_v\n")
+	end
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp = []
+	total_pos_sampled = 0
 	for i in 0:(q-1) #For every direction
 		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
@@ -175,35 +178,44 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
+		if(no_move[agent.id] == 1)
+			print("Agent $(agent.id) detected not to move in q loop\n")
+        		
+		end
 		
 		no_angles_considered += 1
 		for j in 1:m #For every position up to m
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
-		
+			#=if(no_move[agent.id] == 1)
+				print("Agent $(agent.id )detected not to move in m loop\n")
+                	end=#
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
 				if norm(new_agent_pos .- neighbour_position) < 2 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+					if(conflict != 1 && no_move[agent.id] == 1)	
+						print("Position with q = $i and m = $j detected collision\n")
+					end
 					conflict = 1
 					break
 				end			
 			end
 			
 			if (conflict == 1)		
+				#print("Conflict detected in m = $m loop. Continuing\n")
 				continue
 			end
-
+			total_pos_sampled += 1
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-			print("Commencing agent step voronoi cell calculation\n")
+			#print("Commencing agent step voronoi cell calculation\n")
 			agent_voronoi_cell = voronoi_cell(new_agent_pos, direction_of_move, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
-			
-			if(no_move[Int64(agent.id)] == 1)
-				print("\n\n\nThe dq for this position of $(new_agent_pos) was \n")
-			for i in 1:length(temp_hp)
-				print("$(temp_hp[i])\n")
-			end
+			if(no_move[agent.id] == 1)
+				print("\n\n\nAgent $(agent.id) not moving. The dq for this position of $(new_agent_pos) was \n")
+				for i in 1:length(temp_hp)
+					print("$(temp_hp[i])\n")
+				end
 
-			print("Potential new area of $new_area\n")
+				print("Potential new area of $new_area\n")
 			end
 			#=
 			#print("The vertices of this convex hull point are\n")
@@ -217,6 +229,21 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 			print("\n")
 			=#
+
+			if(new_area > pi*rho^2)
+				print("Conventional area exceeded by agent $(agent.id)\n")
+                		print("For a potential agent position of $new_agent_pos, the vertices were\n")
+                		for i in 1:length(agent_voronoi_cell)
+                                	 vector_to_vertex = agent_voronoi_cell[i][1] .- new_agent_pos
+                                 	angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
+                                 	print("Vertex $(agent_voronoi_cell[i][1]) angle of $angle_to_vertex\n")
+                                 	#print("$(atan(cell[i][1][2], cell[i][1][1])) ")
+                                end
+
+                		exit()
+        		end
+
+
 			if (new_area < min_area)
                         	min_area = new_area
                         	#print("New min area, direction of $direction_of_move\n")
@@ -251,13 +278,16 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		
 		#push!(pos_area_array, [angle_of_move, min_area])
 	end
-
+		
+	if(no_move[agent.id] == 1)
+		print("The total number of positions sampled for this non-moving agent is $total_pos_sampled\n")
+	end
 	#push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
 	if(move_made == 1)
-		no_move[agent.id] = 0
+		no_move[Int64(agent.id)] = 0
 	end
 	
-	print("The number of angles considered was $no_angles_considered\n")
+	#print("The number of angles considered was $no_angles_considered\n")
 	
 	#Create the noise addition
 	epsilon = randn(model.rng, Float64, 2)
@@ -266,14 +296,12 @@ function move_gradient(agent, model,  kn, q, m, rho)
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
+	#print("Agent $(agent.id) will move to a new position of $(new_pos[agent.id])\n")
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		exit()
 	end
-
-	if(min_area > pi*rho^2)
-		print("Conventional area exceeded by agent $(agent.id)\n")
-	end
+	min_agent_pos = min_direction .+ agent.pos
 
 	if(move_made == 0)
                 turn = rand([-1, 1])
@@ -492,8 +520,12 @@ end
 ###Create the model_step function
 function model_step!(model)
         all_agents_iterable = allagents(model)
-        for agent in all_agents_iterable
-                move_agent!(agent, Tuple(new_pos[agent.id]), model)
+        
+	for agent in all_agents_iterable
+		if(no_move[Int64(agent.id)]==1)
+			print("Agent $(agent.id) has a no_moves status of $(no_move[Int64(agent.id)]), moving from position $(agent.pos) to $(new_pos[Int64(agent.id)]). Was the thing detected to have a value of 1? $(no_move[Int64(agent.id)] == 1 ? 1 : 0)\n")
+		end
+		move_agent!(agent, Tuple(new_pos[agent.id]), model)
         end
 
         #Now recalculate the agent DODs based off their new positions
@@ -509,7 +541,7 @@ function model_step!(model)
                 end
                 ri = agent_i.pos
 		vi = agent_i.vel
-		print("Commencing model step voronoi cell calculation\n")
+		#print("Commencing model step voronoi cell calculation\n")
 		new_cell_i = voronoi_cell(ri, vi, neighbour_positions, rho, temp_hp, agent_i.vel)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
@@ -519,7 +551,7 @@ function model_step!(model)
                 end
 		total_area += agent_i.A
         end
-        
+       
 	#Now update the model's convex hull
 	convexhullbro = update_convex_hull(model)
 	convex_hull_area = voronoi_area(-1, convexhullbro, rho)
@@ -598,7 +630,7 @@ abmvideo(
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
-no_steps = 300
+no_steps = 30
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

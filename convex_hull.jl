@@ -43,6 +43,7 @@ function convex_hull(P)
                 k += 1
 	end
 
+	print("The convex hull was calculated to be $H\n")
 	return H
 end
 

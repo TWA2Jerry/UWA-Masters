@@ -87,7 +87,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
-	print("Commencing main voronoi cell generation\n")
+	#print("Commencing main voronoi cell generation\n")
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
@@ -225,7 +225,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 ###
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-	print("\n\n\nCommencing bounded DOD calculation\n")	
+	#print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
@@ -235,12 +235,12 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 		i += 1
 	end
 	
-			
+	#=		
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		print("The half plane is $half_plane\n")
 	end
-		
+	=#	
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	replace_vector(temp_half_planes, dq)
