@@ -164,7 +164,6 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp = []
 	for i in 0:(q-1) #For every direction
-		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
@@ -173,6 +172,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		no_angles_considered += 1
 		for j in 1:m #For every position up to m
+			conflict = 0
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
@@ -439,9 +439,9 @@ savefig("voronoi_pack_init_tess.png")
 	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
 	=#
 	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
-        for i in 1:nagents(model)
+        #=for i in 1:nagents(model)
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
-        end
+        end=#
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 
 
@@ -521,9 +521,9 @@ function model_step!(model)
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
-	for i in 1:nagents(model)
+	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
-	end
+	end=#
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	
 	##Statistics recording
