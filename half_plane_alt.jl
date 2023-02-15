@@ -226,7 +226,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 			print("Bounding box fence detected\n")
 			exit()
 		end
-		if(abs(dq[i][2][1]) > eps) 
+		if(abs(dq[i][1] - pi/2) > 10^(-6)) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf
@@ -257,10 +257,10 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 				exit()
 			end
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                	y1 = m*x1 + c
+			y1 = m*x1 + c
 
                 	x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
-                	y2 = m*x2 + c
+			y2 = m*x2 + c
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		

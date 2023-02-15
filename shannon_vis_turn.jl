@@ -26,7 +26,7 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-sigma = 0.1
+sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -167,7 +167,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (3)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -190,6 +190,9 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			if(new_area > pi*rho^2)
+				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
+			end
 			#=		
 			print("\n\n\nThe dq for this position was \n")
 			for i in 1:length(temp_hp)
@@ -504,7 +507,7 @@ function model_step!(model)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
-                        print("Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
+			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
                         exit()
                 end
 		total_area += agent_i.A/(pi*rho^2)
