@@ -26,7 +26,7 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-sigma = 0.0
+sigma = 0.1
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -167,7 +167,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		angular_conflict = 0
+		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -178,12 +179,15 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
 				if norm(new_agent_pos .- neighbour_position) < 2 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+					if(j == 1)
+						angular_conflict = 1
+					end
 					conflict = 1
 					break
 				end			
 			end
 			
-			if (conflict == 1)		
+			if (conflict == 1 && angular_conflict == 1)		
 				continue
 			end
 
