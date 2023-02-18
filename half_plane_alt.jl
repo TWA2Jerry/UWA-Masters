@@ -261,6 +261,22 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 
                 	x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
 			y2 = m*x2 + c
+			
+			#=
+			xi1 = dq[i][3][1]
+			yi1 = dq[i][3][2]
+			xi2 = dq[i][3][1] + 2*(dq[i][2][1])
+			yi2 = dq[i][3][2] + 2*(dq[i][2][2])
+			dx = xi2 - xi1
+			dy = yi2 - yi1
+			dr = sqrt(dx^2 + dy^2)
+			D = xi1*yi2 - xi2 * yi1
+			xw1 = (D*dy-(dy/abs(dy))*dx*sqrt(rho^2*dr^2 - D^2))/(dr^2)
+			yw1 = (-D*dx-abs(dy)*sqrt(rho^2*dr^2-D^2))/(dr^2i)
+			xw2 = (D*dy+(dy/abs(dy))*dx*sqrt(rho^2*dr^2 - D^2))/(dr^2)
+                        yw2 = (-D*dx+abs(dy)*sqrt(rho^2*dr^2-D^2))/(dr^2)
+			print("The Wolfram intersects were calculated to be ($xw1, $yw1), ($xw2,$yw2)\n")
+			=#
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		

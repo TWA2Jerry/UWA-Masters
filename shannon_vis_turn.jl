@@ -78,10 +78,17 @@ function voronoi_area(ri, cell, rho)
 			#print("Circle segments detected\n")
 			circle_detected = 1
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
+			r = 0.0
 			if(rho^2 < (0.5*chord_length)^2)
 				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri. Chord length calculated to be $chord_length, against a rho value of $rho\n")
+				if(abs(0.5*chord_length - rho)/rho < 10^(-5))
+					r = 100.0
+				else
+					print("Bro, chord length is still cooked\n")
+				end
+			else
+                       		r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			end
-			r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			h = rho - r
 			circle_segment_area = rho^2*acos((rho-h)/rho) - (rho-h)*sqrt(2*rho*h-h^2) #Calculated according to Wolfram formula 
 			
@@ -426,11 +433,13 @@ function initialise(; seed = 123, no_birds = 100)
 	model.CHA = initial_convex_hull_area
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
 	init_rot_ord = rot_ord(allagents(model))
+	init_rot_ord_alt = rot_ord_alt(allagents(model))
 	print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	write(compac_frac_file, "$packing_fraction ")
 	average_area = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
 	write(rot_o_file, "$init_rot_ord ")
+	write(rot_o_alt_file, "$init_rot_ord_alt ")
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
@@ -540,9 +549,11 @@ function model_step!(model)
 	if(model.n < no_steps)
 		write(compac_frac_file, "$packing_fraction ")
 		write(rot_o_file, "$rot_order ")
+		write(rot_o_alt_file, "$rot_order_alt ")
 	else
 		write(compac_frac_file, "$packing_fraction")
 		write(rot_o_file, "$rot_order")
+		write(rot_o_alt_file, "$rot_order_alt")
 	end
 	average_area = total_area / nagents(model)
 	if(model.n < no_steps)
@@ -611,6 +622,7 @@ for i in 1:no_simulations
 	write(compac_frac_file, "\n")
 	write(mean_a_file, "\n")
 	write(rot_o_file, "\n")
+	write(rot_o_alt_file, "\n")
 end
 
 close(compac_frac_file)
@@ -620,10 +632,12 @@ close(rot_o_file)
 compac_frac_file = open("compaction_frac.txt", "r")
 mean_a_file = open("mean_area.txt", "r")
 rot_o_file = open("rot_order.txt", "r")
+rot_o_alt_file = open("rot_order_alt.txt", "r")
 
 cf_array = []
 ma_array = []
 rot_o_array = []
+rot_o_alt_array = []
 
 for i in 0:no_steps
 	push!(cf_array, [])
@@ -634,6 +648,7 @@ end
 cf_lines = readlines(compac_frac_file)
 ma_lines = readlines(mean_a_file)
 rot_o_lines = readlines(rot_o_file)
+rot_o_alt_lines = readlines(rot_o_alt_file)
 
 print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
@@ -658,15 +673,24 @@ for line in rot_o_lines
         end
 end
 
+for line in rot_o_alt_lines
+        split_line = parse.(Float64, split(line, " "))
+        for i in 1:length(split_line)
+                push!(rot_o_alt_array[i], split_line[i])
+        end
+end
+
 
 cf_ave_file = open("cf_ave.txt", "w")
 ma_ave_file = open("ma_ave.txt", "w")
 rot_o_ave_file = open("rot_o_ave.txt", "w")
+rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "w")
 
 for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
 	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
+	write(rot_o_alt_ave_file, "$i $(mean_rot_o_alt_array[i+1])\n")
 end
 
 
