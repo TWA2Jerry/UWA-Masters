@@ -499,8 +499,13 @@ end
 
 ###Create the model_step function
 function model_step!(model)
+	#Calculate the rotational order of the agents. After some debate, we've decided that position \times desired_velocity is the way to go. 
         all_agents_iterable = allagents(model)
-        for agent in all_agents_iterable
+	rot_order = rot_ord(allagents(model))
+        rot_order_alt = rot_ord_alt(allagents(model))
+	
+	#Move the agents to their predetermined places 
+	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
         end
 
@@ -544,7 +549,6 @@ function model_step!(model)
 	
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
-	rot_order = rot_ord(allagents(model))
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	if(model.n < no_steps)
 		write(compac_frac_file, "$packing_fraction ")
@@ -612,7 +616,8 @@ abmvideo(
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
-no_steps = 500
+rot_o_alt_file = open("rot_order_alt.txt", "w")
+no_steps = 400
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
@@ -643,6 +648,7 @@ for i in 0:no_steps
 	push!(cf_array, [])
 	push!(ma_array, [])
 	push!(rot_o_array, [])
+	push!(rot_o_alt_array, [])
 end
 
 cf_lines = readlines(compac_frac_file)
@@ -690,7 +696,7 @@ for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
 	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
-	write(rot_o_alt_ave_file, "$i $(mean_rot_o_alt_array[i+1])\n")
+	write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
 end
 
 

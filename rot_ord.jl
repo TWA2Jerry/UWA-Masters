@@ -35,10 +35,10 @@ function rot_ord_alt(agents)
         ##Iterate through the agents again and find the absolute value of the sum of the cross products r_ig \times v_i
         rot_order = 0.0
         for agent in agents
-                rot_order += cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed)
+		rot_order += abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
         end
 
-        rot_order = abs(rot_order)/length(agents)
+        rot_order = rot_order/length(agents)
 
         return rot_order
 end
