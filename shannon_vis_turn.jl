@@ -380,7 +380,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#initial_dods = voronoi_area(initial_positions, rho)
 	initial_dods = []
 	for i in 1:no_birds
-		print("\n\nCalculating initial DOD for agent $i, at position $(initial_positions[i]).")
+		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri  = initial_positions[i]
 		neighbouring_positions = []
 		for j in 1:no_birds
@@ -419,12 +419,14 @@ function initialise(; seed = 123, no_birds = 100)
 	end
 	#Now make the agents with their respective DoDs and add to the model
 	total_area = 0.0
+	total_speed = 0.0
 	for i in 1:no_birds
 		agent = bird(i, initial_positions[i], 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0), 1.0, initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += initial_dods[i]/(pi*rho^2)
+		total_speed += agent.speed
 	end	
 
 	#Calculate the actual area of the convex hull of the group of birds
@@ -438,6 +440,8 @@ function initialise(; seed = 123, no_birds = 100)
 	write(compac_frac_file, "$packing_fraction ")
 	average_area = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
+	average_speed = total_speed/no_birds
+	write(mean_speed_file, "$average_speed ")
 	write(rot_o_file, "$init_rot_ord ")
 	write(rot_o_alt_file, "$init_rot_ord_alt ")
 	print("Initialisation complete. \n\n\n")
@@ -503,7 +507,7 @@ function model_step!(model)
         all_agents_iterable = allagents(model)
 	rot_order = rot_ord(allagents(model))
         rot_order_alt = rot_ord_alt(allagents(model))
-	
+	print("Alternate rotational order returned as $rot_order_alt\n")	
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
@@ -511,6 +515,7 @@ function model_step!(model)
 
         #Now recalculate the agent DODs based off their new positions
         total_area = 0.0
+	total_speed = 0.0
 	temp_hp = []
 	for agent_i in all_agents_iterable
                 neighbour_positions = []
@@ -529,6 +534,7 @@ function model_step!(model)
                         exit()
                 end
 		total_area += agent_i.A/(pi*rho^2)
+		total_speed += agent_i.speed
         end
         
 	#Now update the model's convex hull
@@ -560,10 +566,13 @@ function model_step!(model)
 		write(rot_o_alt_file, "$rot_order_alt")
 	end
 	average_area = total_area / nagents(model)
+	average_speed = total_speed/nagents(model)
 	if(model.n < no_steps)
 		write(mean_a_file, "$average_area ")
+		write(mean_speed_file, "$average_speed ")
 	else 
 		write(mean_a_file, "$average_area")
+		write(mean_speed_file, "$average_speed")
 	end
 
 	last_hp_vert = open("Last_hp_vert.txt", "w")
@@ -617,6 +626,7 @@ compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
+mean_speed_file = open("mean_speed.txt", "w")
 no_steps = 400
 no_simulations = 1
 for i in 1:no_simulations
@@ -633,28 +643,34 @@ end
 close(compac_frac_file)
 close(mean_a_file)
 close(rot_o_file)
+close(rot_o_alt_file)
+close(mean_speed_file)
 
 compac_frac_file = open("compaction_frac.txt", "r")
 mean_a_file = open("mean_area.txt", "r")
 rot_o_file = open("rot_order.txt", "r")
 rot_o_alt_file = open("rot_order_alt.txt", "r")
+mean_speed_file = open("mean_speed.txt", "r")
 
 cf_array = []
 ma_array = []
 rot_o_array = []
 rot_o_alt_array = []
+ms_array = []
 
 for i in 0:no_steps
 	push!(cf_array, [])
 	push!(ma_array, [])
 	push!(rot_o_array, [])
 	push!(rot_o_alt_array, [])
+	push!(ms_array, [])
 end
 
 cf_lines = readlines(compac_frac_file)
 ma_lines = readlines(mean_a_file)
 rot_o_lines = readlines(rot_o_file)
 rot_o_alt_lines = readlines(rot_o_alt_file)
+ms_lines = readlines(mean_speed_file)
 
 print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
@@ -683,20 +699,32 @@ for line in rot_o_alt_lines
         split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
                 push!(rot_o_alt_array[i], split_line[i])
+		print("The split line was $(split_line[i])\n")
         end
 end
+
+for line in ms_lines
+        split_line = parse.(Float64, split(line, " "))
+        for i in 1:length(split_line)
+                push!(ms_array[i], split_line[i])
+                #print("The split line was $(split_line[i])\n")
+        end
+end
+
 
 
 cf_ave_file = open("cf_ave.txt", "w")
 ma_ave_file = open("ma_ave.txt", "w")
 rot_o_ave_file = open("rot_o_ave.txt", "w")
 rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "w")
+mean_speed_file = open("mean_speed_ave.txt", "w")
 
 for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
 	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
 	write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
+	write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
 end
 
 
