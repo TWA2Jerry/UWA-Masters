@@ -193,7 +193,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 ###
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-	#print("\n\n")	
+	print("\n\n")	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
@@ -204,9 +204,9 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 	end
 	
 	
-	#print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
+	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
-		#print("The half plane is $half_plane\n")
+		print("The half plane is $half_plane\n")
 	end
 	
 
@@ -240,7 +240,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
 			x1 = dq[i][3][1]
 			x2 = dq[i][3][1]
 			if(rho^2 - (x1 - ri[1])^2 <0)
-				print("Circle intercept negative\n")
+				print("Circle intercept negative. This was using the infinite gradient case, for the $i-th half plane in the dq. Intercept x-coord was calculated to be $x1.\n")
 				exit()
 			end
 			y1 = -sqrt(rho^2 - (x1 - ri[1])^2) + ri[2]
@@ -252,7 +252,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [])
                 	b = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative\n")
+				print("Circle intercept negative. This was for the non-infinite gradient case for the $i-th half plane in the dq. The value of the discriminant was calculated to be $(b^2-4*a*d)\n")
 				exit()
 			end
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
