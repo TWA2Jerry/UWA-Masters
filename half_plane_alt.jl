@@ -83,7 +83,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0])
+function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -245,7 +245,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
 			x1 = dq[i][3][1]
 			x2 = dq[i][3][1]
 			if(rho^2 - (x1 - ri[1])^2 <0)
-				print("Circle intercept negative\n")
+				print("Circle intercept negative. This was for the infinite gradient case, with half plane $(dq[i]).\n")
 				exit()
 			end
 			y1 = -sqrt(rho^2 - (x1 - ri[1])^2) + ri[2]
@@ -257,7 +257,7 @@ function voronoi_cell(ri, vi, neighbouring_points, rho, temp_half_planes = [], v
                 	b = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative\n")
+				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d))\n")
 				exit()
 			end
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))

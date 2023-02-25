@@ -193,7 +193,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, direction_of_move, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			#=		
 			print("\n\n\nThe dq for this position was \n")
@@ -372,7 +372,7 @@ function initialise(; seed = 123, no_birds = 100)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = voronoi_cell(ri, initial_vels[i], neighbouring_positions, rho, temp_hp, initial_vels[i])
+		initial_cell = voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i])
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -494,7 +494,7 @@ function model_step!(model)
                 end
                 ri = agent_i.pos
 		vi = agent_i.vel
-                new_cell_i = voronoi_cell(ri, vi, neighbour_positions, rho, temp_hp)
+                new_cell_i = voronoi_cell(ri,  neighbour_positions, rho, temp_hp, vi)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)

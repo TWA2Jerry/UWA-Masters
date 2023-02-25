@@ -179,7 +179,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict = 0
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -203,7 +203,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
@@ -364,12 +364,16 @@ function initialise(; seed = 123, no_birds = 100)
 
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
+	initial_vels = []
 	temp_hp = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	for i in 1:no_birds
 		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
+		rand_vel = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+		rand_vel = rand_vel ./norm(rand_vel)
 		push!(initial_positions, rand_position)
+		push!(initial_vels, rand_vel)
 		pack_positions[i] = Point2(rand_position)
 		push!(moves_areas, [])
 		push!(last_half_planes, [])
@@ -393,7 +397,7 @@ function initialise(; seed = 123, no_birds = 100)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho, temp_hp)
+		initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i])
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -425,7 +429,7 @@ function initialise(; seed = 123, no_birds = 100)
 	total_area = 0.0
 	total_speed = 0.0
 	for i in 1:no_birds
-		agent = bird(i, initial_positions[i], 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0), 1.0, initial_dods[i])
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
@@ -530,7 +534,7 @@ function model_step!(model)
                         push!(neighbour_positions, agent_j.pos)
                 end
                 ri = agent_i.pos
-                new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp)
+                new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp, agent_i.vel)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
