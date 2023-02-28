@@ -189,7 +189,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 2 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+				if norm(new_agent_pos .- neighbour_position) < 3.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					if(j == 1)
 						angular_conflict = 1
 					end
