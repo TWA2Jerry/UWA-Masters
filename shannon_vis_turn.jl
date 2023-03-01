@@ -26,7 +26,7 @@ no_move = ones(Int64, 100) #An array which will allow us to keep track of which 
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-sigma = 0.1
+sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -198,7 +198,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 				end			
 			end
 			
-			if (conflict == 1 && angular_conflict == 1)		
+			if (conflict == 1 || angular_conflict == 1)	#This seems wrong to me? Because if we have an angular conflict, even if we don't have a conflict, we still shouldn't move	
 				continue
 			end
 
@@ -344,7 +344,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 100)
+function initialise(; seed = 123, no_birds = 10)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
