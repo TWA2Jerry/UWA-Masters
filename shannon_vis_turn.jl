@@ -198,7 +198,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 				end			
 			end
 			
-			if (conflict == 1 || angular_conflict == 1)	#This seems wrong to me? Because if we have an angular conflict, even if we don't have a conflict, we still shouldn't move	
+			if (conflict == 1 || angular_conflict == 1)		
 				continue
 			end
 
@@ -635,7 +635,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 400
+no_steps = 500
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
