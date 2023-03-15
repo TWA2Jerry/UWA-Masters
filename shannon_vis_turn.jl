@@ -189,7 +189,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 10.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					if(j == 1)
 						angular_conflict = 1
 					end
@@ -491,7 +491,8 @@ function agent_step!(agent, model)
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
         new_agent_vel = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
-	change_in_position = new_agent_pos .- (agent.pos)
+	#At least in this version, we move agents asynchronously, so move agents in the agent step
+	move_agent!(agent, Tuple(new_pos[agent.id]), model)
 	if(move_made==1)
 		agent.vel = new_agent_vel
 		agent.speed = 1.0
@@ -513,7 +514,7 @@ end
 function model_step!(model)
 	#Calculate the rotational order of the agents. After some debate, we've decided that position \times desired_velocity is the way to go. 
         all_agents_iterable = allagents(model)
-	rot_order = rot_ord(allagents(model))
+	#=rot_order = rot_ord(allagents(model))
         rot_order_alt = rot_ord_alt(allagents(model))
 	print("Alternate rotational order returned as $rot_order_alt\n")	
 	#Move the agents to their predetermined places 
@@ -524,6 +525,7 @@ function model_step!(model)
         #Now recalculate the agent DODs based off their new positions
         total_area = 0.0
 	total_speed = 0.0
+	=#
 	temp_hp = []
 	for agent_i in all_agents_iterable
                 neighbour_positions = []
@@ -541,16 +543,16 @@ function model_step!(model)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
                         exit()
                 end
-		total_area += agent_i.A/(pi*rho^2)
-		total_speed += agent_i.speed
+		#total_area += agent_i.A/(pi*rho^2)
+		#total_speed += agent_i.speed
         end
         
-	#Now update the model's convex hull
+	#= #Now update the model's convex hull
 	convexhullbro = update_convex_hull(model)
 	convex_hull_area = voronoi_area(-1, convexhullbro, rho)
-	model.CHA = convex_hull_area
+	model.CHA = convex_hull_area =#
 	model.t += model.dt
-        model.n += 1
+        model.n += 1 
 
 	#Finally, plot the model after the step
 	#figure, _ = abmplot(model)
@@ -561,7 +563,7 @@ function model_step!(model)
 	end=#
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	
-	##Statistics recording
+	#= ##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	if(model.n < no_steps)
@@ -590,8 +592,8 @@ function model_step!(model)
 		write(last_hp_vert, "$(last_half_planes[i][2])\n")
 		write(last_hp_vert, "\n\n")
 	end
-	close(last_hp_vert)
-
+	close(last_hp_vert) =#
+	
 	print("Finished step $(model.n)\n\n\n")
 end
 

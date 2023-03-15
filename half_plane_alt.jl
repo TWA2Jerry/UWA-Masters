@@ -198,7 +198,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 ###
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
-	print("\n\n\nCommencing bounded DOD calculation\n")	
+	#print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
 		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
@@ -209,10 +209,10 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 	end
 	
 			
-	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
+	#=print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		print("The half plane is $half_plane\n")
-	end
+	end =#
 		
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
@@ -333,7 +333,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 					push!(vq, [b_circle_intersect_i, 0, i])
 				end
 				vlen += 1
-				print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
