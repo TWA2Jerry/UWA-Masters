@@ -174,6 +174,15 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp = []
+
+	#For the relic idea, we have a bounding half plane based on the agent's current position and velocity
+        relic_x = -1.0*(-viy)
+        relic_y = -vix
+        relic_pq = [relic_x, relic_y]
+        relic_angle = atan(relic_y, relic_x)
+        relic_is_box = 2
+        relic_half_plane = [relic_angle, relic_pq, agent.pos, relic_is_box]
+
 	for i in 0:(q-1) #For every direction
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
@@ -203,7 +212,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
@@ -635,7 +644,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 500
+no_steps = 600
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

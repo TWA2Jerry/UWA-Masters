@@ -83,7 +83,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0])
+function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -124,13 +124,16 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 	#Add the half plane that bounds the area to the area in front of the agent
         fw_point = ri
         fw_x = -1.0*(-vel[2])
-        fw_y = -vel[1]
+        fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
         fw_pq = [fw_x, fw_y]
         angle = atan(fw_y, fw_x)
         fw_is_box = 2
         fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
         push!(half_planes, fw_half_plane)
 
+	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
+	#print("About to push the relic, which is $relic\n")
+	push!(half_planes, relic)
 
 	sort!(half_planes)
 	#print("After sorting, half_planes is given by \n")
