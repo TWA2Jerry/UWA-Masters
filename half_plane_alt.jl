@@ -133,7 +133,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
-	push!(half_planes, relic)
+	#push!(half_planes, relic)
 
 	sort!(half_planes)
 	#print("After sorting, half_planes is given by \n")
