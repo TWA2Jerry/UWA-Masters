@@ -207,8 +207,20 @@ function move_gradient(agent, model,  kn, q, m, rho)
 					break
 				end			
 			end
-			
-			if (conflict == 1 || angular_conflict == 1)		
+		
+			#Predictive strategy exclusive: For each possible direction, detect if it will cause collision
+			collision = 0
+			for agentj in all_agents_iterable
+				if(agentj.id == agent.id)
+					continue
+				end
+				collision = collide_predicted(agent.pos, agentj.pos, direction_of_move, agentj.vel, q, 3)
+				if(collision == 1)
+					break
+				end
+			end
+
+			if (conflict == 1 || angular_conflict == 1 || collision == 1)		
 				continue
 			end
 
