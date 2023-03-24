@@ -9,7 +9,7 @@ function path_collide(ri, rj, veli, velj)
 	vjy = velj[2]
 	a = (vix-vjx)^2 + (viy-vjy)^2
 	b = 2*(vix - vjx)*(rix-rjx) + 2*(viy-vjy)*(riy-rjy)
-	c = (rix-rjx)^2+(riy-rjy)^2-4
+	c = (rix-rjx)^2+(riy-rjy)^2-9
 	val0 = c
 	#print("c was calculated as $c\n")
 	val1 = a+b+c
@@ -34,7 +34,7 @@ function collide_predicted(ri,rj,  vi, vj, q, qprime)
 	vjy = vj[2]
 	
 	collision_flag = 0
-	for i in -div(qprime,2):div(qprime/2)
+	for i in -div(qprime,2):div(qprime,2)
 		velj = [cos(i*2*pi/q)*vjx - sin(i*2*pi/q)*vjy, sin(i*2*pi/q)*vjx + cos(i*2*pi/q)*vjy]
 		if(path_collide(ri, rj, vi, vj)==1)
 			collision_flag = 1
@@ -43,4 +43,5 @@ function collide_predicted(ri,rj,  vi, vj, q, qprime)
 	end
 	#For each velocity, check if the chosen vi will result in a collision with vj
 	#If there is a collision with any of the three possible vj, then return collision detected
+	return collision_flag
 end

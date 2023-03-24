@@ -198,28 +198,29 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
-			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 10.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+			#=for neighbour_position in positions
+				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					if(j == 1)
 						angular_conflict = 1
 					end
 					conflict = 1
 					break
 				end			
-			end
+			end=#
 		
 			#Predictive strategy exclusive: For each possible direction, detect if it will cause collision
 			collision = 0
-			for agentj in all_agents_iterable
-				if(agentj.id == agent.id)
-					continue
-				end
-				collision = collide_predicted(agent.pos, agentj.pos, direction_of_move, agentj.vel, q, 3)
-				if(collision == 1)
-					break
+			if(j == 1)
+				for agentj in all_agents_iterable
+					if(agentj.id == agent.id)
+						continue
+					end
+					collision = collide_predicted(agent.pos, agentj.pos, direction_of_move, agentj.vel, q, 3)
+					if(collision == 1)
+						break
+					end
 				end
 			end
-
 			if (conflict == 1 || angular_conflict == 1 || collision == 1)		
 				continue
 			end
