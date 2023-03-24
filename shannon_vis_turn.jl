@@ -12,6 +12,7 @@ using Plots
 print("Packages loaded\n")
 
 include("half_plane_alt.jl")
+include("predictor.jl")
 include("convex_hull.jl")
 include("rot_ord.jl")
 print("All homemade files included\n")
