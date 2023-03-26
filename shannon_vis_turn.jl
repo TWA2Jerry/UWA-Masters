@@ -164,28 +164,32 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp = []
 	for i in 0:(q-1) #For every direction
-		conflict = 0
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		if(abs(rel_angle) > (2)*2*pi/q + eps)
+		angular_conflict = 0
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
 		for j in 1:m #For every position up to m
+			conflict = 0
 			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
-			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 2 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+			#=for neighbour_position in positions
+				if norm(new_agent_pos .- neighbour_position) < 3.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+					if(j == 1)
+						angular_conflict = 1
+					end
 					conflict = 1
 					break
 				end			
 			end
 			
-			if (conflict == 1)		
+			if (conflict == 1 || angular_conflict == 1)		
 				continue
-			end
+			end=#
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp) #Generates the set of vertices which define the voronoi cell
@@ -326,7 +330,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 100)
+function initialise(; seed = 123, no_birds = 10)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
