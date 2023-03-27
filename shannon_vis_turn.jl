@@ -198,7 +198,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 10.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+				if norm(new_agent_pos .- neighbour_position) < 3.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					if(j == 1)
 						angular_conflict = 1
 					end
@@ -353,7 +353,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 10)
+function initialise(; seed = 123, no_birds = 50)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -644,7 +644,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 600
+no_steps = 300
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
