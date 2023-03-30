@@ -27,6 +27,8 @@ new_pos = [] #An array that will store the new positions of the agents for movem
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
 sigma = 0.0
+rot_order = 0.0
+rot_order_alt = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -442,25 +444,23 @@ function initialise(; seed = 123, no_birds = 50)
 	initial_convex_hull_area = voronoi_area(-1, convexhullbro, rho)
 	model.CHA = initial_convex_hull_area
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
-	init_rot_ord = rot_ord(allagents(model))
-	init_rot_ord_alt = rot_ord_alt(allagents(model))
+	#init_rot_ord = rot_ord(allagents(model))
+	#init_rot_ord_alt = rot_ord_alt(allagents(model))
 	print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	write(compac_frac_file, "$packing_fraction ")
 	average_area = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
 	average_speed = total_speed/no_birds
 	write(mean_speed_file, "$average_speed ")
-	write(rot_o_file, "$init_rot_ord ")
-	write(rot_o_alt_file, "$init_rot_ord_alt ")
+	#write(rot_o_file, "$init_rot_ord ")
+        #write(rot_o_alt_file, "$init_rot_ord_alt ")
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
-	
-	#=
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
 annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
-	=#
+	
 	#Finally, plot the figure
 	#=	
 	figure, _ = abmplot(model)	
@@ -491,8 +491,6 @@ function agent_step!(agent, model)
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
         new_agent_vel = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
-	#At least in this version, we move agents asynchronously, so move agents in the agent step
-	move_agent!(agent, Tuple(new_pos[agent.id]), model)
 	if(move_made==1)
 		agent.vel = new_agent_vel
 		agent.speed = 1.0
@@ -504,7 +502,14 @@ function agent_step!(agent, model)
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
-	#move_agent!(agent, new_agent_pos, model)	
+	#move_agent!(agent, new_agent_pos, model)
+	all_agents_iterable = allagents(model)
+	global rot_order, rot_order_alt
+	rot_order += rot_ord(all_agents_iterable, agent)
+	rot_order_alt += rot_ord_alt(all_agents_iterable, agent)
+	#At least in this version, we move agents asynchronously, so move agents in the agent step
+        move_agent!(agent, Tuple(new_pos[agent.id]), model)
+
 end
 	
 
@@ -521,11 +526,11 @@ function model_step!(model)
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
         end
-
+	=#
         #Now recalculate the agent DODs based off their new positions
         total_area = 0.0
 	total_speed = 0.0
-	=#
+	
 	temp_hp = []
 	for agent_i in all_agents_iterable
                 neighbour_positions = []
@@ -543,14 +548,14 @@ function model_step!(model)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
                         exit()
                 end
-		#total_area += agent_i.A/(pi*rho^2)
-		#total_speed += agent_i.speed
+		total_area += agent_i.A/(pi*rho^2)
+		total_speed += agent_i.speed
         end
         
-	#= #Now update the model's convex hull
+	#Now update the model's convex hull
 	convexhullbro = update_convex_hull(model)
 	convex_hull_area = voronoi_area(-1, convexhullbro, rho)
-	model.CHA = convex_hull_area =#
+	model.CHA = convex_hull_area 
 	model.t += model.dt
         model.n += 1 
 
@@ -563,9 +568,11 @@ function model_step!(model)
 	end=#
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	
-	#= ##Statistics recording
+	global rot_order, rot_order_alt
+	rot_order = rot_order/nagents(model)
+	rot_order_alt = rot_order_alt/nagents(model)
 	packing_fraction = nagents(model)*pi/model.CHA
-	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
+	#+print("Packing fraction at n = $(model.n) is $(packing_fraction)\n") =#
 	if(model.n < no_steps)
 		write(compac_frac_file, "$packing_fraction ")
 		write(rot_o_file, "$rot_order ")
@@ -585,7 +592,7 @@ function model_step!(model)
 		write(mean_speed_file, "$average_speed")
 	end
 
-	last_hp_vert = open("Last_hp_vert.txt", "w")
+	#=last_hp_vert = open("Last_hp_vert.txt", "w")
 	for i in 1:nagents(model)
 		write(last_hp_vert, "Agent $i, position of $(new_pos[i]), considering position of $(last_half_planes[i][3])\n")
 		write(last_hp_vert, "$(last_half_planes[i][1])\n")
@@ -593,7 +600,8 @@ function model_step!(model)
 		write(last_hp_vert, "\n\n")
 	end
 	close(last_hp_vert) =#
-	
+	rot_order = 0.0
+	rot_order_alt = 0.0
 	print("Finished step $(model.n)\n\n\n")
 end
 
@@ -689,27 +697,27 @@ for line in cf_lines
 		print("The element read was $(split_line[i])\n")
 		push!(cf_array[i], split_line[i])
         end
-end
-
+end 
+print("cf lines done\n")
 for line in ma_lines
         split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
                 push!(ma_array[i], split_line[i])
         end
 end
-
+print("ma lines done\n")
 for line in rot_o_lines
         split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
                 push!(rot_o_array[i], split_line[i])
         end
 end
-
+print("rot lines done\n")
 for line in rot_o_alt_lines
         split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
                 push!(rot_o_alt_array[i], split_line[i])
-		print("The split line was $(split_line[i])\n")
+		#print("The split line was $(split_line[i])\n")
         end
 end
 
@@ -728,13 +736,14 @@ ma_ave_file = open("ma_ave.txt", "w")
 rot_o_ave_file = open("rot_o_ave.txt", "w")
 rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "w")
 mean_speed_file = open("mean_speed_ave.txt", "w")
-
 for i in 0:no_steps
 	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
 	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
-	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
-	write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
 	write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
+	if (i<no_steps)
+		write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
+        	write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
+	end
 end
 
 
