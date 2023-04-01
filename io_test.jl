@@ -1,0 +1,22 @@
+out_file = open("io_test.txt", "w")
+a = 5
+b = [1,2]
+c = (1,2)
+print(a ,"\n")
+write(out_file, "This is my gun, my only gun", "\n")
+write(out_file, "$a \n")
+write(out_file, "$b \n")
+write(out_file, "$c \n")
+write(out_file, "$(c[1]) $(c[2])\n")
+
+using Random
+out_file_3 = open("io_test_2.txt", "w")
+for i in 1:20
+	write(out_file_3, "$(rand(Float64)) ")
+end
+
+for i in 1:3
+	bro = open("rewrite_test.txt", "w")
+	write(bro, "$i\n")
+	close(bro)
+end
