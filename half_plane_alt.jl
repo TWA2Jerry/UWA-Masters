@@ -121,6 +121,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 	push!(half_planes, top_side)
 	push!(half_planes, left_side)
 	
+	#= This stuff is now going to be done using the voronoi_cell_bounded function in half_plane_bounded.jl
 	#Add the half plane that bounds the area to the area in front of the agent
         fw_point = ri
         fw_x = -1.0*(-vel[2])
@@ -134,6 +135,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
 	#push!(half_planes, relic)
+	=#
 
 	sort!(half_planes)
 	#print("After sorting, half_planes is given by \n")

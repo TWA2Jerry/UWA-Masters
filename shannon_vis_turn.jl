@@ -12,6 +12,7 @@ using Plots
 print("Packages loaded\n")
 
 include("half_plane_alt.jl")
+include("half_plane_bounded.jl")
 include("convex_hull.jl")
 include("rot_ord.jl")
 print("All homemade files included\n")
@@ -212,7 +213,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell(new_agent_pos, positions, rho, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	agent_voronoi_cell = voronoi_cell_bounded(new_agent_pos, positions, rho, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
@@ -406,7 +407,16 @@ function initialise(; seed = 123, no_birds = 10)
 			end
 			push!(neighbouring_positions, initial_positions[j])
 		end
-		initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i])
+		vix = initial_vels[i][1]
+		viy = initial_vels[i][2]
+		relic_x = -1.0*(-viy)
+        	relic_y = -vix
+        	relic_pq = [relic_x, relic_y]
+        	relic_angle = atan(relic_y, relic_x)
+        	relic_is_box = 2
+        	relic_half_plane = [relic_angle, relic_pq, agent.pos, relic_is_box]
+
+		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 		
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -543,14 +553,26 @@ function model_step!(model)
                         push!(neighbour_positions, agent_j.pos)
                 end
                 ri = agent_i.pos
-                new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp, agent_i.vel)
+		vix = agent_i.vel[1]
+		viy = agent_i.vel[2]
+		relic_x = -1.0*(-viy)
+        	relic_y = -vix
+        	relic_pq = [relic_x, relic_y]
+        	relic_angle = atan(relic_y, relic_x)
+        	relic_is_box = 2
+        	relic_half_plane = [relic_angle, relic_pq, agent_i.pos, relic_is_box]
+
+                new_cell_i = voronoi_cell_bounded(ri, neighbour_positions, rho, temp_hp, agent_i.vel, relic_half_plane)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
                         exit()
                 end
-		total_area += agent_i.A/(pi*rho^2)
+		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
+		true_new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp, agent_i.vel)
+                true_new_area = voronoi_area(ri, true_new_cell_i, rho)
+		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
         end
         
