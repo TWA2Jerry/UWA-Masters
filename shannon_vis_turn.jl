@@ -397,6 +397,7 @@ function initialise(; seed = 123, no_birds = 10)
 	#Calculate the DoDs based off the initial positions
 	#initial_dods = voronoi_area(initial_positions, rho)
 	initial_dods = []
+	true_initial_dods = []
 	for i in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri  = initial_positions[i]
@@ -414,11 +415,15 @@ function initialise(; seed = 123, no_birds = 10)
         	relic_pq = [relic_x, relic_y]
         	relic_angle = atan(relic_y, relic_x)
         	relic_is_box = 2
-        	relic_half_plane = [relic_angle, relic_pq, agent.pos, relic_is_box]
+        	relic_half_plane = [relic_angle, relic_pq, ri, relic_is_box]
 
 		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
-		
+	
+		true_initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i], relic_half_plane)
+                true_initial_A = voronoi_area(ri, true_initial_cell, rho)
+
+
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
 			
 		print("Initial DOD calculated to be $initial_A\n")
@@ -434,7 +439,7 @@ function initialise(; seed = 123, no_birds = 10)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
 		end
 		push!(initial_dods, initial_A)
-	
+		push!(true_initial_dods, true_initial_A)
 			
 		#print("The initial half planes for agent $(i) is \n")
 		#print("$(last_half_planes[i][2])\n")
@@ -452,7 +457,7 @@ function initialise(; seed = 123, no_birds = 10)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
-		total_area += initial_dods[i]/(pi*rho^2)
+		total_area += true_initial_dods[i]/(pi*rho^2)
 		total_speed += agent.speed
 	end	
 
