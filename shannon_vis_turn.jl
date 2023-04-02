@@ -577,6 +577,7 @@ function model_step!(model)
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
 		true_new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(ri, true_new_cell_i, rho)
+		print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
         end
@@ -720,7 +721,7 @@ print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
 	split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
-		print("The element read was $(split_line[i])\n")
+		#print("The element read was $(split_line[i])\n")
 		push!(cf_array[i], split_line[i])
         end
 end
@@ -743,7 +744,7 @@ for line in rot_o_alt_lines
         split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
                 push!(rot_o_alt_array[i], split_line[i])
-		print("The split line was $(split_line[i])\n")
+		#print("The split line was $(split_line[i])\n")
         end
 end
 
