@@ -506,7 +506,7 @@ function agent_step!(agent, model)
 	k1 = [0.0, 0.0, 0.0, 0.0]
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 100, rho)
+	move_made = move_gradient(agent, model, k1, 8, 100, rho, sqrt(12)*3.0)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
