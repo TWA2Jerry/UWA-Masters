@@ -150,7 +150,7 @@ end
 
 
 ###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn, q, m, rho)
+function move_gradient(agent, model,  kn, q, m, rho, target_DOD)
 	#Calculate the unit vector in the current direction of motion
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
@@ -166,7 +166,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		pushfirst!(positions, neighbour.pos)	
 	end		
-	min_area = inf  #The agent's current DOD area
+	min_diff = inf  #The agent's current DOD area
 	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
 	pos_area_array = []
@@ -238,8 +238,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 			print("\n")
 			=#
-			if (new_area < min_area)
-                        	min_area = new_area
+			if (abs(new_area-target_DOD) < min_diff)
+				min_diff = abs(new_area-target_DOD)
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
@@ -292,10 +292,6 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		exit()
 	end
 
-	if(min_area > pi*rho^2)
-		print("Conventional area exceeded by agent $(agent.id)\n")
-	end
-	
 	if(move_made == 0)
 		turn = rand([-1, 1])
 		min_direction = [cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy]
