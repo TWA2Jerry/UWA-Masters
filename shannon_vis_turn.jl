@@ -246,13 +246,6 @@ function move_gradient(agent, model,  kn, q, m, rho, target_DOD)
 				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
 					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
-					#=
-					for i in 1:length(temp_hp)
-                                		#print("$(temp_hp[i])\n")
-					end
-					=#
-					#print("Also, here's the vertices of the cell\n")
-					#print("$(agent_voronoi_cell)\n")
 				end
                 	end
 
@@ -506,7 +499,7 @@ function agent_step!(agent, model)
 	k1 = [0.0, 0.0, 0.0, 0.0]
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-	move_made = move_gradient(agent, model, k1, 8, 100, rho, sqrt(12)*3.0)
+	move_made = move_gradient(agent, model, k1, 8, 100, rho, sqrt(12)*100.0)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -668,7 +661,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 50
+no_steps = 500
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
