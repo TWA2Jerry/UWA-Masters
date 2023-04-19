@@ -343,7 +343,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 10)
+function initialise(; seed = 123, no_birds = 50)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -499,7 +499,7 @@ function agent_step!(agent, model)
 	k1 = [0.0, 0.0, 0.0, 0.0]
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-	move_made = move_gradient(agent, model, k1, 8, 100, rho, sqrt(12)*1000.0)
+	move_made = move_gradient(agent, model, k1, 8, 100, rho, sqrt(12)*1000)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
