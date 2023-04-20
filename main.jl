@@ -16,6 +16,7 @@ include("half_plane_bounded.jl")
 include("convex_hull.jl")
 include("rot_ord.jl")
 include("rot_ord_check.jl")
+include("init_pos.jl")
 print("All homemade files included\n")
 
 rho = 100.0
@@ -200,7 +201,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
-				if norm(new_agent_pos .- neighbour_position) < 3.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					if(j == 1)
 						angular_conflict = 1
 					end
@@ -357,7 +358,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 10)
+function initialise(; seed = 123, no_birds = 50)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -381,13 +382,16 @@ function initialise(; seed = 123, no_birds = 10)
 	temp_hp = []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
+	#Initialise the positions based on the spawn-error free function of assign_positions
+	assign_positions(2.0, 2.0, no_birds, 100.0, 100.0, 50.0, 50.0, initial_positions)
+
 	for i in 1:no_birds
-		rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
+		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		rand_vel = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
 		rand_vel = rand_vel ./norm(rand_vel)
-		push!(initial_positions, rand_position)
+		#push!(initial_positions, rand_position)
 		push!(initial_vels, rand_vel)
-		pack_positions[i] = Point2(rand_position)
+		pack_positions[i] = initial_positions[i]
 		push!(moves_areas, [])
 		push!(last_half_planes, [])
 		push!(new_pos, (0.0, 0.0))
@@ -675,7 +679,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 50
+no_steps = 5
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()
