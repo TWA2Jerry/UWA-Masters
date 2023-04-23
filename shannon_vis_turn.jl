@@ -344,11 +344,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 50)
+function initialise(DOD_target; seed = 123, no_birds = 10)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_DOD => DOD_target)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -504,7 +504,7 @@ function agent_step!(agent, model)
 	k1 = [0.0, 0.0, 0.0, 0.0]
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-	move_made = move_gradient(agent, model, k1, 8, 100, rho, sqrt(12)*1000)
+	move_made = move_gradient(agent, model, k1, 8, 100, rho, model.target_DOD)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -660,111 +660,136 @@ abmvideo(
 )
 =#
 
-
+rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "w")
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 5
-no_simulations = 1
-for i in 1:no_simulations
-	model = initialise()
-	#figure, _ = abmplot(model)
-        #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
-	step!(model, agent_step!, model_step!, no_steps)
-	write(compac_frac_file, "\n")
-	write(mean_a_file, "\n")
-	write(rot_o_file, "\n")
-	write(rot_o_alt_file, "\n")
+
+no_steps = 300
+no_simulations = 5
+for target_DOD in  [sqrt(12):50.0:5000.0;]
+	print("This is for target DOD = $target_DOD\n")
+	global compac_frac_file = open("compaction_frac.txt", "w")
+	global mean_a_file = open("mean_area.txt", "w")
+	global rot_o_file = open("rot_order.txt", "w")
+	global rot_o_alt_file = open("rot_order_alt.txt", "w")
+	global mean_speed_file = open("mean_speed.txt", "w")
+
+	truncate(compac_frac_file, 0)
+	truncate(mean_a_file, 0)
+	truncate(rot_o_file, 0)
+	truncate(rot_o_alt_file, 0)
+	truncate(mean_speed_file, 0)
+
+	for i in 1:no_simulations
+		model = initialise(target_DOD)
+		#figure, _ = abmplot(model)
+        	#save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
+		step!(model, agent_step!, model_step!, no_steps)
+		write(compac_frac_file, "\n")
+		write(mean_a_file, "\n")
+		write(rot_o_file, "\n")
+		write(rot_o_alt_file, "\n")
+	end
+
+	close(compac_frac_file)
+	close(mean_a_file)
+	close(rot_o_file)
+	close(rot_o_alt_file)
+	close(mean_speed_file)
+
+	compac_frac_file = open("compaction_frac.txt", "r")
+	mean_a_file = open("mean_area.txt", "r")
+	rot_o_file = open("rot_order.txt", "r")
+	rot_o_alt_file = open("rot_order_alt.txt", "r")
+	mean_speed_file = open("mean_speed.txt", "r")
+
+	cf_array = []
+	ma_array = []
+	rot_o_array = []
+	rot_o_alt_array = []
+	ms_array = []
+
+	for i in 0:no_steps
+		push!(cf_array, [])
+		push!(ma_array, [])
+		push!(rot_o_array, [])
+		push!(rot_o_alt_array, [])
+		push!(ms_array, [])
+	end
+
+	cf_lines = readlines(compac_frac_file)
+	ma_lines = readlines(mean_a_file)
+	rot_o_lines = readlines(rot_o_file)
+	rot_o_alt_lines = readlines(rot_o_alt_file)
+	ms_lines = readlines(mean_speed_file)
+
+	print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
+	for line in cf_lines
+		split_line = parse.(Float64, split(line, " "))
+        	for i in 1:length(split_line)
+			#print("The element read was $(split_line[i])\n")
+			push!(cf_array[i], split_line[i])
+        	end
+	end
+
+	for line in ma_lines
+        	split_line = parse.(Float64, split(line, " "))
+        	for i in 1:length(split_line)
+                	push!(ma_array[i], split_line[i])
+        	end
+	end
+
+	for line in rot_o_lines
+        	split_line = parse.(Float64, split(line, " "))
+        	for i in 1:length(split_line)
+                	push!(rot_o_array[i], split_line[i])
+        	end
+	end
+
+	for line in rot_o_alt_lines
+        	split_line = parse.(Float64, split(line, " "))
+        	for i in 1:length(split_line)
+                	push!(rot_o_alt_array[i], split_line[i])
+			#print("The split line was $(split_line[i])\n")
+        	end
+	end
+
+	for line in ms_lines
+        	split_line = parse.(Float64, split(line, " "))
+        	for i in 1:length(split_line)
+                	push!(ms_array[i], split_line[i])
+                	#print("The split line was $(split_line[i])\n")
+        	end
+	end
+
+	close(compac_frac_file)
+        close(mean_a_file)
+        close(rot_o_file)
+        close(rot_o_alt_file)
+        close(mean_speed_file)
+
+	
+	cf_ave_file = open("cf_ave.txt", "w")
+	ma_ave_file = open("ma_ave.txt", "w")
+	rot_o_ave_file = open("rot_o_ave.txt", "w")
+	rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "w")
+	mean_speed_ave_file = open("mean_speed_ave.txt", "w")
+
+	for i in 0:no_steps
+		write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
+		write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
+		write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
+		write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
+		write(mean_speed_ave_file, "$i $(mean(ms_array[i+1]))\n")
+	end
+
+	mean_rot_o_alt = 0.0
+	for i in 0:no_steps
+		mean_rot_o_alt += mean(rot_o_alt_array[i+1])
+	end
+	write(rot_alt_target_ave_file, "$target_DOD $mean_rot_o_alt\n")
 end
-
-close(compac_frac_file)
-close(mean_a_file)
-close(rot_o_file)
-close(rot_o_alt_file)
-close(mean_speed_file)
-
-compac_frac_file = open("compaction_frac.txt", "r")
-mean_a_file = open("mean_area.txt", "r")
-rot_o_file = open("rot_order.txt", "r")
-rot_o_alt_file = open("rot_order_alt.txt", "r")
-mean_speed_file = open("mean_speed.txt", "r")
-
-cf_array = []
-ma_array = []
-rot_o_array = []
-rot_o_alt_array = []
-ms_array = []
-
-for i in 0:no_steps
-	push!(cf_array, [])
-	push!(ma_array, [])
-	push!(rot_o_array, [])
-	push!(rot_o_alt_array, [])
-	push!(ms_array, [])
-end
-
-cf_lines = readlines(compac_frac_file)
-ma_lines = readlines(mean_a_file)
-rot_o_lines = readlines(rot_o_file)
-rot_o_alt_lines = readlines(rot_o_alt_file)
-ms_lines = readlines(mean_speed_file)
-
-print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
-for line in cf_lines
-	split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-		#print("The element read was $(split_line[i])\n")
-		push!(cf_array[i], split_line[i])
-        end
-end
-
-for line in ma_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(ma_array[i], split_line[i])
-        end
-end
-
-for line in rot_o_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(rot_o_array[i], split_line[i])
-        end
-end
-
-for line in rot_o_alt_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(rot_o_alt_array[i], split_line[i])
-		#print("The split line was $(split_line[i])\n")
-        end
-end
-
-for line in ms_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(ms_array[i], split_line[i])
-                #print("The split line was $(split_line[i])\n")
-        end
-end
-
-
-
-cf_ave_file = open("cf_ave.txt", "w")
-ma_ave_file = open("ma_ave.txt", "w")
-rot_o_ave_file = open("rot_o_ave.txt", "w")
-rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "w")
-mean_speed_file = open("mean_speed_ave.txt", "w")
-
-for i in 0:no_steps
-	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
-	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
-	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
-	write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
-	write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
-end
-
-
-
+close(rot_alt_target_ave_file)
