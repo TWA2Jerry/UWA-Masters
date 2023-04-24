@@ -30,14 +30,14 @@ function inter(h1, h2)
 	#m2 = h2[2][2]/h2[2][1]
 	#m1 = 0.0
 	#m2 = 0.0
-	if(abs(h1[2][1]) < eps)
+	if(abs(h1[1] - pi/2) < 0.0000001)
 		#print("Infinite gradient detected for m1\n")
 		m1 = inf
 	else 
 		m1 = h1[2][2]/h1[2][1]
 	end
 	#print("m1 found to be $m1\n")
-	if(abs(h2[2][1]) < eps)
+	if(abs(h1[1] - pi/2) < 0.0000001)
 		m2 = inf
 		#print("Infinite gradient detected for m2\n")
 	else
@@ -235,7 +235,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 			print("Bounding box fence detected\n")
 			exit()
 		end
-		if(abs(dq[i][2][1]) > eps) 
+		if(abs(dq[i][1] - pi/2) > 0.000001) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf

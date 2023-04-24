@@ -692,6 +692,7 @@ for target_DOD in  [sqrt(12):50.0:5000.0;]
 		write(mean_a_file, "\n")
 		write(rot_o_file, "\n")
 		write(rot_o_alt_file, "\n")
+		write(mean_speed_file, "\n")
 	end
 
 	close(compac_frac_file)
