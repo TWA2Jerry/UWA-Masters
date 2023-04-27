@@ -149,7 +149,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 			print("Bounding box fence detected\n")
 			exit()
 		end
-		if(abs(dq[i][2][1]) > eps) 
+		if(abs(abs(dq[i][1]) - pi/2) > 0.0000001) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf

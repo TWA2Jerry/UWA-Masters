@@ -193,6 +193,11 @@ function move_gradient(agent, model,  kn, q, m, rho, target_DOD)
 		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
+		alt_rel_angle = i*2*pi/q > pi? 2*pi-i*2*pi/q : i*2*pi/q
+		if(alt_rel_angle != rel_angle)
+			print("The two methods of measuring the relative angle differed. alt_rel_angle gave $alt_rel_angle, while the other method gave $rel_angle\n")
+			exit()
+		end
 		no_angles_considered += 1
 		for j in 1:m #For every position up to m
 			conflict = 0
@@ -282,7 +287,7 @@ function move_gradient(agent, model,  kn, q, m, rho, target_DOD)
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
-		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id]). Target DOD was $target_DOD\n")
 		exit()
 	end
 
@@ -670,7 +675,7 @@ mean_speed_file = open("mean_speed.txt", "w")
 no_steps = 300
 no_simulations = 5
 for target_DOD in  [sqrt(12):50.0:5000.0;]
-	print("This is for target DOD = $target_DOD\n")
+	print("\n\nThis is for target DOD = $target_DOD\n")
 	global compac_frac_file = open("compaction_frac.txt", "w")
 	global mean_a_file = open("mean_area.txt", "w")
 	global rot_o_file = open("rot_order.txt", "w")
@@ -684,6 +689,9 @@ for target_DOD in  [sqrt(12):50.0:5000.0;]
 	truncate(mean_speed_file, 0)
 
 	for i in 1:no_simulations
+		for i in 1:length(new_pos)
+			pop!(new_pos)
+		end
 		model = initialise(target_DOD)
 		#figure, _ = abmplot(model)
         	#save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
@@ -789,7 +797,7 @@ for target_DOD in  [sqrt(12):50.0:5000.0;]
 
 	mean_rot_o_alt = 0.0
 	for i in 0:no_steps
-		mean_rot_o_alt += mean(rot_o_alt_array[i+1])
+		mean_rot_o_alt += mean(rot_o_alt_array[i+1])/(no_steps+1)
 	end
 	write(rot_alt_target_ave_file, "$target_DOD $mean_rot_o_alt\n")
 end
