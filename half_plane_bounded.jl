@@ -38,7 +38,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 	push!(half_planes, left_side)
 	
 	#Add the half plane that bounds the area to the area in front of the agent
-        fw_point = ri
+        #=fw_point = ri
         fw_x = -1.0*(-vel[2])
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
         fw_pq = [fw_x, fw_y]
@@ -46,6 +46,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
         fw_is_box = 2
         fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
         push!(half_planes, fw_half_plane)
+	=#
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")

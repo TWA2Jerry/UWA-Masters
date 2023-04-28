@@ -194,7 +194,7 @@ function move_gradient(agent, model,  kn, q, m, rho, target_DOD)
 			continue
 		end
 		alt_rel_angle = i*2*pi/q > pi? 2*pi-i*2*pi/q : i*2*pi/q
-		if(alt_rel_angle != rel_angle)
+		if((abs(alt_rel_angle) > (1)*2*pi/q + eps) != (abs(rel_angle) > (1)*2*pi/q + eps))
 			print("The two methods of measuring the relative angle differed. alt_rel_angle gave $alt_rel_angle, while the other method gave $rel_angle\n")
 			exit()
 		end
