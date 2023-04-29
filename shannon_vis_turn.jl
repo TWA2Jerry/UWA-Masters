@@ -193,7 +193,7 @@ function move_gradient(agent, model,  kn, q, m, rho, target_DOD)
 		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
-		alt_rel_angle = i*2*pi/q > pi? 2*pi-i*2*pi/q : i*2*pi/q
+		alt_rel_angle = i*2*pi/q > pi ? 2*pi-i*2*pi/q : i*2*pi/q
 		if((abs(alt_rel_angle) > (1)*2*pi/q + eps) != (abs(rel_angle) > (1)*2*pi/q + eps))
 			print("The two methods of measuring the relative angle differed. alt_rel_angle gave $alt_rel_angle, while the other method gave $rel_angle\n")
 			exit()
@@ -673,8 +673,8 @@ rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
 
 no_steps = 300
-no_simulations = 5
-for target_DOD in  [sqrt(12):50.0:5000.0;]
+no_simulations = 1
+for target_DOD in  [sqrt(12):100.0:5000.0;]
 	print("\n\nThis is for target DOD = $target_DOD\n")
 	global compac_frac_file = open("compaction_frac.txt", "w")
 	global mean_a_file = open("mean_area.txt", "w")
