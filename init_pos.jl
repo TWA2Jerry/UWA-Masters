@@ -1,3 +1,4 @@
+#Function that spawns agents into cells to prevent married couples. spanx, spany represents the x and y dimension sizes respectively of the spawn space, cellx celly represent the minimum cell dimensions for each agent, offset represents the offset from (0,0) you wanna spawn. 
 function assign_positions(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx, offsety, initial_positions)
 	init_grid = []
 

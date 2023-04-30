@@ -21,8 +21,8 @@ print("All homemade files included\n")
 rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
-rect = Rectangle(Point2(0,0), Point2(200, 200))
-rect_bound = 200.0
+rect = Rectangle(Point2(0,0), Point2(1100, 1100))
+rect_bound = 1100.0
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
@@ -349,9 +349,9 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(DOD_target; seed = 123, no_birds = 10)
+function initialise(DOD_target; seed = 123, no_birds = 50)
 	#Create the space
-	space = ContinuousSpace((200.0, 200.0); periodic = true)
+	space = ContinuousSpace((1100.0, 1100.0); periodic = true)
 	#Create the properties of the model
 	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_DOD => DOD_target)
 	
@@ -374,7 +374,7 @@ function initialise(DOD_target; seed = 123, no_birds = 10)
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 
 	#Initialise the agent initial positions using the non-spawn error function in init_pos.jl
-        assign_positions(2.0, 2.0, no_birds, 100.0, 100.0,50.0, 50.0, initial_positions)
+        assign_positions(2.0, 2.0, no_birds, 100.0, 100.0,500.0, 500.0, initial_positions)
 
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
@@ -674,7 +674,7 @@ mean_speed_file = open("mean_speed.txt", "w")
 
 no_steps = 300
 no_simulations = 1
-for target_DOD in  [sqrt(12):100.0:5000.0;]
+for target_DOD in  [sqrt(12):200.0:15000.0;]
 	print("\n\nThis is for target DOD = $target_DOD\n")
 	global compac_frac_file = open("compaction_frac.txt", "w")
 	global mean_a_file = open("mean_area.txt", "w")
