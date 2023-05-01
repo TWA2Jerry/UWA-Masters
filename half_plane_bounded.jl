@@ -28,10 +28,10 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
 	
-	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -1000.0]), 1]
-	right_side = [pi/2, [0.0, 50.0], Tuple([1000.0, 0.0]), 1]
-	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 1000.0]), 1]
-	left_side = [-pi/2, [0.0, -50.0], Tuple([-1000.0, 0.0]), 1]
+	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -11000.0]), 1]
+	right_side = [pi/2, [0.0, 50.0], Tuple([11000.0, 0.0]), 1]
+	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 11000.0]), 1]
+	left_side = [-pi/2, [0.0, -50.0], Tuple([-11000.0, 0.0]), 1]
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
 	push!(half_planes, top_side)
@@ -150,7 +150,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 			print("Bounding box fence detected\n")
 			exit()
 		end
-		if(abs(abs(dq[i][1]) - pi/2) > 0.0000001) 
+		if(abs(abs(dq[i][1]) - pi/2) > 0.000001) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf
@@ -177,7 +177,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
                 	b = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d))\n")
+				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d)). The value of ri was $ri\n")
 				exit()
 			end
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))

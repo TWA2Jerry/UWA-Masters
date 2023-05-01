@@ -30,21 +30,21 @@ function inter(h1, h2)
 	#m2 = h2[2][2]/h2[2][1]
 	#m1 = 0.0
 	#m2 = 0.0
-	if(abs(abs(h1[1]) - pi/2) < 0.0000001)
+	if(abs(abs(h1[1]) - pi/2) < 0.000001)
 		#print("Infinite gradient detected for m1\n")
 		m1 = inf
 	else 
 		m1 = h1[2][2]/h1[2][1]
 	end
 	#print("m1 found to be $m1\n")
-	if(abs(abs(h2[1]) - pi/2) < 0.0000001)
+	if(abs(abs(h2[1]) - pi/2) < 0.000001)
 		m2 = inf
 		#print("Infinite gradient detected for m2\n")
 	else
 		m2 = h2[2][2]/h2[2][1]
 	end	
 	if(abs(m1 - m2) < abs(eps))
-		print("Parallel planes yo\n")
+		print("Parallel planes yo. The values of the gradients was $m1 and $m2.\n")
 		#exit()
 		return -1
 	end  
@@ -123,7 +123,8 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 	
 	#This stuff is now going to be done using the voronoi_cell_bounded function in half_plane_bounded.jl
 	#Add the half plane that bounds the area to the area in front of the agent
-        fw_point = ri
+        #=
+	fw_point = ri
         fw_x = -1.0*(-vel[2])
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
         fw_pq = [fw_x, fw_y]
@@ -131,7 +132,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
         fw_is_box = 2
         fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
         push!(half_planes, fw_half_plane)
-	
+	=#
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
 	#push!(half_planes, relic)
@@ -158,7 +159,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
 			len -= 1
 		end
 	
-		#Check for parallel half planes
+		#Check for parallel half planes. That is, before adding the latest half plane, check that it's not parallel with the last half plane in dq, if it is, then check which is inside. 
 		if(len > 0 && norm(cross(half_planes[i][2], dq[len][2]))< eps) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
 			if(dot(half_planes[i][2], dq[len][2]) < 0.0)
 				#print("Uh, Houston, we may have a anti-parallel pair")
@@ -262,7 +263,7 @@ function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel =
                 	b = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d))\n")
+				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d)). The value of ri was $ri.\n")
 				exit()
 			end
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))

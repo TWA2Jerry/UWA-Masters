@@ -18,11 +18,11 @@ include("rot_ord.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 
-rho = 100.0
+const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(1100, 1100))
-rect_bound = 1100.0
+const rect_bound = 1100.0
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
@@ -484,12 +484,12 @@ annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
-	#Finally, plot the figure
+	#Finally, plot the  figure
 	#=	
 	figure, _ = abmplot(model)	
 	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
 	=#
-	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
+	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 1100, 0, 1100)))
         #=for i in 1:nagents(model)
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -591,7 +591,7 @@ function model_step!(model)
 	#Finally, plot the model after the step
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
+	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 1100, 0, 1100)))
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
@@ -672,9 +672,9 @@ rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
 
-no_steps = 300
+no_steps = 500
 no_simulations = 1
-for target_DOD in  [sqrt(12):200.0:15000.0;]
+for target_DOD in  [sqrt(12)*1000*2]
 	print("\n\nThis is for target DOD = $target_DOD\n")
 	global compac_frac_file = open("compaction_frac.txt", "w")
 	global mean_a_file = open("mean_area.txt", "w")
