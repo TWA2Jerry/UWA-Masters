@@ -672,7 +672,7 @@ rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
 
-no_steps = 500
+no_steps = 1000
 no_simulations = 1
 for target_DOD in  [sqrt(12)*1000*2]
 	print("\n\nThis is for target DOD = $target_DOD\n")
