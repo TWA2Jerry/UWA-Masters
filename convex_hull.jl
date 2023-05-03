@@ -4,6 +4,30 @@ function cross(v1, v2)
         return v1[1] * v2[2] - v1[2]*v2[1]
 end
 =#
+###Function for updating the convex hull, returns the points of the convex hull so the area of the convex hull can be calculated
+function update_convex_hull(model)
+	points = []
+	all_agents_iterable = allagents(model)
+	for agent in all_agents_iterable
+		push!(points, [agent.pos[1], agent.pos[2], agent.id])
+		#print("The point added was $([agent.pos[1], agent.pos[2], Int64(agent.id)]), the agent id is $(agent.id)\n")
+	end
+	
+	for i in 1:nagents(model)
+		convex_hull_point[i] = 0
+	end
+
+	CH = convex_hull(points)
+	CH_for_area = []
+	
+	for point in CH
+		convex_hull_point[Int64(point[3])] = 1
+		push!(CH_for_area, [[point[1], point[2]], 1, 1]) #Note that the points used for the CH_for_area consists of the actual point itself and 1,1 because the voronoi area calcualtor we're going to use requires a 2 and 3 index, checking them to see if the points are circular. 
+	end
+
+	return CH_for_area
+end
+
 
 ###Function that calculates the convex hull of a set of points P
 function convex_hull(P)
