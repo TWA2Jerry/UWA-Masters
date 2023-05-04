@@ -19,17 +19,17 @@ include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 
-rho = 100.0
+const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(200, 200))
-rect_bound = 200.0
+const rect_bound = 200.0
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
-sigma = 0.0
+const sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
