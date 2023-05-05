@@ -32,7 +32,7 @@ last_half_planes = []
 const sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
-function mean(v)
+function my_mean(v)
 	total = 0.0
 	for i in 1:length(v)
 		total += v[i]
@@ -49,7 +49,7 @@ include("move_gradient_file.jl")
 
 ###Create the agent
 mutable struct bird <: AbstractAgent
-	id::Int
+	id::Int64
 	pos::NTuple{2, Float64}
 	vel::NTuple{2, Float64}
 	speed::Float64
@@ -385,8 +385,9 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 5
+no_steps = 500
 no_simulations = 1
+
 for i in 1:no_simulations
 	model = initialise()
 	#figure, _ = abmplot(model)
@@ -485,5 +486,27 @@ for i in 0:no_steps
 	write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
 end
 
+#=
+using Statistics: mean
+model = initialise();
+adata = [(:A, mean)]
+data, _ = run!(model, agent_step!, model_step!, 3; adata)
+data
 
+adata = [(:A, mean)]
+alabels = ["avg.x"]
+model = initialise()
+using GLMakie
+figure, abmobs = abmexploration(
+	model;
+	agent_step!, model_step!,
+	adata
+)
+=#
+#=close(compac_frac_file)
+close(mean_a_file)
+close(rot_o_file)
+close(rot_o_alt_file)
+close(mean_speed_file)
+=#
 

@@ -1,6 +1,7 @@
 ###Function that determines the gradient of movement
 function move_gradient(agent, model,  kn, q, m, rho)
 	#Calculate the unit vector in the current direction of motion
+	ri = agent.pos
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
 	theta_0 = atan(unit_v[2], unit_v[1])
@@ -70,8 +71,17 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			if(rot_ord_check(new_agent_pos, agent_voronoi_cell) != 1)
-				print("Rotational order violated\n")
-				exit
+				print("Rotational order violated. The vertices were $agent_voronoi_cell for an origin of $new_agent_pos\n")
+				print("The angles were \n")
+				for i in 1:length(agent_voronoi_cell)
+					vec_to_point = [agent_voronoi_cell[i][1][1] - ri[1], agent_voronoi_cell[i][1][2] - ri[2]]
+                			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
+					print("$angle_of_vec ")
+				end
+				print("\n")
+				print("The half planes were\n")
+				print("$temp_hp\n")
+				exit()
 			end
 
 			#=		
