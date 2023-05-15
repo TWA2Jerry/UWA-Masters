@@ -11,7 +11,7 @@ using Plots
 
 print("Packages loaded\n")
 
-include("half_plane_alt.jl")
+include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
 include("convex_hull.jl")
 include("rot_ord.jl")
@@ -385,7 +385,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 5
+no_steps = 500
 no_simulations = 1
 for i in 1:no_simulations
 	model = initialise()

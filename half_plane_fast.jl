@@ -1,11 +1,94 @@
+const eps = 0.0000000001
+const inf = 1000000000000.0
+function norm(v)
+        sum_of_squares = 0.0
+        for i in 1:length(v)
+                sum_of_squares += (v[i])^2
+        end
+
+        return sqrt(sum_of_squares)
+end
+
+function dot(v1, v2)
+	if(length(v1) != length(v2))
+	   print("Bruh these vectors ain't got the same length no?\n")
+	   return -1
+	end
+
+	sum = 0.0
+	for i in 1:length(v1)
+		sum += v1[i]*v2[i]
+	end
+	return sum
+end
+
+###Function for calculating the intersection between two points
+function inter(h1, h2)
+        #h1 and h2 represent the half planes we want to calculate the line intersections for
+	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
+	#m1 = h1[2][2]/h1[2][1]
+	#m2 = h2[2][2]/h2[2][1]
+	#m1 = 0.0
+	#m2 = 0.0
+	if(abs(h1[1] - pi/2) < 0.000001)
+		#print("Infinite gradient detected for m1\n")
+		m1 = inf
+	else 
+		m1 = h1[2][2]/h1[2][1]
+	end
+	#print("m1 found to be $m1\n")
+	if(abs(h2[1] - pi/2) < 0.000001)
+		m2 = inf
+		#print("Infinite gradient detected for m2\n")
+	else
+		m2 = h2[2][2]/h2[2][1]
+	end	
+	if(abs(m1 - m2) < abs(eps))
+		print("Parallel planes yo\n")
+		#exit()
+		return -1
+	end  
+	##print("m1 - m2 found to be $(m1-m2)\n")
+	c1 = h1[3][2] - m1*h1[3][1]
+	c2 = h2[3][2] - m2*h2[3][1]
+        xint = (c2-c1)/(m1-m2)
+	yint = -1
+	if(abs(m1 - inf) < abs(eps))
+		yint = m2 * xint + c2
+	else 
+		yint = m1 * xint + c1
+	end
+	#print("Intersect calculated as $([xint, yint])\n")
+	return [xint, yint]
+end
+
+
+
+###Function for calculating the magnitude of the cross product between two vectors v1 and v2
+function cross(v1, v2)
+	return v1[1] * v2[2] - v1[2]*v2[1]
+end
+
+
+
+###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
+
+function outside(half_plane, point)
+        #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
+        return cross(half_plane[2], point .- half_plane[3]) < -eps
+end
+
+#print(outside([1, [1,2], [3,4]], [5,6]))
+
+
+
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
+function voronoi_cell(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
 	#print(outside([1, [1,2], [3,4]], [5,6]))
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
-	dq = []
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
 		r_ji = point .- ri
@@ -23,6 +106,11 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 		push!(dq, half_plane)
 	end
 
+
+	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
+	
+	dq = []	
+
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
 	
 	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -1000.0]), 1]
@@ -34,6 +122,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 	push!(half_planes, top_side)
 	push!(half_planes, left_side)
 	
+	#= This stuff is now going to be done using the voronoi_cell_bounded function in half_plane_bounded.jl
 	#Add the half plane that bounds the area to the area in front of the agent
         fw_point = ri
         fw_x = -1.0*(-vel[2])
@@ -43,13 +132,12 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
         fw_is_box = 2
         fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
         push!(half_planes, fw_half_plane)
-	push!(dq, fw_half_plane)	
+	push!(dq, fw_half_plane)
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
 	#push!(half_planes, relic)
-
-
+	=#
 
 ###
 ###This is the section where we account for the circle of vision
@@ -70,7 +158,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 		print("The half plane is $half_plane\n")
 	end
 	=#	
-		
+
 	sort!(dq)
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
@@ -88,7 +176,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 			print("Bounding box fence detected\n")
 			exit()
 		end
-		if(abs(dq[i][1]-pi/2) > 0.000001) 
+		if(abs(dq[i][1] - pi/2) > 0.000001) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf
@@ -148,7 +236,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
                 #Remove any half planes from the back of the queue, again, don't do it if 
 		while(vlen >= 1 && outside(dq[i], vq[1][1]))
 			if(vq[1][2] != 0)
-				if(len <= 0)
+			if(len <= 0)
 					print("Tried to delete a half plane from dequeue when there wasn't one\n")
 					exit()
 				end
@@ -299,3 +387,38 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 	return vq
 
 end
+
+function replace_vector(a, b)
+	for i in 1:length(a)
+		pop!(a)
+	end
+
+	for i in 1:length(b)
+		push!(a, b[i])
+	end
+end
+
+#Square test case
+#neighbouring_positions = [[60.0, 50.0], [50.0, 60.0], [40.0, 50.0], [50.0, 40.0]]
+
+#Triangle test case
+#agent_pos = [50.0, 50.0]
+#neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [50.0, 45.0]]
+#
+
+#Weird triangle test case
+#neighbouring_positions = [[55.0, 55.0], [45.0, 55.0], [55.0, 45.0]]
+
+
+#Only two neighbours, parallel planes
+#neighbouring_positions = [[45.0, 55.0], (55.0, 45.0)]
+
+#=
+agent_pos = [50.0, 50.0]
+rho = 10.0
+vertices = voronoi_cell(agent_pos, neighbouring_positions, rho)
+print("\n\nNow displaying the vertices\n")
+for vertex in vertices
+	print(vertex[1])
+end
+=#
