@@ -62,7 +62,8 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	agent_voronoi_cell = voronoi_cell_bounded(new_agent_pos, positions, rho, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	print("\nThe time to calculate a voronoi cell in move gradient is ")
+			agent_voronoi_cell = @time voronoi_cell_bounded(new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)

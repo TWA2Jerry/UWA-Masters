@@ -1,4 +1,4 @@
-include("./half_plane_alt.jl")
+include("./half_plane_fast.jl")
 #=
 function cross(v1, v2)
         return v1[1] * v2[2] - v1[2]*v2[1]

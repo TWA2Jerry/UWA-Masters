@@ -73,7 +73,7 @@ function voronoi_area(ri, cell, rho)
 			if(num_points == 2)
                         	return pi*rho^2 - circle_segment_area
                         end
-			if(outside(chord_half_plane, ri))
+			if(outside(chord_half_plane, ri, eps, inf))
 				balloon = pi*rho^2 - circle_segment_area
 				balloon_detected = 1
 					

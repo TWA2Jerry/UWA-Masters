@@ -23,7 +23,7 @@ end
 
 function rot_ord_alt(agents)
         num_agents = length(agents)
-	print("Alt rotational order function here. Number of agents calculated to be $num_agents\n")
+	#print("Alt rotational order function here. Number of agents calculated to be $num_agents\n")
         ##Calculate the group center
         r_g = (0.0, 0.0)
         for agent in agents
@@ -31,17 +31,17 @@ function rot_ord_alt(agents)
         end
 
         r_g = r_g ./ num_agents
-	print("Alt rotational order function here. r_g calculated to be $r_g\n")
+	#print("Alt rotational order function here. r_g calculated to be $r_g\n")
         ##Iterate through the agents again and find the absolute value of the sum of the cross products r_ig \times v_i
         rot_order = 0.0
         for agent in agents
 		rot_order += abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
         	int_rot = abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
-		print("Cross product calculated to be $int_rot\n")
+		#print("Cross product calculated to be $int_rot\n")
 	end
 
         rot_order = rot_order/num_agents
-	print("Rotational order calculated to be $rot_order\n")
+	#print("Rotational order calculated to be $rot_order\n")
 
         return rot_order
 end

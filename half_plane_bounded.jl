@@ -1,5 +1,5 @@
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
+function voronoi_cell_bounded(ri, neighbouring_points, rho,eps, inf, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -88,7 +88,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 			print("Bounding box fence detected\n")
 			exit()
 		end
-		if(abs(dq[i][1]-pi/2) > 0.000001) 
+		if(abs(abs(dq[i][1])-pi/2) > 0.000001) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf
@@ -131,7 +131,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
 
-		while(vlen >= 1 && outside(dq[i], vq[vlen][1]))
+		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
 			if(vq[vlen][3] != 0)
 				if(len <= 0)
                                         print("Tried to delete a half plane from dequeue when there wasn't one\n")
@@ -146,7 +146,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
                 end
 
                 #Remove any half planes from the back of the queue, again, don't do it if 
-		while(vlen >= 1 && outside(dq[i], vq[1][1]))
+		while(vlen >= 1 && outside(dq[i], vq[1][1], eps, inf))
 			if(vq[1][2] != 0)
 				if(len <= 0)
 					print("Tried to delete a half plane from dequeue when there wasn't one\n")
@@ -161,14 +161,14 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
                 end
 
 		#Check for parallel half planes is no longer needed as far as I'm aware, because we...okay maybe it is...because if you cut out none, you'll still end up trying to compute parallel plane intersects
-		if(len > 0 && norm(cross(dq[i][2], newdq[len][2]))< eps && outside(newdq[len], dq[i][3])) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
+		if(len > 0 && norm(cross(dq[i][2], newdq[len][2]))< eps && outside(newdq[len], dq[i][3], eps, inf)) #Check if parallel by if the cross product is less than eps. Note that norm also works on scalars (returns abs val)
                         continue
                 end
 
 		invalid_half_plane = 0
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
-			intersect_i = inter(dq[i], newdq[len])
+			intersect_i = inter(dq[i], newdq[len], eps, inf)
 			is_outside = 0
 			invalid = 0
 			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
@@ -176,7 +176,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 			end
 
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
-			if(intersect_i == -1 || outside(newdq[len], forward_after_inter))
+			if(intersect_i == -1 || outside(newdq[len], forward_after_inter, eps, inf))
 				invalid = 1
 			end
 
@@ -184,7 +184,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 				push!(vq, [intersect_i, i-1, i])
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
-			elseif(!outside(newdq[len], b_circle_intersect_i))
+			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
 				if(dq[i][4] == 2)
 					push!(vq, [b_circle_intersect_i, 0, -1])
 				else
@@ -230,7 +230,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 
 	#print("Commencing final cleanup\n")
         #Do a final cleanup
-	while(vlen >= 2 && outside(newdq[1], vq[vlen][1]))
+	while(vlen >= 2 && outside(newdq[1], vq[vlen][1], eps, inf))
 
 		if(vq[vlen][3] != 0)
 			#print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
@@ -247,7 +247,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 
         end
 
-	while(vlen >= 2 && outside(newdq[len], vq[1][1]))
+	while(vlen >= 2 && outside(newdq[len], vq[1][1], eps, inf))
 		if(vq[1][2] != 0)
 			#print("Popping from the front of newdq. The front is $(vq[1])\n")
 			if(len <= 0)
@@ -273,7 +273,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
-                        intersect_last = inter(newdq[len], newdq[1])
+                        intersect_last = inter(newdq[len], newdq[1], eps, inf)
                         is_outside = 0
                         invalid = 0
                         if(norm(intersect_last .- ri) > rho)
@@ -281,7 +281,7 @@ function voronoi_cell_bounded(ri, neighbouring_points, rho, temp_half_planes = [
                         end
 
 			forward_after_inter = intersect_last .+ 1.0 .* newdq[1][2]
-                        if(outside(newdq[len], forward_after_inter))
+                        if(outside(newdq[len], forward_after_inter, eps, inf))
                                 invalid = 1
                         end
 

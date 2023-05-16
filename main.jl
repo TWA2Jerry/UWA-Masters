@@ -64,7 +64,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 50)
+function initialise(; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((200.0, 200.0); periodic = true)
 	#Create the properties of the model
@@ -130,10 +130,10 @@ function initialise(; seed = 123, no_birds = 50)
         	relic_is_box = 2
         	relic_half_plane = [relic_angle, relic_pq, ri, relic_is_box]
 
-		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, temp_hp, initial_vels[i], relic_half_plane)
+		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 	
-		true_initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho, temp_hp, initial_vels[i], relic_half_plane)
+		true_initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i], relic_half_plane)
                 true_initial_A = voronoi_area(ri, true_initial_cell, rho)
 
 
@@ -200,14 +200,14 @@ savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
 	#=	
-	figure, _ = abmplot(model)	
-	save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
+	#figure, _ = abmplot(model)	
+	#save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
 	=#
-	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
+	#figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, 200, 0, 200)))
         #=for i in 1:nagents(model)
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
-        save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
+        #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 
 
 	return model
@@ -280,7 +280,7 @@ function model_step!(model)
         	relic_is_box = 2
         	relic_half_plane = [relic_angle, relic_pq, agent_i.pos, relic_is_box]
 
-                new_cell_i = voronoi_cell_bounded(ri, neighbour_positions, rho, temp_hp, agent_i.vel, relic_half_plane)
+                new_cell_i = voronoi_cell_bounded(ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
@@ -288,9 +288,10 @@ function model_step!(model)
                         exit()
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
-		true_new_cell_i = voronoi_cell(ri, neighbour_positions, rho, temp_hp, agent_i.vel)
+		print("\n\n\n The time for calulating the voronoi cell in model step is ")
+		true_new_cell_i = @time voronoi_cell(ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(ri, true_new_cell_i, rho)
-		print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
+		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
         end
@@ -305,11 +306,11 @@ function model_step!(model)
 	#Finally, plot the model after the step
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
+	#figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, 200, 0, 200)))
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
-	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+	#save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
@@ -379,14 +380,20 @@ abmvideo(
 )
 =#
 
-
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 500
+no_steps = 5
 no_simulations = 1
+
+function run_ABM()
+	global compac_frac_file
+        global mean_a_file
+        global rot_o_file
+        global rot_o_alt_file
+	global mean_speed_file
 for i in 1:no_simulations
 	model = initialise()
 	#figure, _ = abmplot(model)
@@ -398,17 +405,17 @@ for i in 1:no_simulations
 	write(rot_o_alt_file, "\n")
 end
 
-close(compac_frac_file)
-close(mean_a_file)
-close(rot_o_file)
-close(rot_o_alt_file)
-close(mean_speed_file)
+	close(compac_frac_file)
+	close(mean_a_file)
+	close(rot_o_file)
+	close(rot_o_alt_file)
+	close(mean_speed_file)
 
-compac_frac_file = open("compaction_frac.txt", "r")
-mean_a_file = open("mean_area.txt", "r")
-rot_o_file = open("rot_order.txt", "r")
-rot_o_alt_file = open("rot_order_alt.txt", "r")
-mean_speed_file = open("mean_speed.txt", "r")
+	compac_frac_file = open("compaction_frac.txt", "r")
+	mean_a_file = open("mean_area.txt", "r")
+	rot_o_file = open("rot_order.txt", "r")
+	rot_o_alt_file = open("rot_order_alt.txt", "r")
+	mean_speed_file = open("mean_speed.txt", "r")
 
 cf_array = []
 ma_array = []
@@ -486,4 +493,5 @@ for i in 0:no_steps
 end
 
 
+end #This should be the end of the function or running the ABM
 
