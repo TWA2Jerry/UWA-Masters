@@ -9,7 +9,7 @@ function norm(v)
         return sqrt(sum_of_squares)
 end
 
-function dot(v1, v2)
+function dot(v1::Vector{Float64}, v2::Vector{Float64})
 	if(length(v1) != length(v2))
 	   print("Bruh these vectors ain't got the same length no?\n")
 	   return -1
@@ -23,13 +23,13 @@ function dot(v1, v2)
 end
 
 ###Function for calculating the intersection between two points
-function inter(h1, h2, eps, inf)
+function inter(h1, h2, eps::Float64, inf::Float64)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
 	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
 	#m1 = h1[2][2]/h1[2][1]
 	#m2 = h2[2][2]/h2[2][1]
-	#m1 = 0.0
-	#m2 = 0.0
+	m1::Float64 = 0.0
+	m2::Float64 = 0.0
 	if(abs(abs(h1[1]) - pi/2) < 0.000001)
 		#print("Infinite gradient detected for m1\n")
 		m1 = inf
@@ -49,10 +49,10 @@ function inter(h1, h2, eps, inf)
 		return -1
 	end  
 	##print("m1 - m2 found to be $(m1-m2)\n")
-	c1 = h1[3][2] - m1*h1[3][1]
-	c2 = h2[3][2] - m2*h2[3][1]
-        xint = (c2-c1)/(m1-m2)
-	yint = -1
+	c1::Float64 = h1[3][2] - m1*h1[3][1]
+	c2::Float64 = h2[3][2] - m2*h2[3][1]
+        xint::Float64 = (c2-c1)/(m1-m2)
+	yint::Float64 = -1.0
 	if(abs(m1 - inf) < abs(eps))
 		yint = m2 * xint + c2
 	else 

@@ -1,5 +1,5 @@
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(ri, neighbouring_points, rho,eps, inf, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
+function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes

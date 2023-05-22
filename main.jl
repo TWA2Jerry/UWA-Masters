@@ -113,13 +113,13 @@ function initialise(; seed = 123, no_birds = 100)
 	true_initial_dods = []
 	for i in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
-		ri  = initial_positions[i]
-		neighbouring_positions = []
+		ri  = Tuple(initial_positions[i])
+		neighbouring_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 		for j in 1:no_birds
 			if(i == j)
 				continue 
 			end
-			push!(neighbouring_positions, initial_positions[j])
+			push!(neighbouring_positions, Tuple(initial_positions[j]))
 		end
 		vix = initial_vels[i][1]
 		viy = initial_vels[i][2]
@@ -495,3 +495,4 @@ end
 
 end #This should be the end of the function or running the ABM
 
+run_ABM()
