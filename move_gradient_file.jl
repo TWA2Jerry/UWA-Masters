@@ -34,7 +34,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
         relic_half_plane = [relic_angle, relic_pq, agent.pos, relic_is_box]
 
 	for i in 0:(q-1) #For every direction
-		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]
+		direction_of_move = Tuple([cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy])
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict = 0

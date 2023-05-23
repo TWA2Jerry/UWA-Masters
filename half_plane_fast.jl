@@ -9,7 +9,7 @@ function norm(v)
         return sqrt(sum_of_squares)
 end
 
-function dot(v1::Vector{Float64}, v2::Vector{Float64})
+function dot(v1, v2)
 	if(length(v1) != length(v2))
 	   print("Bruh these vectors ain't got the same length no?\n")
 	   return -1
@@ -46,7 +46,7 @@ function inter(h1::Vector{Any}, h2::Vector{Any}, eps::Float64, inf::Float64)
 	if(abs(m1 - m2) < abs(eps))
 		print("Parallel planes yo\n")
 		#exit()
-		return -1
+		return (-1.0, -1.0, -1)
 	end  
 	##print("m1 - m2 found to be $(m1-m2)\n")
 	c1::Float64 = h1[3][2] - m1*h1[3][1]
@@ -59,13 +59,13 @@ function inter(h1::Vector{Any}, h2::Vector{Any}, eps::Float64, inf::Float64)
 		yint = m1 * xint + c1
 	end
 	#print("Intersect calculated as $([xint, yint])\n")
-	return [xint, yint]
+	return (xint, yint, 1)
 end
 
 
 
 ###Function for calculating the magnitude of the cross product between two vectors v1 and v2
-function cross(v1::Vector{Float64}, v2::Vector::Float64)
+function cross(v1, v2)
 	return v1[1] * v2[2] - v1[2]*v2[1]
 end
 
@@ -73,7 +73,7 @@ end
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 
-function outside(half_plane::Vector{Any}, point::Vector{Float64}, eps::Float64, inf::Float64)
+function outside(half_plane::Vector{Any}, point::Tuple{Float64, Float64}, eps::Float64, inf::Float64)
         #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
         return cross(half_plane[2], point .- half_plane[3]) < -eps
 end
@@ -98,7 +98,7 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
 		v_jix = -1.0 * (0.5 * r_ji[2])
 		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
-		pq = [v_jix, v_jiy]
+		pq = Tuple([v_jix, v_jiy])
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
 		is_box = 0 #This is just to differentiate between the box and actual line segments later
@@ -113,10 +113,10 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
 	
-	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -1000.0]), 1]
-	right_side = [pi/2, [0.0, 50.0], Tuple([1000.0, 0.0]), 1]
-	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 1000.0]), 1]
-	left_side = [-pi/2, [0.0, -50.0], Tuple([-1000.0, 0.0]), 1]
+	bottom_side = [0.0, Tuple([50.0, 0.0]), Tuple([0.0, -1000.0]), 1]
+	right_side = [pi/2, Tuple([0.0, 50.0]), Tuple([1000.0, 0.0]), 1]
+	top_side = [pi, Tuple([-50.0, 0.0]), Tuple([0.0, 1000.0]), 1]
+	left_side = [-pi/2, Tuple([0.0, -50.0]), Tuple([-1000.0, 0.0]), 1]
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
 	push!(half_planes, top_side)
@@ -127,7 +127,7 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
         fw_point = ri
         fw_x = -1.0*(-vel[2])
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
-        fw_pq = [fw_x, fw_y]
+        fw_pq = (fw_x, fw_y)
         angle = atan(fw_y, fw_x)
         fw_is_box = 2
         fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
@@ -215,9 +215,9 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
 		a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
-                f_circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
+                f_circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? Tuple([x1, y1]) : Tuple([x2, y2]) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
-		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
+		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? Tuple([x1, y1]) : Tuple([x2, y2])
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
 			if(vq[vlen][3] != 0)
@@ -257,28 +257,29 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 			#print("\nThe time for collecting an intersection was ")
-			intersect_i =  inter(dq[i], newdq[len], eps, inf)
+			intersect_info =  inter(dq[i], newdq[len], eps, inf)
+			intersect_i = (intersect_info[1], intersect_info[2])
 			is_outside = 0
 			invalid = 0
-			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
+			if(intersect_info[3] == -1 || norm(intersect_i .- ri) > rho)
 				is_outside = 1	
 			end
 
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
-			if(intersect_i == -1 || outside(newdq[len], forward_after_inter, eps, inf))
+			if(intersect_info[3] == -1 || outside(newdq[len], forward_after_inter, eps, inf))
 				invalid = 1
 	global mean_speed_file
 			end
 
 			if(is_outside == 0 && invalid == 0)
-				push!(vq, [intersect_i, i-1, i])
+				push!(vq, [Tuple(intersect_i), i-1, i])
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
 				if(dq[i][4] == 2)
-					push!(vq, [b_circle_intersect_i, 0, -1])
+					push!(vq, [Tuple(b_circle_intersect_i), 0, -1])
 				else
-					push!(vq, [b_circle_intersect_i, 0, i])
+					push!(vq, [Tuple(b_circle_intersect_i), 0, i])
 				end
 				vlen += 1
 				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
@@ -288,7 +289,7 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 
 		else #Note that we've changed the format to account for what to label the forwards half plane is if it was the artifical bounding half plane
 			if(dq[i][4] == 2)
-                                        push!(vq, [b_circle_intersect_i, 0, -1])
+                                        push!(vq, [Tuple(b_circle_intersect_i), 0, -1])
                         else
                                         push!(vq, [b_circle_intersect_i, 0, i])                                
 			end
@@ -363,8 +364,9 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
-                        intersect_last = inter(newdq[len], newdq[1], eps, inf)
-                        is_outside = 0
+                        intersect_last_info = inter(newdq[len], newdq[1], eps, inf)
+                        intersect_last = (intersect_last_info[1], intersect_last_info[2])
+			is_outside = 0
                         invalid = 0
                         if(norm(intersect_last .- ri) > rho)
                                 is_outside = 1

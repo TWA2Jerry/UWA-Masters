@@ -14,21 +14,21 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
 		v_jix = -1.0 * (0.5 * r_ji[2])
 		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
-		pq = [v_jix, v_jiy]
+		pq::Tuple{Float64, Float64} = (v_jix, v_jiy)
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
 		is_box = 0 #This is just to differentiate between the box and actual line segments later
-		half_plane = [angle, pq, Tuple(half_plane_point), is_box]
+		half_plane = [angle, pq, half_plane_point, is_box]
 		push!(half_planes, half_plane)
 		push!(dq, half_plane)
 	end
 
 	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
 	
-	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -1000.0]), 1]
-	right_side = [pi/2, [0.0, 50.0], Tuple([1000.0, 0.0]), 1]
-	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 1000.0]), 1]
-	left_side = [-pi/2, [0.0, -50.0], Tuple([-1000.0, 0.0]), 1]
+	bottom_side = [0.0, (50.0, 0.0), Tuple([0.0, -1000.0]), 1]
+	right_side = [pi/2, (0.0, 50.0), Tuple([1000.0, 0.0]), 1]
+	top_side = [pi, (-50.0, 0.0), Tuple([0.0, 1000.0]), 1]
+	left_side = [-pi/2, (0.0, -50.0), Tuple([-1000.0, 0.0]), 1]
 	push!(half_planes, bottom_side)
 	push!(half_planes, right_side)
 	push!(half_planes, top_side)
@@ -38,10 +38,10 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
         fw_point = ri
         fw_x = -1.0*(-vel[2])
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
-        fw_pq = [fw_x, fw_y]
+        fw_pq = (fw_x, fw_y)
         angle = atan(fw_y, fw_x)
         fw_is_box = 2
-        fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
+        fw_half_plane = [angle, fw_pq, ri, fw_is_box]
         push!(half_planes, fw_half_plane)
 	push!(dq, fw_half_plane)	
 
@@ -126,11 +126,12 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
-		a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
+		a1_a2 = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
                 f_circle_intersect_i = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
+		f_circle_intersect_i = Tuple(f_circle_intersect_i)
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
-
+		b_circle_intersect_i = Tuple(b_circle_intersect_i)
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
 			if(vq[vlen][3] != 0)
 				if(len <= 0)
@@ -168,15 +169,16 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		invalid_half_plane = 0
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
-			intersect_i = inter(dq[i], newdq[len], eps, inf)
+			intersect_info = inter(dq[i], newdq[len], eps, inf)
+			intersect_i = (intersect_info[1], intersect_info[2])
 			is_outside = 0
 			invalid = 0
-			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
+			if(intersect_info[3] == -1 || norm(intersect_i .- ri) > rho)
 				is_outside = 1	
 			end
 
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
-			if(intersect_i == -1 || outside(newdq[len], forward_after_inter, eps, inf))
+			if(intersect_info[3] == -1 || outside(newdq[len], Tuple(forward_after_inter), eps, inf))
 				invalid = 1
 			end
 
@@ -273,8 +275,9 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
-                        intersect_last = inter(newdq[len], newdq[1], eps, inf)
-                        is_outside = 0
+                        intersect_last_info = inter(newdq[len], newdq[1], eps, inf)
+                        intersect_last = (intersect_last_info[1], intersect_last_info[2])
+			is_outside = 0
                         invalid = 0
                         if(norm(intersect_last .- ri) > rho)
                                 is_outside = 1
