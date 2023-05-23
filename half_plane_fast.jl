@@ -23,7 +23,7 @@ function dot(v1::Vector{Float64}, v2::Vector{Float64})
 end
 
 ###Function for calculating the intersection between two points
-function inter(h1, h2, eps::Float64, inf::Float64)
+function inter(h1::Vector{Any}, h2::Vector{Any}, eps::Float64, inf::Float64)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
 	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
 	#m1 = h1[2][2]/h1[2][1]
@@ -65,7 +65,7 @@ end
 
 
 ###Function for calculating the magnitude of the cross product between two vectors v1 and v2
-function cross(v1, v2)
+function cross(v1::Vector{Float64}, v2::Vector::Float64)
 	return v1[1] * v2[2] - v1[2]*v2[1]
 end
 
@@ -73,7 +73,7 @@ end
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 
-function outside(half_plane, point, eps, inf)
+function outside(half_plane::Vector{Any}, point::Vector{Float64}, eps::Float64, inf::Float64)
         #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
         return cross(half_plane[2], point .- half_plane[3]) < -eps
 end
