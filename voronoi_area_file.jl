@@ -26,7 +26,13 @@ function voronoi_area(ri, cell, rho)
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
 		#Use the shoestring formula to calcualte the area
+		#Just a small debugging line, making sure that the intersection is indeed an intersect
 		j = (i)%num_points+1
+		if(length(cell[i][1]) != 2 || length(cell[j][1]) != 2)
+                        print("The points aren't actually points. They're given by cell[i][1] = $(cell[i][1]) and cell[j][1] = $(cell[j][1]). This was for i = $i and j = $j for a total number of points of $num_points\n")
+                        exit()
+                end
+
 		xi = cell[i][1][1]
 		yi = cell[i][1][2]
 		xj = cell[j][1][1]
@@ -69,7 +75,7 @@ function voronoi_area(ri, cell, rho)
 			#Check, if the agent position is inside the chord half plane. 
 			chord_vector = cell[j][1] .- cell[i][1]
 			chord_point = 0.5 .* chord_vector .+ cell[i][1]
-			chord_half_plane = [atan(chord_vector[2], chord_vector[1]), chord_vector, chord_point, 0]
+			chord_half_plane = (atan(chord_vector[2], chord_vector[1]), chord_vector, Tuple(chord_point), 0)
 			if(num_points == 2)
                         	return pi*rho^2 - circle_segment_area
                         end

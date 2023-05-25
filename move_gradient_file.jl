@@ -1,5 +1,5 @@
 ###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn, q, m, rho)
+function move_gradient(agent::bird, model::StandardABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64)
 	#Calculate the unit vector in the current direction of motion
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0

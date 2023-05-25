@@ -10,7 +10,7 @@ using GeometryBasics
 using Plots
 
 print("Packages loaded\n")
-
+include("struct_def.jl")
 include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
 include("convex_hull.jl")
@@ -19,11 +19,11 @@ include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 
-const rho = 100.0
-initialised = 0
+const rho::Float64 = 100.0
+initialised::Int64 = 0
 area_zero = zeros(Int64, 100)
 rect = Rectangle(Point2(0,0), Point2(200, 200))
-const rect_bound = 200.0
+const rect_bound::Float64 = 200.0
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
@@ -42,7 +42,7 @@ function mean(v)
 end
 
 include("voronoi_area_file.jl")
-include("move_gradient_file.jl")
+#include("move_gradient_file.jl")
 
 
 
@@ -56,7 +56,7 @@ mutable struct bird <: AbstractAgent
 	A::Float64 #The area of the agent's DOD
 end
 	
-
+include("move_gradient_file.jl")
 
 print("Agent template created\n")
 
