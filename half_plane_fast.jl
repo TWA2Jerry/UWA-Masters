@@ -1,7 +1,7 @@
 const eps::Float64 = 0.0000000001
 const inf::Float64 = 1000000000000.0
 function norm(v)
-        sum_of_squares = 0.0
+        sum_of_squares::Float64 = 0.0
         for i in 1:length(v)
                 sum_of_squares += (v[i])^2
         end
@@ -23,7 +23,7 @@ function dot(v1::Vector{Float64}, v2::Vector{Float64})
 end
 
 ###Function for calculating the intersection between two points
-function inter(h1, h2, eps::Float64, inf::Float64)
+function inter(h1::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, h2::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, eps::Float64, inf::Float64)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
 	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
 	#m1 = h1[2][2]/h1[2][1]
@@ -73,7 +73,7 @@ end
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 
-function outside(half_plane, point, eps, inf)
+function outside(half_plane::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, point, eps, inf)
         #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
         return cross(half_plane[2], point .- half_plane[3]) < -eps
 end
@@ -89,7 +89,10 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 	#Look at each of the neighbours of the agent, and generate the half planes
 	#print(outside([1, [1,2], [3,4]], [5,6]))
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
+	
+	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
 	dq = []
+	
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
 		r_ji = point .- ri
@@ -102,25 +105,11 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
 		is_box = 0 #This is just to differentiate between the box and actual line segments later
-		half_plane = [angle, pq, Tuple(half_plane_point), is_box]
+		half_plane = (angle, pq, Tuple(half_plane_point), is_box)
 		push!(half_planes, half_plane)
 		push!(dq, half_plane)
 	end
 
-
-	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
-	
-
-	#Add in the bounding box lines, and sort the vector of half planes according to their angles, note that the 1 at the end of the vector defining the half plane is simply to characterise them as box bounds so we can delete them later
-	
-	bottom_side = [0.0, [50.0, 0.0], Tuple([0.0, -1000.0]), 1]
-	right_side = [pi/2, [0.0, 50.0], Tuple([1000.0, 0.0]), 1]
-	top_side = [pi, [-50.0, 0.0], Tuple([0.0, 1000.0]), 1]
-	left_side = [-pi/2, [0.0, -50.0], Tuple([-1000.0, 0.0]), 1]
-	push!(half_planes, bottom_side)
-	push!(half_planes, right_side)
-	push!(half_planes, top_side)
-	push!(half_planes, left_side)
 	
 	#= This stuff is now going to be done using the voronoi_cell_bounded function in half_plane_bounded.jl
 	#Add the half plane that bounds the area to the area in front of the agent
@@ -130,7 +119,7 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
         fw_pq = [fw_x, fw_y]
         angle = atan(fw_y, fw_x)
         fw_is_box = 2
-        fw_half_plane = [angle, fw_pq, Tuple(ri), fw_is_box]
+        fw_half_plane = (angle, fw_pq, Tuple(ri), fw_is_box)
         push!(half_planes, fw_half_plane)
 	push!(dq, fw_half_plane)
 
@@ -256,8 +245,8 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 		invalid_half_plane = 0
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
-			#print("\nThe time for collecting an intersection was ")
-			intersect_i =  inter(dq[i], newdq[len], eps, inf)
+			print("\nThe time for collecting an intersection was ")
+			intersect_i =  @time inter(dq[i], newdq[len], eps, inf)
 			is_outside = 0
 			invalid = 0
 			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
@@ -366,12 +355,12 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
                         intersect_last = inter(newdq[len], newdq[1], eps, inf)
                         is_outside = 0
                         invalid = 0
-                        if(norm(intersect_last .- ri) > rho)
+			if(norm(intersect_last .- ri) > rho)
                                 is_outside = 1
                         end
 
 			forward_after_inter = intersect_last .+ 1.0 .* newdq[1][2]
-                        if(outside(newdq[len], forward_after_inter, eps, inf))
+                        if(intersect_last == -1 || outside(newdq[len], forward_after_inter, eps, inf))
                                 invalid = 1
                         end
 
