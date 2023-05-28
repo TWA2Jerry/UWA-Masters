@@ -133,7 +133,7 @@ function initialise(; seed = 123, no_birds = 100)
 		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
 	
-		true_initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i], relic_half_plane)
+		true_initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A = voronoi_area(ri, true_initial_cell, rho)
 
 
