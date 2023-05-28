@@ -1,5 +1,5 @@
 ###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn, q, m, rho)
+function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#Calculate the unit vector in the current direction of motion
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
@@ -15,8 +15,9 @@ function move_gradient(agent, model,  kn, q, m, rho)
 		end
 		pushfirst!(positions, neighbour.pos)	
 	end		
-	min_area = inf  #The agent's current DOD area
-	min_direction = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
+	#min_area = inf  #The agent's current DOD area
+	min_diff::Float64 = inf
+	min_direction::Vector{Float64} = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
 	pos_area_array = []
 	no_angles_considered = 0
@@ -96,8 +97,9 @@ function move_gradient(agent, model,  kn, q, m, rho)
 			print("\n")
 			=#
 
-			if (new_area < min_area)
-                        	min_area = new_area
+			if (abs(new_area-target_area) < min_diff)
+                        	min_diff = abs(new_area-target_area)
+				#min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
@@ -144,9 +146,9 @@ function move_gradient(agent, model,  kn, q, m, rho)
 	end
 	
 	#This warning might not be as important due to the fact that we may set min_area = inf, and then skip all other possible positions for sampling
-	if(min_area > pi*rho^2)
+	#=if(min_area > pi*rho^2)
 		print("Conventional area exceeded by agent $(agent.id)\n")
-	end
+	end=#
 	
 	if(move_made == 0)
 		turn = rand([-1, 1])
