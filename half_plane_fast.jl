@@ -1,6 +1,24 @@
 const eps::Float64 = 0.0000000001
 const inf::Float64 = 1000000000000.0
-function norm(v)
+function norm(v::Tuple{Float64, Float64})
+        sum_of_squares::Float64 = 0.0
+        for i in 1:length(v)
+                sum_of_squares += (v[i])^2
+        end
+
+        return sqrt(sum_of_squares)
+end
+
+function norm(v::Float64)
+        sum_of_squares::Float64 = 0.0
+        for i in 1:length(v)
+                sum_of_squares += (v[i])^2
+        end
+
+        return sqrt(sum_of_squares)
+end
+
+function norm(v::Vector{Float64})
         sum_of_squares::Float64 = 0.0
         for i in 1:length(v)
                 sum_of_squares += (v[i])^2
@@ -46,7 +64,7 @@ function inter(h1::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int6
 	if(abs(m1 - m2) < abs(eps))
 		print("Parallel planes yo\n")
 		#exit()
-		return -1
+		return ([-1.0, -1.0], -1)
 	end  
 	##print("m1 - m2 found to be $(m1-m2)\n")
 	c1::Float64 = h1[3][2] - m1*h1[3][1]
@@ -59,7 +77,7 @@ function inter(h1::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int6
 		yint = m1 * xint + c1
 	end
 	#print("Intersect calculated as $([xint, yint])\n")
-	return [xint, yint]
+	return ([xint, yint], 1)
 end
 
 
@@ -91,7 +109,7 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
-	dq = []
+	dq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
 	
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
@@ -246,15 +264,16 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 			print("\nThe time for collecting an intersection was ")
-			intersect_i =  @time inter(dq[i], newdq[len], eps, inf)
+			intersect_info::Tuple{Vector{Float64}, Int64} =  @time inter(dq[i], newdq[len], eps, inf)
+			intersect_i::Vector{Float64} = intersect_info[1]
 			is_outside = 0
 			invalid = 0
-			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
+			if(intersect_info[2] == -1 || norm(intersect_i .- ri) > rho)
 				is_outside = 1	
 			end
 
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
-			if(intersect_i == -1 || outside(newdq[len], forward_after_inter, eps, inf))
+			if(intersect_info[2] == -1 || outside(newdq[len], forward_after_inter, eps, inf))
 				invalid = 1
 	global mean_speed_file
 			end
@@ -352,15 +371,16 @@ function voronoi_cell(ri, neighbouring_points, rho,eps, inf ,temp_half_planes = 
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
-                        intersect_last = inter(newdq[len], newdq[1], eps, inf)
-                        is_outside = 0
+                        intersect_last_info::Tuple{Vector{Float64}, Int64} = inter(newdq[len], newdq[1], eps, inf)
+                        intersect_last::Vector{Float64} = intersect_last_info[1]
+			is_outside = 0
                         invalid = 0
 			if(norm(intersect_last .- ri) > rho)
                                 is_outside = 1
                         end
 
 			forward_after_inter = intersect_last .+ 1.0 .* newdq[1][2]
-                        if(intersect_last == -1 || outside(newdq[len], forward_after_inter, eps, inf))
+                        if(intersect_last_info[2] == -1 || outside(newdq[len], forward_after_inter, eps, inf))
                                 invalid = 1
                         end
 

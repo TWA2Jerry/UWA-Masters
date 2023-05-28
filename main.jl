@@ -85,7 +85,7 @@ function initialise(; seed = 123, no_birds = 100)
 	#Generate random initial positions for each bird, then calculate the DoDs
 	initial_positions = []
 	initial_vels = []
-	temp_hp = []
+	temp_hp::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}}= []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
@@ -128,7 +128,7 @@ function initialise(; seed = 123, no_birds = 100)
         	relic_pq = [relic_x, relic_y]
         	relic_angle = atan(relic_y, relic_x)
         	relic_is_box = 2
-        	relic_half_plane = [relic_angle, relic_pq, ri, relic_is_box]
+        	relic_half_plane = (relic_angle, relic_pq, ri, relic_is_box)
 
 		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A = voronoi_area(ri, initial_cell, rho) 
@@ -261,9 +261,9 @@ function model_step!(model)
         #Now recalculate the agent DODs based off their new positions
         total_area = 0.0
 	total_speed = 0.0
-	temp_hp = []
+	temp_hp::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
 	for agent_i in all_agents_iterable
-                neighbour_positions = []
+                neighbour_positions::Vector{Tuple{Float64, Float64}} = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
                                 continue
@@ -278,7 +278,7 @@ function model_step!(model)
         	relic_pq = [relic_x, relic_y]
         	relic_angle = atan(relic_y, relic_x)
         	relic_is_box = 2
-        	relic_half_plane = [relic_angle, relic_pq, agent_i.pos, relic_is_box]
+        	relic_half_plane = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
                 new_cell_i = voronoi_cell_bounded(ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
                 new_area = voronoi_area(ri, new_cell_i, rho)

@@ -23,7 +23,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
-	temp_hp = []
+	temp_hp::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
 
 	#For the relic idea, we have a bounding half plane based on the agent's current position and velocity
         relic_x = -1.0*(-viy)
@@ -31,7 +31,7 @@ function move_gradient(agent, model,  kn, q, m, rho)
         relic_pq = [relic_x, relic_y]
         relic_angle = atan(relic_y, relic_x)
         relic_is_box = 2
-        relic_half_plane = [relic_angle, relic_pq, agent.pos, relic_is_box]
+        relic_half_plane = (relic_angle, relic_pq, agent.pos, relic_is_box)
 
 	for i in 0:(q-1) #For every direction
 		direction_of_move = [cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy]

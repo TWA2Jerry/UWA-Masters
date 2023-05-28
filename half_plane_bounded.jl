@@ -1,10 +1,10 @@
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes = [], vel = [0.0,0.0], relic = [atan(0.0), [0.0, 0.0], [0.0,0.0], 0])
+function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = [0.0,0.0], relic::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), [0.0, 0.0], (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
 	#print(outside([1, [1,2], [3,4]], [5,6]))
-	half_planes = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
+	half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	dq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
@@ -25,7 +25,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 
 	#Add the half plane that bounds the area to the area in front of the agent
         fw_point = ri
-        fw_x = -1.0*(-vel[2])
+        fw_x::Float64 = -1.0*(-vel[2])
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
         fw_pq = [fw_x, fw_y]
         angle = atan(fw_y, fw_x)
@@ -158,16 +158,17 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 			#print("The time to determine an intersect was ")
-			intersect_i =  inter(dq[i], newdq[len], eps, inf)
+			intersect_info::Tuple{Vector{Float64}, Int64} =  inter(dq[i], newdq[len], eps, inf)
+			intersect_i::Vector{Float64} = intersect_info[1]
 			is_outside::Int64 = 0
 			invalid::Int64 = 0
-			if(intersect_i == -1 || norm(intersect_i .- ri) > rho)
+			if(intersect_info[2] == -1 || norm(intersect_i .- ri) > rho)
 				is_outside = 1	
 			end
 
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
 			#Note that I think we use the intersect_i condition first here because otherwise, it should throw a type error
-			if(intersect_i == -1 || outside(newdq[len], forward_after_inter, eps, inf))
+			if(intersect_info[2] == -1 || outside(newdq[len], forward_after_inter, eps, inf))
 				invalid = 1
 			end
 
@@ -264,15 +265,16 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
-                        intersect_last = inter(newdq[len], newdq[1], eps, inf)
-                        is_outside = 0
+                        intersect_last_info::Tuple{Vector{Float64}, Int64} = inter(newdq[len], newdq[1], eps, inf)
+                        intersect_last::Vector{Float64} = intersect_last_info[1]
+			is_outside = 0
                         invalid = 0
                         if(norm(intersect_last .- ri) > rho)
                                 is_outside = 1
                         end
 
 			forward_after_inter = intersect_last .+ 1.0 .* newdq[1][2]
-                        if(intersect_last == -1 || outside(newdq[len], forward_after_inter, eps, inf))
+                        if(intersect_last_info[2] == -1 || outside(newdq[len], forward_after_inter, eps, inf))
                                 invalid = 1
                         end
 
