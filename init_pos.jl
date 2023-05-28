@@ -1,3 +1,4 @@
+###Function that assigns an initial position to each agent such that they 
 function assign_positions(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx, offsety, initial_positions)
 	init_grid = []
 

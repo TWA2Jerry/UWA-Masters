@@ -69,11 +69,27 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 			##Some error detection stuff
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
-			end
+				print("\n\n\nThe dq for this position was \n")
+                        	for i in 1:length(temp_hp)
+                                	print("$(temp_hp[i])\n")
+                        	end
+
+				end
 
 			if(rot_ord_check(new_agent_pos, agent_voronoi_cell) != 1)
-				print("Rotational order violated\n")
-				exit
+				print("Rotational order violated for a potential position of $new_agent_pos\n")
+				print("\n\n\nThe dq for this position was \n")
+                        	for i in 1:length(temp_hp)
+                                	print("$(temp_hp[i])\n")
+                        	end
+				print("The points and angles were\n")
+				for i in 1:length(agent_voronoi_cell)
+			                vec_to_point = [agent_voronoi_cell[i][1][1] - new_agent_pos[1], agent_voronoi_cell[i][1][2] - new_agent_pos[2]]
+                			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
+                        		print("$(agent_voronoi_cell[i]), $(angle_of_vec))
+				end
+
+				exit()
 			end
 
 			#=		

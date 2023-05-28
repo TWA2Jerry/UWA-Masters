@@ -22,8 +22,10 @@ print("All homemade files included\n")
 const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
-rect = Rectangle(Point2(0,0), Point2(200, 200))
-const rect_bound = 200.0
+const rect_bound::Float64 = 1000.0
+const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
+rect = Rectangle(Point2(0,0), Point2(1000, 1000))
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
@@ -66,7 +68,7 @@ print("Agent template created\n")
 using Random #for reproducibility
 function initialise(; seed = 123, no_birds = 100)
 	#Create the space
-	space = ContinuousSpace((200.0, 200.0); periodic = true)
+	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
 	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0)
 	
@@ -89,7 +91,7 @@ function initialise(; seed = 123, no_birds = 100)
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, 100.0, 100.0, 50.0, 50.0, initial_positions)
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
 
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
@@ -495,4 +497,5 @@ end
 
 end #This should be the end of the function or running the ABM
 
-run_ABM()
+###This line simulates the model
+#run_ABM()
