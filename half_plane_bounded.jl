@@ -36,7 +36,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
-	#push!(half_planes, relic)
+	#push!(dq, relic)
 
 
 
