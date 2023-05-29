@@ -73,8 +73,8 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
                         	for i in 1:length(temp_hp)
                                 	print("$(temp_hp[i])\n")
                         	end
-
-				end
+				exit()
+			end
 
 			if(rot_ord_check(new_agent_pos, agent_voronoi_cell) != 1)
 				print("Rotational order violated for a potential position of $new_agent_pos\n")
@@ -86,7 +86,7 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 				for i in 1:length(agent_voronoi_cell)
 			                vec_to_point = [agent_voronoi_cell[i][1][1] - new_agent_pos[1], agent_voronoi_cell[i][1][2] - new_agent_pos[2]]
                 			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
-                        		print("$(agent_voronoi_cell[i]), $(angle_of_vec))
+                        		print("$(agent_voronoi_cell[i]), $(angle_of_vec)")
 				end
 
 				exit()

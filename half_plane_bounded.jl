@@ -6,8 +6,9 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print(outside([1, [1,2], [3,4]], [5,6]))
 	half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	dq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
-	for point in neighbouring_points	
+	for i::Int64 in 1:length(neighbouring_points)	
 		#Use the half-way point as the point p
+		point = neighbouring_points[i] 
 		r_ji = point .- ri
 		half_plane_point = 0.5 .* r_ji .+ ri
 
@@ -17,7 +18,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		pq = [v_jix, v_jiy]
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
-		is_box = 0 #This is just to differentiate between the box and actual line segments later
+		is_box = i #This is just to differentiate between the box and actual line segments later
 		half_plane = (angle, pq, Tuple(half_plane_point), is_box)
 		push!(half_planes, half_plane)
 		push!(dq, half_plane)
@@ -29,7 +30,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
         fw_pq = [fw_x, fw_y]
         angle = atan(fw_y, fw_x)
-        fw_is_box = 2
+        fw_is_box = -1
         fw_half_plane = (angle, fw_pq, Tuple(ri), fw_is_box)
         push!(half_planes, fw_half_plane)
 	push!(dq, fw_half_plane)	
@@ -46,7 +47,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
-		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
+		if(dq[i][4]==-5000 || norm(dq[i][3] .- ri) >= rho)
 			deleteat!(dq, i)
 			continue
 		end
@@ -63,9 +64,8 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	sort!(dq)
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
-	replace_vector(temp_half_planes, dq)
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
-	vq::Vector{Any} = []
+	vq::Vector{Any} = [] #In this vector, the elements are tuples: the first element of the tuple is the actual intersect, the second is the integer value of the "back" half plane, while the third element is the integer value of the "forward" half plane. 
 	newdq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
 	dql::Int64 = length(dq)
 	len::Int64 = 0
@@ -73,7 +73,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	for i in 1:dql
 		#print("Single fence agent detected\n")
 		m::Float64 = 0.0
-		if(dq[i][4] == 1)
+		if(dq[i][4] == -5000)
 			print("Bounding box fence detected\n")
 			exit()
 		end
@@ -173,11 +173,11 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			end
 
 			if(is_outside == 0 && invalid == 0)
-				push!(vq, [intersect_i, i-1, i])
+				push!(vq, [intersect_i, newdq[len][4], dq[i][4]])
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
-				if(dq[i][4] == 2)
+				if(dq[i][4] == -1)
 					push!(vq, [b_circle_intersect_i, 0, -1])
 				else
 					push!(vq, [b_circle_intersect_i, 0, i])
@@ -279,7 +279,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
                         end
 
                         if(is_outside == 0 && invalid == 0)
-                                push!(vq, [intersect_last, len, 1])
+                                push!(vq, [intersect_last, newdq[len][4], newdq[1][4]])
                                 vlen += 1
                         end
 	end
@@ -288,7 +288,29 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		#print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
 	end
 
-	
+	replace_vector(temp_half_planes, newdq) #Replace the temp_half_planes with newdq, which gives the relevant half planes
+
+	#Final check before we send vq off for processing: rotational order check
+	if(rot_ord_check(ri, vq) != 1)
+                                print("Rotational order violated for a potential position of $ri\n")
+                                print("\n\n\nThe dq for this position was \n")
+                                for i in 1:length(dq)
+                                        print("$(dq[i])\n")
+                                end
+				print("The actual relevant half planes were\n")
+				for i in 1:length(newdq)
+					print("$(newdq[i])\n")		
+				end
+                                print("The points and angles were\n")
+                                for i in 1:length(vq)
+                                        vec_to_point = [vq[i][1][1] - ri[1], vq[i][1][2] - ri[2]]
+                                        angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
+                                        print("$(vq[i]), $(angle_of_vec)\n")
+                                end
+
+                                exit()
+        end
+		
 	return vq
 
 end
