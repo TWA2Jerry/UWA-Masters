@@ -45,7 +45,7 @@ function voronoi_area(ri, cell, rho)
 			if(rho^2 < (0.5*chord_length)^2)
 				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri. Chord length calculated to be $chord_length, against a rho value of $rho\n")
 				if(abs(0.5*chord_length - rho)/rho < 10^(-5))
-					r = 100.0
+					r = 0.0
 				else
 					print("Bro, chord length is still cooked\n")
 				end
@@ -62,7 +62,7 @@ function voronoi_area(ri, cell, rho)
 			theta = min((angle_to_ip1 - angle_to_i + 2*pi)%(2*pi), (angle_to_i - angle_to_ip1 + 2*pi)%(2*pi))
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
 			if(abs(alt_circle_segment_area - circle_segment_area)/circle_segment_area > 0.01)
-				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area")
+				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area.\n")
 				#exit()
 			end
 

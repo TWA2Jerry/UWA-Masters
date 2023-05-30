@@ -24,7 +24,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		push!(dq, half_plane)
 	end
 
-	#Add the half plane that bounds the area to the area in front of the agent
+	#=Add the half plane that bounds the area to the area in front of the agent
         fw_point = ri
         fw_x::Float64 = -1.0*(-vel[2])
         fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
@@ -34,10 +34,11 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
         fw_half_plane = (angle, fw_pq, Tuple(ri), fw_is_box)
         push!(half_planes, fw_half_plane)
 	push!(dq, fw_half_plane)	
+	=#	
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
-	#push!(dq, relic)
+	push!(dq, relic)
 
 
 
@@ -104,7 +105,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
                 	b::Float64 = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d::Float64 = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d))\n")
+				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d)). The ri value was $ri\n")
 				exit()
 			end
 			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
