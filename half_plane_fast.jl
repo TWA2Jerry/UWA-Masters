@@ -149,7 +149,7 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 	#print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
-		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho)
+		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho || abs(norm(dq[i][3] .- ri)-rho) < 10^(-12))
 			deleteat!(dq, i)
 			continue
 		end
@@ -206,14 +206,19 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
                 	a::Float64 = 1+m^2
                 	b::Float64 = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d::Float64 = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
+			discriminant::Float64 = (b)^2 - 4*(a)*(d)
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d))\n")
-				exit()
+				if(discriminant/b^2 < eps*10)
+					discriminant = 0.0
+				else
+					print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d))\n")
+					exit()
+				end
 			end
-			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+			x1 = (-(b) - sqrt(discriminant))/(2*(a))
                 	y1 = m*x1 + c
 
-                	x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                	x2 = (-(b) + sqrt(discriminant))/(2*(a))
                 	y2 = m*x2 + c
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")

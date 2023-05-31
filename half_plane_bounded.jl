@@ -48,7 +48,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
-		if(dq[i][4]==-5000 || norm(dq[i][3] .- ri) >= rho)
+		if(dq[i][4]==-5000 || norm(dq[i][3] .- ri) >= rho || abs(norm(dq[i][3] .- ri)-rho) < 10^(-12))
 			deleteat!(dq, i)
 			continue
 		end
@@ -104,14 +104,19 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
                 	a::Float64 = 1+m^2
                 	b::Float64 = -2*ri[1]+2*m*c-2*m*ri[2]
                 	d::Float64 = ri[1]^2 + c^2 - 2*ri[2]*c + ri[2]^2 - rho^2
+			discriminant::Float64 = (b)^2 - 4*(a)*(d)
 			if((b)^2 - 4*(a)*(d) < 0)
-				print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d)). The ri value was $ri\n")
-				exit()
+				if((b^2-4*a*d)/(b^2) < eps*10)
+					discriminant = 0.0
+				else
+					print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d)) against a b^2 value of $(b^2). The ri value was $ri\n")
+					exit()
+				end
 			end
-			x1 = (-(b) - sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+			x1 = (-(b) - sqrt(discriminant))/(2*(a))
                 	y1 = m*x1 + c
 
-                	x2 = (-(b) + sqrt((b)^2 - 4*(a)*(d)))/(2*(a))
+                	x2 = (-(b) + sqrt(discriminant))/(2*(a))
                 	y2 = m*x2 + c
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
@@ -181,7 +186,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 				if(dq[i][4] == -1)
 					push!(vq, [b_circle_intersect_i, 0, -1])
 				else
-					push!(vq, [b_circle_intersect_i, 0, i])
+					push!(vq, [b_circle_intersect_i, 0, dq[i][4]])
 				end
 				vlen += 1
 				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
@@ -190,10 +195,10 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			end	
 
 		else #Note that we've changed the format to account for what to label the forwards half plane is if it was the artifical bounding half plane
-			if(dq[i][4] == 2)
+			if(dq[i][4] == -1)
                                         push!(vq, [b_circle_intersect_i, 0, -1])
                         else
-                                        push!(vq, [b_circle_intersect_i, 0, i])                                
+                                        push!(vq, [b_circle_intersect_i, 0, dq[i][4]])                                
 			end
 
 			vlen += 1
@@ -205,10 +210,10 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		end
 
 		#Add the foward intersect
-		if(dq[i][4] == 2)
+		if(dq[i][4] == -1)
 			push!(vq, [f_circle_intersect_i, -1, 0])
                 else
-                       	push!(vq, [f_circle_intersect_i, i, 0])
+                       	push!(vq, [f_circle_intersect_i, dq[i][4], 0])
                 end
 
 		vlen += 1

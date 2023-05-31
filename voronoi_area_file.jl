@@ -44,11 +44,16 @@ function voronoi_area(ri, cell, rho)
 			r = 0.0
 			if(rho^2 < (0.5*chord_length)^2)
 				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri. Chord length calculated to be $chord_length, against a rho value of $rho\n")
+				print("The vertices of the cell were\n")
+				for i in 1:num_points
+					print(cell[i], "\n")				
+				end			
 				if(abs(0.5*chord_length - rho)/rho < 10^(-5))
 					r = 0.0
 				else
 					print("Bro, chord length is still cooked\n")
 				end
+				#exit()
 			else
                        		r = sqrt(rho^2 - (0.5 * chord_length)^2)
 			end
