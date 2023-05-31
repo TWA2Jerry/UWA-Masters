@@ -565,8 +565,8 @@ function model_step!(model)
         	relic_angle = atan(relic_y, relic_x)
         	relic_is_box = 2
         	relic_half_plane = [relic_angle, relic_pq, agent_i.pos, relic_is_box]
-
-                new_cell_i = voronoi_cell_bounded(ri, neighbour_positions, rho, temp_hp, agent_i.vel, relic_half_plane)
+		print("The time it takes for cell to be calculated in move_gradient is ")
+                new_cell_i = @time voronoi_cell_bounded(ri, neighbour_positions, rho, temp_hp, agent_i.vel, relic_half_plane)
                 new_area = voronoi_area(ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
