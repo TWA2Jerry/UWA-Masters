@@ -91,7 +91,7 @@ end
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 
-function outside(half_plane::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, point, eps, inf)
+function outside(half_plane::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, point, eps::Float64, inf::Float64)
         #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
         return cross(half_plane[2], point .- half_plane[3]) < -eps
 end

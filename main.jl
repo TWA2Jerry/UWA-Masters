@@ -66,11 +66,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; seed = 123, no_birds = 100)
+function initialise(target_area_arg; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -223,9 +223,10 @@ function agent_step!(agent, model)
 	#print("Step!\n", agent.planet)
 	dt = model.dt
 	k1::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
+	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 100, rho, 1000.0*sqrt(12.0))
+        move_made = move_gradient(agent, model, k1, 8, 100, rho, target_area)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -388,7 +389,7 @@ rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
 no_steps = 2000
-no_simulations = 1
+no_simulations = 10
 
 function run_ABM()
 	global compac_frac_file
@@ -397,7 +398,7 @@ function run_ABM()
         global rot_o_alt_file
 	global mean_speed_file
 for i in 1:no_simulations
-	model = initialise()
+	model = initialise(0.0)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
@@ -498,4 +499,4 @@ end
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-run_ABM()
+#run_ABM()

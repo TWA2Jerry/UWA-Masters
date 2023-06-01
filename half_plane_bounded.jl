@@ -6,6 +6,14 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print(outside([1, [1,2], [3,4]], [5,6]))
 	half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
 	dq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
+	point::Tuple{Float64, Float64} = (0.0, 0.0)
+	r_ji::Tuple{Float64, Float64} = (0.0, 0.0)
+	half_plane_point::Tuple{Float64, Float64} = (0.0, 0.0)
+	v_jix::Float64 = 0.0
+	v_jiy::Float64 = 0.0
+	pq::Vector{Float64} = []
+	is_box::Int64 = -100000
+	half_plane::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64} = (0.0, [0.0], (0.0, 0.0), -10000)
 	for i::Int64 in 1:length(neighbouring_points)	
 		#Use the half-way point as the point p
 		point = neighbouring_points[i] 
@@ -46,7 +54,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
 	#print("\n\n\nCommencing bounded DOD calculation\n")	
-	i = 1
+	i::Int64 = 1
 	while (i <= length(dq))
 		if(dq[i][4]==-5000 || norm(dq[i][3] .- ri) >= rho || abs(norm(dq[i][3] .- ri)-rho) < 10^(-12))
 			deleteat!(dq, i)
