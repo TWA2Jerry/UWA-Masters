@@ -16,7 +16,7 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 		pushfirst!(positions, neighbour.pos)	
 	end		
 	#min_area = inf  #The agent's current DOD area
-	min_diff::Float64 = inf
+	min_diff::Float64 = abs(agent.A-target_area)
 	min_direction::Vector{Float64} = [0.0, 0.0] #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
 	pos_area_array = []
