@@ -499,4 +499,4 @@ end
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-#run_ABM()
+run_ABM()

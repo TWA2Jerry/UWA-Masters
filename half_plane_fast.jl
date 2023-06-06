@@ -64,7 +64,7 @@ function inter(h1::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int6
 	if(abs(m1 - m2) < abs(eps))
 		print("Parallel planes yo\n")
 		#exit()
-		return ([-1.0, -1.0], -1)
+		return ((-1.0, -1.0), -1)
 	end  
 	##print("m1 - m2 found to be $(m1-m2)\n")
 	c1::Float64 = h1[3][2] - m1*h1[3][1]
@@ -77,7 +77,7 @@ function inter(h1::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int6
 		yint = m1 * xint + c1
 	end
 	#print("Intersect calculated as $([xint, yint])\n")
-	return ([xint, yint], 1)
+	return ((xint, yint), 1)
 end
 
 
@@ -168,7 +168,7 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	replace_vector(temp_half_planes, dq)
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
-	vq = []
+	vq::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = []
 	newdq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
 	dql::Int64 = length(dq)
 	len::Int64 = 0
@@ -224,9 +224,10 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
 		a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
-                f_circle_intersect_i::Vector{Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? [x1, y1] : [x2, y2] #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
+                f_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? (x1, y1) : (x2, y2) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
-		b_circle_intersect_i::Vector{Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? [x1, y1] : [x2, y2]
+		b_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? (x1, y1) : (x2, y2)
+
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
 			if(vq[vlen][3] != 0)
@@ -266,8 +267,8 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 		if (len >= 1)
 			#Determine the intersect of hp_i with hp_(i-1)
 			#print("\nThe time for collecting an intersection was ")
-			intersect_info::Tuple{Vector{Float64}, Int64} =  inter(dq[i], newdq[len], eps, inf)
-			intersect_i::Vector{Float64} = intersect_info[1]
+			intersect_info::Tuple{Tuple{Float64, Float64}, Int64} =  inter(dq[i], newdq[len], eps, inf)
+			intersect_i::Tuple{Float64, Float64} = intersect_info[1]
 			is_outside::Int64 = 0
 			invalid::Int64 = 0
 			if(intersect_info[2] == -1 || norm(intersect_i .- ri) > rho)
@@ -281,14 +282,14 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 			end
 
 			if(is_outside == 0 && invalid == 0)
-				push!(vq, [intersect_i, i-1, i])
+				push!(vq, (intersect_i, i-1, i))
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
 				if(dq[i][4] == 2)
-					push!(vq, [b_circle_intersect_i, 0, -1])
+					push!(vq, (b_circle_intersect_i, 0, -1))
 				else
-					push!(vq, [b_circle_intersect_i, 0, i])
+					push!(vq, (b_circle_intersect_i, 0, i))
 				end
 				vlen += 1
 				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
@@ -298,9 +299,9 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 
 		else #Note that we've changed the format to account for what to label the forwards half plane is if it was the artifical bounding half plane
 			if(dq[i][4] == 2)
-                                        push!(vq, [b_circle_intersect_i, 0, -1])
+                                        push!(vq, (b_circle_intersect_i, 0, -1))
                         else
-                                        push!(vq, [b_circle_intersect_i, 0, i])                                
+                                        push!(vq, (b_circle_intersect_i, 0, i))                                
 			end
 
 			vlen += 1
@@ -313,9 +314,9 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 
 		#Add the foward intersect
 		if(dq[i][4] == 2)
-			push!(vq, [f_circle_intersect_i, -1, 0])
+			push!(vq, (f_circle_intersect_i, -1, 0))
                 else
-                       	push!(vq, [f_circle_intersect_i, i, 0])
+                       	push!(vq, (f_circle_intersect_i, i, 0))
                 end
 
 		vlen += 1
@@ -373,8 +374,8 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
                         #Determine the intersect of hp_i with hp_(i-1)
-                        intersect_last_info::Tuple{Vector{Float64}, Int64} = inter(newdq[len], newdq[1], eps, inf)
-                        intersect_last::Vector{Float64} = intersect_last_info[1]
+                        intersect_last_info::Tuple{Tuple{Float64, Float64}, Int64} = inter(newdq[len], newdq[1], eps, inf)
+                        intersect_last::Tuple{Float64, Float64} = intersect_last_info[1]
 			is_outside = 0
                         invalid = 0
 			if(norm(intersect_last .- ri) > rho)
@@ -387,7 +388,7 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
                         end
 
                         if(is_outside == 0 && invalid == 0)
-                                push!(vq, [intersect_last, len, 1])
+                                push!(vq, (intersect_last, len, 1))
                                 vlen += 1
                         end
 	end
