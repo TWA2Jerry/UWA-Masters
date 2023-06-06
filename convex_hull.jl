@@ -1,9 +1,9 @@
 include("./half_plane_fast.jl")
-#=
-function cross(v1, v2)
+
+function convex_cross(v1, v2)
         return v1[1] * v2[2] - v1[2]*v2[1]
 end
-=#
+
 ###Function for updating the convex hull, returns the points of the convex hull so the area of the convex hull can be calculated
 function update_convex_hull(model)
 	points = []
@@ -47,7 +47,7 @@ function convex_hull(P)
 	sort!(P) 
 	
 	for i in 1:n
-		while (k >= 2 && cross(H[k] .- H[k-1], P[i] .- H[k-1]) <= 0)
+		while (k >= 2 && convex_cross(H[k] .- H[k-1], P[i] .- H[k-1]) <= 0)
 			k -= 1
 			pop!(H)
 		end
@@ -59,7 +59,7 @@ function convex_hull(P)
 		if(i < 2)
 			break
 		end
-		while (k >= t && cross(H[k] .- H[k-1], P[i-1] .- H[k-1]) <= 0)
+		while (k >= t && convex_cross(H[k] .- H[k-1], P[i-1] .- H[k-1]) <= 0)
                         k -= 1
                         pop!(H)
                 end

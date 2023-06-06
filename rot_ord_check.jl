@@ -1,4 +1,4 @@
-function rot_ord_check(origin, points)
+function rot_ord_check(origin::Tuple{Float64, Float64}, points::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
 	all_good = 1
 	flicked = 0
 	vec_angles = []

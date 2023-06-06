@@ -1,19 +1,20 @@
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = [0.0,0.0], relic::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), [0.0, 0.0], (0.0,0.0), 0))
+function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
 	#print(outside([1, [1,2], [3,4]], [5,6]))
-	half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
-	dq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
+	half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [] #The vector that will contain the half plane structures, which will be vectors comprised of the point and vector defining the half plane
+	dq::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	point::Tuple{Float64, Float64} = (0.0, 0.0)
 	r_ji::Tuple{Float64, Float64} = (0.0, 0.0)
 	half_plane_point::Tuple{Float64, Float64} = (0.0, 0.0)
 	v_jix::Float64 = 0.0
 	v_jiy::Float64 = 0.0
-	pq::Vector{Float64} = []
+	pq::Tuple{Float64, Float64} = (0.0, 0.0)
 	is_box::Int64 = -100000
-	half_plane::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64} = (0.0, [0.0], (0.0, 0.0), -10000)
+	half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), -10000)
+	angle::Float64 = 0.0
 	for i::Int64 in 1:length(neighbouring_points)	
 		#Use the half-way point as the point p
 		point = neighbouring_points[i] 
@@ -23,11 +24,11 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
 		v_jix = -1.0 * (0.5 * r_ji[2])
 		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
-		pq = [v_jix, v_jiy]
+		pq = (v_jix, v_jiy)
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
 		is_box = i #This is just to differentiate between the box and actual line segments later
-		half_plane = (angle, pq, Tuple(half_plane_point), is_box)
+		half_plane = (angle, pq, half_plane_point, is_box)
 		push!(half_planes, half_plane)
 		push!(dq, half_plane)
 	end
@@ -75,7 +76,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vq::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = [] #In this vector, the elements are tuples: the first element of the tuple is the actual intersect, the second is the integer value of the "back" half plane, while the third element is the integer value of the "forward" half plane. 
-	newdq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
+	newdq::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	dql::Int64 = length(dq)
 	len::Int64 = 0
 	vlen::Int64 = 0
@@ -129,7 +130,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
-		a1_a2::Vector{Float64} = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
+		a1_a2::Tuple{Float64, Float64} = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
                 f_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? (x1, y1) : (x2, y2) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? (x1, y1) : (x2, y2)

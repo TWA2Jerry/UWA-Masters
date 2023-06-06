@@ -74,7 +74,7 @@ function voronoi_area(ri, cell, rho)
 			#Check, if the agent position is inside the chord half plane. 
 			chord_vector = cell[j][1] .- cell[i][1]
 			chord_point = 0.5 .* chord_vector .+ cell[i][1]
-			chord_half_plane = (atan(chord_vector[2], chord_vector[1]), [chord_vector[1], chord_vector[2]], Tuple(chord_point), 0)
+			chord_half_plane = (atan(chord_vector[2], chord_vector[1]), chord_vector, Tuple(chord_point), 0)
 			if(num_points == 2)
                         	return pi*rho^2 - circle_segment_area
                         end

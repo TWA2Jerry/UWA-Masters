@@ -27,7 +27,7 @@ function norm(v::Vector{Float64})
         return sqrt(sum_of_squares)
 end
 
-function dot(v1::Vector{Float64}, v2::Vector{Float64})
+function dot(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
 	if(length(v1) != length(v2))
 	   print("Bruh these vectors ain't got the same length no?\n")
 	   return -1
@@ -41,7 +41,7 @@ function dot(v1::Vector{Float64}, v2::Vector{Float64})
 end
 
 ###Function for calculating the intersection between two points
-function inter(h1::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, h2::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, eps::Float64, inf::Float64)
+function inter(h1::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}, h2::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}, eps::Float64, inf::Float64)
         #h1 and h2 represent the half planes we want to calculate the line intersections for
 	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
 	#m1 = h1[2][2]/h1[2][1]
@@ -83,7 +83,7 @@ end
 
 
 ###Function for calculating the magnitude of the cross product between two vectors v1 and v2
-function cross(v1, v2)
+function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
 	return v1[1] * v2[2] - v1[2]*v2[1]
 end
 
@@ -91,7 +91,7 @@ end
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 
-function outside(half_plane::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}, point, eps::Float64, inf::Float64)
+function outside(half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}, point::Tuple{Float64, Float64}, eps::Float64, inf::Float64)
         #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
         return cross(half_plane[2], point .- half_plane[3]) < -eps
 end
@@ -101,14 +101,14 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64 ,temp_half_planes::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = (0.0,0.0), relic::Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), [0.0, 0.0], (0.0,0.0), 0))
+function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64 ,temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
 	#print(outside([1, [1,2], [3,4]], [5,6]))
 	
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
-	dq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
+	dq::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	
 	for point in neighbouring_points	
 		#Use the half-way point as the point p
@@ -118,7 +118,7 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
 		v_jix = -1.0 * (0.5 * r_ji[2])
 		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
-		pq = [v_jix, v_jiy]
+		pq = (v_jix, v_jiy)
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
 		is_box = 0 #This is just to differentiate between the box and actual line segments later
@@ -169,7 +169,7 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 	replace_vector(temp_half_planes, dq)
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
 	vq::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = []
-	newdq::Vector{Tuple{Float64, Vector{Float64}, Tuple{Float64, Float64}, Int64}} = []
+	newdq::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	dql::Int64 = length(dq)
 	len::Int64 = 0
 	vlen::Int64 = 0
@@ -223,7 +223,7 @@ function voronoi_cell(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{T
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
-		a1_a2 = [x1, y1] .- [x2, y2] #Calculate the vector from the second to first intersect with the circle
+		a1_a2 = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
                 f_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? (x1, y1) : (x2, y2) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? (x1, y1) : (x2, y2)
