@@ -16,7 +16,7 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 		pushfirst!(positions, neighbour.pos)	
 	end		
 	#min_area = inf  #The agent's current DOD area
-	min_diff::Float64 = inf
+	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made = 0
 	pos_area_array = []
@@ -63,8 +63,8 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell =  @time voronoi_cell_bounded(Tuple(new_agent_pos), positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	#print("\nThe time to calculate a voronoi cell in move gradient is ")
+			agent_voronoi_cell =  voronoi_cell_bounded(Tuple(new_agent_pos), positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)

@@ -292,7 +292,7 @@ function model_step!(model)
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
 		print("\n\n\n The time for calulating the voronoi cell in model step is ")
-		true_new_cell_i = @time voronoi_cell(ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
+		true_new_cell_i =  @time voronoi_cell(ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(ri, true_new_cell_i, rho)
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		total_area += true_new_area/(pi*rho^2)
@@ -308,7 +308,7 @@ function model_step!(model)
 
 	#Finally, plot the model after the step
 	#figure, _ = abmplot(model)
-	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+	#print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)))
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
@@ -388,7 +388,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 2000
+no_steps = 20
 no_simulations = 10
 
 function run_ABM()
@@ -398,7 +398,7 @@ function run_ABM()
         global rot_o_alt_file
 	global mean_speed_file
 for i in 1:no_simulations
-	model = initialise(0.0)
+	model = initialise(1000.0*sqrt(12))
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
@@ -406,6 +406,7 @@ for i in 1:no_simulations
 	write(mean_a_file, "\n")
 	write(rot_o_file, "\n")
 	write(rot_o_alt_file, "\n")
+	write(mean_speed_file, "\n")
 end
 
 	close(compac_frac_file)
