@@ -22,10 +22,10 @@ print("All homemade files included\n")
 const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
-const rect_bound::Float64 = 1000.0
+const rect_bound::Float64 = 500.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
-rect = Rectangle(Point2(0,0), Point2(1000, 1000))
+rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
 new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
@@ -66,7 +66,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg; seed = 123, no_birds = 100)
+function initialise(target_area_arg; seed = 123, no_birds = 10)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -388,8 +388,8 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 20
-no_simulations = 10
+no_steps = 2000
+no_simulations = 1
 
 function run_ABM()
 	global compac_frac_file
