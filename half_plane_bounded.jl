@@ -1,5 +1,5 @@
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
+function voronoi_cell_bounded(model, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -85,6 +85,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 		m::Float64 = 0.0
 		if(dq[i][4] == -5000)
 			print("Bounding box fence detected\n")
+			AgentsIO.save_checkpoint("simulation_save.jld2", model)
 			exit()
 		end
 		if(abs(abs(dq[i][1])-pi/2) > 0.000001) 
@@ -103,6 +104,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			x2 = dq[i][3][1]
 			if(rho^2 - (x1 - ri[1])^2 <0)
 				print("Circle intercept negative. This was for the infinite gradient case, with half plane $(dq[i]).\n")
+				AgentsIO.save_checkpoint("simulation_save.jld2", model)
 				exit()
 			end
 			y1 = -sqrt(rho^2 - (x1 - ri[1])^2) + ri[2]
@@ -119,6 +121,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 					discriminant = 0.0
 				else
 					print("Circle intercept negative. This was for the normal case for the half plane $(dq[i]). The value of the discriminant was $((b)^2 - 4*(a)*(d)) against a b^2 value of $(b^2). The ri value was $ri\n")
+					AgentsIO.save_checkpoint("simulation_save.jld2", model)
 					exit()
 				end
 			end
@@ -139,7 +142,8 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			if(vq[vlen][3] != 0)
 				if(len <= 0)
                                         print("Tried to delete a half plane from dequeue when there wasn't one\n")
-                                        exit()
+                                        AgentsIO.save_checkpoint("simulation_save.jld2", model)
+					exit()
                                 end
 				pop!(newdq)
 				len -= 1
@@ -154,6 +158,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			if(vq[1][2] != 0)
 				if(len <= 0)
 					print("Tried to delete a half plane from dequeue when there wasn't one\n")
+					AgentsIO.save_checkpoint("simulation_save.jld2", model)
 					exit()
 				end
 				popfirst!(newdq)
@@ -243,7 +248,8 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			#print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
 			if(len <= 0)
                                 print("Tried to delete a half plane from dequeue when there wasn't one\n")
-                        	exit()
+                        	AgentsIO.save_checkpoint("simulation_save.jld2", model)
+				exit()
                         end
 
 			pop!(newdq)
@@ -259,7 +265,8 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
 			#print("Popping from the front of newdq. The front is $(vq[1])\n")
 			if(len <= 0)
                                 print("Tried to delete a half plane from dequeue when there wasn't one\n")
-                        	exit()
+                        	AgentsIO.save_checkpoint("simulation_save.jld2", model)
+				exit()
                         end
 			popfirst!(newdq)
                 	len -= 1
@@ -322,7 +329,7 @@ function voronoi_cell_bounded(ri::Tuple{Float64, Float64}, neighbouring_points::
                                         angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
                                         print("$(vq[i]), $(angle_of_vec)\n")
                                 end
-
+				AgentsIO.save_checkpoint("simulation_save.jld2", model)
                                 exit()
         end
 		

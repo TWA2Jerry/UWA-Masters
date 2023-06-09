@@ -31,7 +31,7 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
         relic_y = -vix
         relic_pq = (relic_x, relic_y)
         relic_angle = atan(relic_y, relic_x)
-        relic_is_box = 2
+        relic_is_box = -2
         relic_half_plane = (relic_angle, relic_pq, agent.pos, relic_is_box)
 
 	for i in 0:(q-1) #For every direction
@@ -64,8 +64,8 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell =  voronoi_cell_bounded(Tuple(new_agent_pos), positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-                	new_area = voronoi_area(new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			agent_voronoi_cell =  voronoi_cell_bounded(model, Tuple(new_agent_pos), positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	new_area = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
@@ -73,6 +73,7 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
                         	for i in 1:length(temp_hp)
                                 	print("$(temp_hp[i])\n")
                         	end
+				AgentsIO.save_checkpoint("simulation_save.jld2", model)
 				exit()
 			end
 
@@ -88,7 +89,7 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
                 			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
                         		print("$(agent_voronoi_cell[i]), $(angle_of_vec)")
 				end
-
+				AgentsIO.save_checkpoint("simulation_save.jld2", model)
 				exit()
 			end
 

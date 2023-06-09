@@ -66,7 +66,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg; seed = 123, no_birds = 10)
+function initialise(target_area_arg; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -110,7 +110,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 10)
 	init_tess_areas = voronoiarea(init_tess)
 
 	#Calculate the DoDs based off the initial positions
-	#initial_dods = voronoi_area(initial_positions, rho)
+	#initial_dods = voronoi_area(model, initial_positions, rho)
 	initial_dods = []
 	true_initial_dods = []
 	for i in 1:no_birds
@@ -132,11 +132,11 @@ function initialise(target_area_arg; seed = 123, no_birds = 10)
         	relic_is_box = 2
         	relic_half_plane = (relic_angle, relic_pq, ri, relic_is_box)
 
-		initial_cell = @time voronoi_cell_bounded(ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
-		initial_A = voronoi_area(ri, initial_cell, rho) 
+		initial_cell = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
+		initial_A = voronoi_area(model, ri, initial_cell, rho) 
 	
-		true_initial_cell = @time voronoi_cell(ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
-                true_initial_A = voronoi_area(ri, true_initial_cell, rho)
+		true_initial_cell = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
+                true_initial_A = voronoi_area(model, ri, true_initial_cell, rho)
 
 
 		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
@@ -178,7 +178,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 10)
 
 	#Calculate the actual area of the convex hull of the group of birds
 	convexhullbro = update_convex_hull(model)
-	initial_convex_hull_area = voronoi_area(-1, convexhullbro, rho)
+	initial_convex_hull_area = voronoi_area(model, -1, convexhullbro, rho)
 	model.CHA = initial_convex_hull_area
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
 	init_rot_ord = rot_ord(allagents(model))
@@ -283,8 +283,8 @@ function model_step!(model)
         	relic_is_box = 2
         	relic_half_plane = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
-                new_cell_i = voronoi_cell_bounded(ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-                new_area = voronoi_area(ri, new_cell_i, rho)
+                new_cell_i = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                new_area = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
@@ -292,8 +292,8 @@ function model_step!(model)
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
 		print("\n\n\n The time for calulating the voronoi cell in model step is ")
-		true_new_cell_i =  @time voronoi_cell(ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
-                true_new_area = voronoi_area(ri, true_new_cell_i, rho)
+		true_new_cell_i =  @time voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
+                true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
@@ -301,7 +301,7 @@ function model_step!(model)
         
 	#Now update the model's convex hull
 	convexhullbro = update_convex_hull(model)
-	convex_hull_area = voronoi_area(-1, convexhullbro, rho)
+	convex_hull_area = voronoi_area(model, -1, convexhullbro, rho)
 	model.CHA = convex_hull_area
 	model.t += model.dt
         model.n += 1

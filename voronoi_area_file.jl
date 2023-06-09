@@ -1,6 +1,6 @@
 ###Function that calculates the area of a voronoi cell given the vertices that
 #comprise the cell.
-function voronoi_area(ri, cell, rho)
+function voronoi_area(model, ri, cell, rho)
        	Area = 0.0
 	circle_area = 0.0
 	circle_detected = 0
@@ -104,6 +104,7 @@ function voronoi_area(ri, cell, rho)
 		#=	
 		if(abs(Area)+circle_area > pi*rho^2 && initialised == 0)
 			print("Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
+			AgentsIO.save_checkpoint("simulation_save.jld2", model)
 			exit()
 		end
 		=#
