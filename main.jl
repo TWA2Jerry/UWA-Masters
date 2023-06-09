@@ -11,6 +11,15 @@ using Plots
 
 print("Packages loaded\n")
 
+###Create the agent
+mutable struct bird <: AbstractAgent
+        id::Int
+        pos::NTuple{2, Float64}
+        vel::NTuple{2, Float64}
+        speed::Float64
+        A::Float64 #The area of the agent's DOD
+end
+
 include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
 include("convex_hull.jl")
@@ -45,20 +54,6 @@ end
 
 include("voronoi_area_file.jl")
 include("move_gradient_file.jl")
-
-
-
-
-###Create the agent
-mutable struct bird <: AbstractAgent
-	id::Int
-	pos::NTuple{2, Float64}
-	vel::NTuple{2, Float64}
-	speed::Float64
-	A::Float64 #The area of the agent's DOD
-end
-	
-
 
 print("Agent template created\n")
 
