@@ -1,5 +1,5 @@
 ###Function that determines the gradient of movement
-function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, Dict{Int64, bird}, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#Calculate the unit vector in the current direction of motion
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
@@ -63,8 +63,8 @@ function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, r
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell =  voronoi_cell_bounded(model, Tuple(new_agent_pos), positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	print("\nThe time to calculate a voronoi cell in move gradient is ")
+			agent_voronoi_cell =  @time voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)
