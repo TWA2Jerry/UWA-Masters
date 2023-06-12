@@ -17,7 +17,8 @@ mutable struct bird <: AbstractAgent
         pos::NTuple{2, Float64}
         vel::NTuple{2, Float64}
         speed::Float64
-        A::Float64 #The area of the agent's DOD
+        A::Float64 #The area of the agent's DOD, at least in their own eyes
+	true_A::Float64 #The true area of the agent's DOD
 end
 
 include("half_plane_fast.jl")
@@ -163,7 +164,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 	total_area = 0.0
 	total_speed = 0.0
 	for i in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i])
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
@@ -196,10 +197,6 @@ display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
-	#=	
-	#figure, _ = abmplot(model)	
-	#save("./Simulation_Images/shannon_flock_n_=_$(0)", figure)
-	=#
 	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
@@ -290,6 +287,7 @@ function model_step!(model)
 		true_new_cell_i =  @time voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
+		agent_i.true_A = true_new_area
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
         end
@@ -354,29 +352,10 @@ using CairoMakie # choosing a plotting backend
 model = initialise()
 print("Number of agents is $(nagents(model))\n")
 
-#=
-###Test the model has been initialised and works
-using InteractiveDynamics
-using CairoMakie # choosing a plotting backend
-=#
-
-
 figure, _ = abmplot(model)
 figure # returning the figure displays it
 save("shannon_flock.png", figure)
 =#	
-
-
-###Animate
-#model = initialise();
-
-#=
-abmvideo(
-    "Shannon_flock.mp4", model, agent_step!, model_step!;
-    framerate = 4, frames = 120,
-    title = "Shannon flock"
-)
-=#
 
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
@@ -385,6 +364,27 @@ rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
 no_steps = 2000
 no_simulations = 1
+
+using ColorSchemes
+import ColorSchemes.balance
+
+###Animate
+model = initialise(1000.0*sqrt(12));
+#ac(agent) =  get(balance, abs(agent.A-model.target_area)/(pi*rho^2))
+plotkwargs = (; ac = get(balance, 0.7), as  = 10, am = :diamond)
+
+print("Gone past the thang")
+
+abmvideo(
+    "Colour_Test.mp4", model, agent_step!, model_step!;
+    spf = 1,
+        framerate = 12, frames = 24,
+    title = "Shannon flock",
+        showstep = true,
+	ac = get(balance, 0.7), as = 10, am = :diamond
+)
+
+print("Finished the vid\n")
 
 function run_ABM()
 	global compac_frac_file
@@ -495,4 +495,4 @@ end
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-run_ABM()
+#run_ABM()
