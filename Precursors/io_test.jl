@@ -8,7 +8,7 @@ write(out_file, "$a \n")
 write(out_file, "$b \n")
 write(out_file, "$c \n")
 write(out_file, "$(c[1]) $(c[2])\n")
-
+write(out_file, "I have no idea\n")
 using Random
 out_file_3 = open("io_test_2.txt", "w")
 for i in 1:20
@@ -20,3 +20,6 @@ for i in 1:3
 	write(bro, "$i\n")
 	close(bro)
 end
+
+out_file_4 = open("io_test_3.txt", "a")
+write(out_file_4, "Uh, hello\n")

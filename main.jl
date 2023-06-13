@@ -32,7 +32,7 @@ print("All homemade files included\n")
 const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
-const rect_bound::Float64 = 500.0
+const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -190,6 +190,13 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
+
+	###Plotting
+	colours::Vector{Float64} = []
+	allagents_iterable = allagents(model)
+	for agent in allagents_iterable
+		push!(colours, abs(agent.A-model.target_area)/(0.5*pi*rho^2))
+	end	
 	#=
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
 annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
@@ -197,10 +204,11 @@ display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
-	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)))
+	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis)
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
+	Colorbar(figure[1,2], colorbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 
 
@@ -284,7 +292,7 @@ function model_step!(model)
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
 		print("\n\n\n The time for calulating the voronoi cell in model step is ")
-		true_new_cell_i =  @time voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
+		true_new_cell_i = @time  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
@@ -300,12 +308,18 @@ function model_step!(model)
         model.n += 1
 
 	#Finally, plot the model after the step
+	colours::Vector{Float64} = []
+        allagents_iterable = allagents(model)
+        for agent in allagents_iterable
+                push!(colours, abs(agent.A-model.target_area)/(0.5*pi*rho^2))
+        end     
 	#figure, _ = abmplot(model)
 	#print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)))
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis) #Note that I have no idea what the colorbarthing is for
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
+	Colorbar(figure[1,2], colourbarthing)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	
 	##Statistics recording
@@ -362,12 +376,13 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 2000
+no_steps = 5000
 no_simulations = 1
 
 using ColorSchemes
 import ColorSchemes.balance
 
+#=
 ###Animate
 model = initialise(1000.0*sqrt(12));
 #ac(agent) =  get(balance, abs(agent.A-model.target_area)/(pi*rho^2))
@@ -385,6 +400,7 @@ abmvideo(
 )
 
 print("Finished the vid\n")
+=#
 
 function run_ABM()
 	global compac_frac_file
@@ -495,4 +511,4 @@ end
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-#run_ABM()
+run_ABM()
