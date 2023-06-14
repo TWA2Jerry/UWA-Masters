@@ -62,11 +62,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg; seed = 123, no_birds = 100)
+function initialise(target_area_arg, simulation_number_arg; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -204,7 +204,7 @@ display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
-	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis)
+	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -315,7 +315,7 @@ function model_step!(model)
         end     
 	#figure, _ = abmplot(model)
 	#print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis) #Note that I have no idea what the colorbarthing is for
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
@@ -363,7 +363,7 @@ using CairoMakie # choosing a plotting backend
 
 #=
 ###Initialise the model
-model = initialise()
+model = initialise(1000*sqrt(12), 1)
 print("Number of agents is $(nagents(model))\n")
 
 figure, _ = abmplot(model)
@@ -384,7 +384,7 @@ import ColorSchemes.balance
 
 #=
 ###Animate
-model = initialise(1000.0*sqrt(12));
+model = initialise(1000.0*sqrt(12), 1);
 #ac(agent) =  get(balance, abs(agent.A-model.target_area)/(pi*rho^2))
 plotkwargs = (; ac = get(balance, 0.7), as  = 10, am = :diamond)
 
@@ -409,7 +409,7 @@ function run_ABM()
         global rot_o_alt_file
 	global mean_speed_file
 for i in 1:no_simulations
-	model = initialise(1000.0*sqrt(12))
+	model = initialise(1000.0*sqrt(12), i)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)

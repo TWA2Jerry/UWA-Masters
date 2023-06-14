@@ -62,11 +62,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg; seed = 123, no_birds = 100)
+function initialise(target_area_arg, simulation_number; seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -347,44 +347,16 @@ using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
 
 
-#=
-###Initialise the model
-model = initialise()
-print("Number of agents is $(nagents(model))\n")
-
-figure, _ = abmplot(model)
-figure # returning the figure displays it
-save("shannon_flock.png", figure)
-=#	
-
-compac_frac_file = open("compaction_frac.txt", "w")
-mean_a_file = open("mean_area.txt", "w")
-rot_o_file = open("rot_order.txt", "w")
-rot_o_alt_file = open("rot_order_alt.txt", "w")
-mean_speed_file = open("mean_speed.txt", "w")
+compac_frac_file = open("compaction_frac.txt", "a")
+mean_a_file = open("mean_area.txt", "a")
+rot_o_file = open("rot_order.txt", "a")
+rot_o_alt_file = open("rot_order_alt.txt", "a")
+mean_speed_file = open("mean_speed.txt", "a")
 no_steps = 2000
 no_simulations = 1
 
 using ColorSchemes
 import ColorSchemes.balance
-
-###Animate
-model = initialise(1000.0*sqrt(12));
-#ac(agent) =  get(balance, abs(agent.A-model.target_area)/(pi*rho^2))
-plotkwargs = (; ac = get(balance, 0.7), as  = 10, am = :diamond)
-
-print("Gone past the thang")
-
-abmvideo(
-    "Colour_Test.mp4", model, agent_step!, model_step!;
-    spf = 1,
-        framerate = 12, frames = 24,
-    title = "Shannon flock",
-        showstep = true,
-	ac = get(balance, 0.7), as = 10, am = :diamond
-)
-
-print("Finished the vid\n")
 
 function run_ABM()
 	global compac_frac_file
