@@ -259,8 +259,9 @@ function model_step!(model)
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
+		print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
-
+	
         #Now recalculate the agent DODs based off their new positions
         total_area = 0.0
 	total_speed = 0.0
@@ -291,8 +292,8 @@ function model_step!(model)
                         exit()
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
-		print("\n\n\n The time for calulating the voronoi cell in model step is ")
-		true_new_cell_i = @time  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
+		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
+		true_new_cell_i =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
@@ -401,6 +402,8 @@ abmvideo(
 
 print("Finished the vid\n")
 =#
+
+
 
 function run_ABM()
 	global compac_frac_file
