@@ -10,7 +10,8 @@ using GeometryBasics
 using Plots
 using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
-
+using ColorSchemes
+import ColorSchemes.balance
 print("Packages loaded\n")
 
 ###Create the agent
@@ -261,7 +262,7 @@ function model_step!(model)
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
-		print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
+		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
 	
         #Now recalculate the agent DODs based off their new positions
@@ -360,11 +361,10 @@ function model_step!(model)
 end
 
 
-include("io_file.jl")
 
-
-no_simulations::Int64 = 1
-no_steps::Int64 = 10
+###This is for the actual running of the model
+const no_simulations::Int64 = 1
+const no_steps::Int64 = 10
 
 function run_ABM()
 	global compac_frac_file
@@ -389,4 +389,4 @@ end
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-run_ABM()
+#run_ABM()

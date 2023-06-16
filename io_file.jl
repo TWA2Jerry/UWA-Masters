@@ -1,8 +1,3 @@
-###Test the model has been initialised and works
-using InteractiveDynamics
-using CairoMakie # choosing a plotting backend
-
-
 #=
 ###Initialise the model
 model = initialise(1000*sqrt(12), 1)
@@ -13,16 +8,13 @@ figure # returning the figure displays it
 save("shannon_flock.png", figure)
 =#     
 
-
-using ColorSchemes
-import ColorSchemes.balance
-
+#=
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-
+=#
 
 #=
 ###Animate
