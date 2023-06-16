@@ -39,7 +39,7 @@ function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict = 0
-		if(abs(rel_angle) > (5)*2*pi/q + eps)
+		if(abs(rel_angle) > (3)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -63,8 +63,8 @@ function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell =  @time  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	#print("\nThe time to calculate a voronoi cell in move gradient is ")
+			agent_voronoi_cell =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)
