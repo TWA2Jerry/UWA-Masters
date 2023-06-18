@@ -366,13 +366,13 @@ end
 const no_simulations::Int64 = 1
 const no_steps::Int64 = 10
 
-function run_ABM()
+function run_ABM(no_sims) #Note that we're asking to input no simulations 
 	global compac_frac_file
         global mean_a_file
         global rot_o_file
         global rot_o_alt_file
 	global mean_speed_file
-for i in 1:no_simulations
+for i in 1:no_sims
 	model = initialise(1000.0*sqrt(12), i)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
