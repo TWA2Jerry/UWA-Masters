@@ -41,7 +41,7 @@ const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initi
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
-new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
+new_pos::Vector{Tuple{Float64, Float64}} = [] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
 last_half_planes = []
 const sigma = 0.0
@@ -101,7 +101,9 @@ function initialise(target_area_arg, simulation_number_arg; seed = 123, no_birds
 		pack_positions[i] = initial_positions[i]
 		push!(moves_areas, [])
 		push!(last_half_planes, [])
-		push!(new_pos, (0.0, 0.0))
+		if(model.simulation_number==1)
+			push!(new_pos, (0.0, 0.0))
+		end
 	end
 
 	#Calculate the DOD based off the initial positions
@@ -207,13 +209,14 @@ display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
+	print("About to do the figure thing\n")
 	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
 	Colorbar(figure[1,2], colorbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
-
+	print("finished figure\n")
 
 	return model
 end  
@@ -318,14 +321,15 @@ function model_step!(model)
                 push!(colours, abs(agent.A-model.target_area)/(0.5*pi*rho^2))
         end     
 	#figure, _ = abmplot(model)
-	#print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+	print("About to do the figure\n")
 	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
 	Colorbar(figure[1,2], colourbarthing)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
-	
+	print("Finished figure\n")	
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
@@ -357,22 +361,21 @@ function model_step!(model)
 	end
 	close(last_hp_vert)
 
-	print("Finished step $(model.n)\n\n\n")
+	print("Finished step $(model.n) for simulation $(model.simulation_number).\n\n\n")
 end
 
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 1
+const no_simulations::Int64 = 5
 const no_steps::Int64 = 10
 
-function run_ABM(no_sims) #Note that we're asking to input no simulations 
+function run_ABM(i) #Note that we're asking to input no simulations 
 	global compac_frac_file
         global mean_a_file
         global rot_o_file
         global rot_o_alt_file
 	global mean_speed_file
-for i in 1:no_sims
 	model = initialise(1000.0*sqrt(12), i)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
@@ -382,9 +385,6 @@ for i in 1:no_sims
 	write(rot_o_file, "\n")
 	write(rot_o_alt_file, "\n")
 	write(mean_speed_file, "\n")
-end
-
-	do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 
 end #This should be the end of the function or running the ABM
 

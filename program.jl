@@ -10,5 +10,9 @@ include("io_file.jl")
 include("main_functions.jl")
 
 ###Run ABM
-run_ABM()
+for i in 1:no_simulations
+	run_ABM(i)
+end
+
+do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 

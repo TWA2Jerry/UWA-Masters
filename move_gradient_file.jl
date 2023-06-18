@@ -1,5 +1,10 @@
 ###Function that determines the gradient of movement
 function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, Dict{Int64, bird}, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+	#=if(model.n == 3 && model.simulation_number == 2) 
+		print("Yo, this is the load tester\n")
+		AgentsIO.save_checkpoint("simulation_save.jld2", model)
+                exit()
+	end=#
 	#Calculate the unit vector in the current direction of motion
 	dt = model.dt
 	unit_v = agent.vel ./ 1.0
@@ -120,10 +125,10 @@ function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	min_direction = direction_of_move
                         	move_made = 1
-				replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
+				#=replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
 					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
-				end
+				end=#
                 	end
 
 		end
