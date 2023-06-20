@@ -150,7 +150,7 @@ function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2
 		#push!(pos_area_array, [angle_of_move, min_area])
 	end
 
-	#push!(moves_areas[agent.id], [model.n, agent.A, pos_area_array])
+	#push!(moves_areas[agent.id], (model.n, agent.A, pos_area_array))
 	if(move_made == 1)
 		no_move[agent.id] = 0
 	end

@@ -21,9 +21,8 @@ write(rot_o_file, "\n")
 write(rot_o_alt_file, "\n")
 write(mean_speed_file, "\n")
 
-###
-Simulate for however many more simulations you need to do
-for i in model.simulation_number+1:no_simulations
+###Simulate for however many more simulations you need to do
+for i in loaded_model.simulation_number+1:no_simulations
 	run_ABM(i)
 end
 

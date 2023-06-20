@@ -32,6 +32,7 @@ include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 
+const no_birds = 100
 const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
@@ -39,11 +40,11 @@ const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
-moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
+moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
-new_pos::Vector{Tuple{Float64, Float64}} = [] #An array that will store the new positions of the agents for movement when we go to the model step
+new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int64, 100)
-last_half_planes = []
+last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
 const sigma = 0.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
@@ -65,7 +66,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg, simulation_number_arg; seed = 123, no_birds = 100)
+function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -99,11 +100,11 @@ function initialise(target_area_arg, simulation_number_arg; seed = 123, no_birds
 		#push!(initial_positions, rand_position)
 		push!(initial_vels, rand_vel)
 		pack_positions[i] = initial_positions[i]
-		push!(moves_areas, [])
-		push!(last_half_planes, [])
-		if(model.simulation_number==1)
+		#push!(moves_areas, [])
+		#push!(last_half_planes, [])
+		#=if(model.simulation_number==1)
 			push!(new_pos, (0.0, 0.0))
-		end
+		end=#
 	end
 
 	#Calculate the DOD based off the initial positions
@@ -140,7 +141,7 @@ function initialise(target_area_arg, simulation_number_arg; seed = 123, no_birds
                 true_initial_A = voronoi_area(model, ri, true_initial_cell, rho)
 
 
-		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
+		last_half_planes[i], (initial_cell, temp_hp, ri)
 			
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
@@ -376,7 +377,7 @@ function run_ABM(i) #Note that we're asking to input no simulations
         global rot_o_file
         global rot_o_alt_file
 	global mean_speed_file
-	model = initialise(1000.0*sqrt(12), i)
+	model = initialise(1000.0*sqrt(12), i, no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
