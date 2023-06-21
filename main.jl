@@ -36,8 +36,8 @@ const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 const rect_bound::Float64 = 1000.0
-const spawn_dim_x::Float64 = 500.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 500.0 #This gives the y dimension size of the initial spawning area for the agents
+const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
@@ -198,9 +198,11 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 
 	###Plotting
 	colours::Vector{Float64} = []
+	rotations::Vector{Float64} = []
 	allagents_iterable = allagents(model)
-	for agent in allagents_iterable
-		push!(colours, abs(agent.A-model.target_area)/(0.5*pi*rho^2))
+	for id in 1:nagents(model)
+		push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
+		push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
 	end	
 	#=
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
@@ -210,7 +212,7 @@ savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
 	print("About to do the figure thing\n")
-	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
+	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -232,7 +234,7 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 100, rho, target_area)
+        move_made = move_gradient(agent, model, k1, 16, 100, rho, target_area)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -316,14 +318,16 @@ function model_step!(model)
 
 	#Finally, plot the model after the step
 	colours::Vector{Float64} = []
+	rotations::Vector{Float64} = []
         allagents_iterable = allagents(model)
-        for agent in allagents_iterable
-                push!(colours, abs(agent.A-model.target_area)/(0.5*pi*rho^2))
+	for id in 1:nagents(model)
+                push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
+                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
         end     
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	print("About to do the figure\n")
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
@@ -368,7 +372,7 @@ end
 
 ###This is for the actual running of the model
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 2000
+const no_steps::Int64 = 5000
 
 function run_ABM(i) #Note that we're asking to input no simulations 
 	global compac_frac_file
