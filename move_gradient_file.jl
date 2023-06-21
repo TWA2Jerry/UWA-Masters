@@ -7,12 +7,12 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	end=#
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
-	unit_v::Float64 = agent.vel ./ 1.0
+	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
 	theta_0::Float64 = atan(unit_v[2], unit_v[1])
 	agent_speed::Float64 = 1.0
 	vix::Float64 = unit_v[1]
-	viy = unit_v[2]
-	positions = Vector{Tuple{Float64, Float64}}(undef, 0)
+	viy::Float64 = unit_v[2]
+	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	all_agents_iterable = allagents(model)
 	for neighbour in all_agents_iterable
 		if(neighbour.id == agent.id)
@@ -23,18 +23,18 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	#min_area = inf  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
-	move_made = 0
+	move_made::Int64 = 0
 	pos_area_array = []
-	no_angles_considered = 0
+	no_angles_considered::Int64 = 0
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 
 	#For the relic idea, we have a bounding half plane based on the agent's current position and velocity
-        relic_x = -1.0*(-viy)
-        relic_y = -vix
-        relic_pq = (relic_x, relic_y)
+        relic_x::Float64 = -1.0*(-viy)
+        relic_y::Float64 = -vix
+        relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         relic_angle = atan(relic_y, relic_x)
         relic_is_box = -2
         relic_half_plane = (relic_angle, relic_pq, agent.pos, relic_is_box)

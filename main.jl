@@ -32,7 +32,7 @@ include("init_pos.jl")
 print("All homemade files included\n")
 
 const no_birds = 100
-const rho = sqrt(2*500^2)
+const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
 const rect_bound::Float64 = 1000.0
