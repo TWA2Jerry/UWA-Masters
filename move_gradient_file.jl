@@ -1,16 +1,16 @@
 ###Function that determines the gradient of movement
-function move_gradient(agent, model::Agents.SingleContainerABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, Dict{Int64, bird}, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#=if(model.n == 3 && model.simulation_number == 2) 
 		print("Yo, this is the load tester\n")
 		AgentsIO.save_checkpoint("simulation_save.jld2", model)
                 exit()
 	end=#
 	#Calculate the unit vector in the current direction of motion
-	dt = model.dt
-	unit_v = agent.vel ./ 1.0
-	theta_0 = atan(unit_v[2], unit_v[1])
-	agent_speed = 1.0
-	vix = unit_v[1]
+	dt::Float64 = model.dt
+	unit_v::Float64 = agent.vel ./ 1.0
+	theta_0::Float64 = atan(unit_v[2], unit_v[1])
+	agent_speed::Float64 = 1.0
+	vix::Float64 = unit_v[1]
 	viy = unit_v[2]
 	positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 	all_agents_iterable = allagents(model)

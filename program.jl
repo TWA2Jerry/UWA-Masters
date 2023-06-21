@@ -7,7 +7,7 @@ mean_speed_file = open("mean_speed.txt", "w")
 
 ###Load the functions
 include("io_file.jl")
-include("main_functions.jl")
+include("main.jl")
 
 ###Run ABM
 for i in 1:no_simulations

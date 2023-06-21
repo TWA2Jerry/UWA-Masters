@@ -1,6 +1,5 @@
 ###Introduction
-#In this template, we generate an agent, but now it moves with some velocity and acceleration. However, the acceleration will be randomised at each time step and the velocity updated accordingly
-#One thing that we're looking out for in particular is if we can update position, velocity and acceleration, which will be N tuples, with vectors generated from our ODE or movement gradient function. Actually no, in accordance with RK4, or even Euler integration, acceleration isn't an quantity we need to keep track of.
+#Hello, this is the file that defines all of the main data structures and functions for simulating our program. If you want to actually run the program, use the program.jl file instead. Run using "julia program.jl".
 
 ###Preliminaries
 using Agents
@@ -33,12 +32,12 @@ include("init_pos.jl")
 print("All homemade files included\n")
 
 const no_birds = 100
-const rho = 100.0
+const rho = sqrt(2*500^2)
 initialised = 0
 area_zero = zeros(Int64, 100)
 const rect_bound::Float64 = 1000.0
-const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
+const spawn_dim_x::Float64 = 500.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 500.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
@@ -78,7 +77,7 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 	print("Before model\n")
 
 	#Create the model
-	model = ABM(
+	model = UnremovableABM(
 		bird, space; 
 		properties, rng, scheduler = Schedulers.fastest
 	)	
@@ -368,8 +367,8 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 5
-const no_steps::Int64 = 10
+const no_simulations::Int64 = 1
+const no_steps::Int64 = 2000
 
 function run_ABM(i) #Note that we're asking to input no simulations 
 	global compac_frac_file
