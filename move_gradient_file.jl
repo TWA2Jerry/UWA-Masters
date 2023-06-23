@@ -35,16 +35,16 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
         relic_x::Float64 = -1.0*(-viy)
         relic_y::Float64 = -vix
         relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-        relic_angle = atan(relic_y, relic_x)
-        relic_is_box = -2
-        relic_half_plane = (relic_angle, relic_pq, agent.pos, relic_is_box)
+        relic_angle::Float64 = atan(relic_y, relic_x)
+        relic_is_box::Int64 = -2
+        relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 
-	for i in 0:(q-1) #For every direction
+	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict = 0
-		if(abs(rel_angle) > (3)*2*pi/q + eps)
+		if(abs(rel_angle) > (4)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
