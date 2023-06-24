@@ -75,7 +75,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 	print("Before model\n")
 
 	#Create the model
-	model = ABM(
+	model = UnremovableABM(
 		bird, space; 
 		properties, rng, scheduler = Schedulers.fastest
 	)	
@@ -193,19 +193,30 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
-	#=
-	Plots.scatter(pack_positions, color =   markersize = 6, label = "generators")
-annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
+
+	###Plotting 
+        colours::Vector{Float64} = []
+        rotations::Vector{Float64} = []
+        allagents_iterable = allagents(model)
+        for id in 1:nagents(model)
+                push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
+                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+        end     
+        #=      
+        Plots.scatter(pack_positions, markersize = 6, label = "generators")
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])              
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
-	=#
-	#Finally, plot the figure
-	figure = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)))
+        =#              
+        #Finally, plot the figure
+        print("About to do the figure thing\n")
+        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
+        Colorbar(figure[1,2], colorbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
-
+        print("finished figure\n")
 
 	return model
 end  
@@ -302,15 +313,25 @@ function model_step!(model)
 	model.t += model.dt
         model.n += 1
 
-	#Finally, plot the model after the step
-	#figure, _ = abmplot(model)
-	#print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	figure = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)))
-	#=for i in 1:nagents(model)
-		text!(new_pos[i], text = "$i", align = (:center, :top))
-	end=#
-	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
-	
+
+	###Plotting 
+        colours::Vector{Float64} = []
+        rotations::Vector{Float64} = []
+        allagents_iterable = allagents(model)
+        for id in 1:nagents(model)
+                push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
+                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+        end     
+        #Finally, plot the figure
+        #print("About to do the figure thing\n")
+        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
+        #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
+                text!(initial_positions[i], text = "$i", align = (:center, :top))
+        end=#
+        Colorbar(figure[1,2], colorbarthing)
+        save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+        print("finished figure\n")
+
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
