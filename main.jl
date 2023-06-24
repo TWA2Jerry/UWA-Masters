@@ -234,7 +234,7 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 16, 100, rho, target_area)
+        move_made = move_gradient(agent, model, k1, 8, 100, rho, target_area)
 	
 	#Update the agent position and velocity
 	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -274,8 +274,12 @@ function model_step!(model)
         total_area = 0.0
 	total_speed = 0.0
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+	previous_areas::Vector{Float64} = zeros(nagents(model))
+	actual_areas::Vector{Float64} = zeros(nagents(model))
 	for agent_i in all_agents_iterable
-                neighbour_positions::Vector{Tuple{Float64, Float64}} = []
+		previous_areas[agent_i.id] = agent_i.A #Just stores the area for the agent in the previous step for plotting
+                
+		neighbour_positions::Vector{Tuple{Float64, Float64}} = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
                                 continue
@@ -303,6 +307,7 @@ function model_step!(model)
 		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
 		true_new_cell_i =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
+		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
 		total_area += true_new_area/(pi*rho^2)
@@ -316,12 +321,13 @@ function model_step!(model)
 	model.t += model.dt
         model.n += 1
 
+	#=
 	#Finally, plot the model after the step
 	colours::Vector{Float64} = []
 	rotations::Vector{Float64} = []
         allagents_iterable = allagents(model)
 	for id in 1:nagents(model)
-                push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
+                push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
         end     
 	#figure, _ = abmplot(model)
@@ -334,6 +340,10 @@ function model_step!(model)
 	Colorbar(figure[1,2], colourbarthing)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	print("Finished figure\n")	
+	=#
+	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
+	draw_figures(model, actual_areas, previous_areas, delta_max, new_pos)
+
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
