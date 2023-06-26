@@ -2,7 +2,8 @@
 #Hello, this is the file that defines all of the main data structures and functions for simulating our program. If you want to actually run the program, use the program.jl file instead. Run using "julia program.jl".
 
 ###Preliminaries
-using Agents
+#using Agents
+include("agent_definition.jl")
 using Random
 using VoronoiCells
 using GeometryBasics
@@ -13,6 +14,7 @@ using ColorSchemes
 import ColorSchemes.balance
 print("Packages loaded\n")
 
+#=
 ###Create the agent
 mutable struct bird <: AbstractAgent
         id::Int
@@ -21,7 +23,7 @@ mutable struct bird <: AbstractAgent
         speed::Float64
         A::Float64 #The area of the agent's DOD, at least in their own eyes
 	true_A::Float64 #The true area of the agent's DOD
-end
+end =#
 
 include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
@@ -133,7 +135,7 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
         	relic_is_box = 2
         	relic_half_plane = (relic_angle, relic_pq, ri, relic_is_box)
 
-		initial_cell = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
+		initial_cell = @time voronoi_cell(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A = voronoi_area(model, ri, initial_cell, rho) 
 	
 		true_initial_cell = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
@@ -296,7 +298,7 @@ function model_step!(model)
         	relic_is_box = 2
         	relic_half_plane = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
-                new_cell_i = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                new_cell_i = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
                 new_area = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
@@ -375,7 +377,7 @@ function model_step!(model)
 	end
 	close(last_hp_vert)
 
-	print("Finished step $(model.n) for simulation $(model.simulation_number).\n\n\n")
+	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end
 
 
@@ -384,13 +386,13 @@ end
 const no_simulations::Int64 = 1
 const no_steps::Int64 = 5000
 
-function run_ABM(i) #Note that we're asking to input no simulations 
+function run_ABM(i, target_area) #Note that we're asking to input no simulations 
 	global compac_frac_file
         global mean_a_file
         global rot_o_file
         global rot_o_alt_file
 	global mean_speed_file
-	model = initialise(1000.0*sqrt(12), i, no_birds)
+	model = initialise(target_area, i, no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)

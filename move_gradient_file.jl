@@ -69,7 +69,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+			agent_voronoi_cell =  voronoi_cell(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)

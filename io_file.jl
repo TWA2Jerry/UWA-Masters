@@ -1,29 +1,14 @@
-#=
-###Initialise the model
-model = initialise(1000*sqrt(12), 1)
-print("Number of agents is $(nagents(model))\n")
-
-figure, _ = abmplot(model)
-figure # returning the figure displays it
-save("shannon_flock.png", figure)
-=#     
-
-#=
-compac_frac_file = open("compaction_frac.txt", "w")
-mean_a_file = open("mean_area.txt", "w")
-rot_o_file = open("rot_order.txt", "w")
-rot_o_alt_file = open("rot_order_alt.txt", "w")
-mean_speed_file = open("mean_speed.txt", "w")
-=#
-
-#=
-
 using Plots
 using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
 using ColorSchemes
 import ColorSchemes.balance
+#using Agents
+using Random
 
+include("agent_definition.jl")
+
+#=
 ###Animate
 model = initialise(1000.0*sqrt(12), 1);
 #ac(agent) =  get(balance, abs(agent.A-model.target_area)/(pi*rho^2))
@@ -45,7 +30,7 @@ print("Finished the vid\n")
 
 
 function do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
-	
+	#=
         close(compac_frac_file)
         close(mean_a_file)
         close(rot_o_file)
@@ -57,6 +42,7 @@ function do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, 
         rot_o_file = open("rot_order.txt", "r")
         rot_o_alt_file = open("rot_order_alt.txt", "r")
         mean_speed_file = open("mean_speed.txt", "r")
+	=#	
 
 cf_array = []
 ma_array = []
@@ -131,8 +117,24 @@ for i in 0:no_steps
         write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
 end
 
+	#=
+	close(compac_frac_file)
+        close(mean_a_file)
+        close(rot_o_file)
+        close(rot_o_alt_file)
+        close(mean_speed_file)
+
+	close(cf_ave_file)
+	close(ma_ave_file)
+	close(rot_o_ave_file)
+	close(rot_o_alt_ave_file)
+	close(mean_speed_file)
+	=#
 end
 
+
+
+###Function for drawing the plots for model step
 function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}})
 	##Draw the standard figure of the agents with their DODs after the step
 	colours::Vector{Float64} = []
