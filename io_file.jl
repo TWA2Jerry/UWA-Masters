@@ -30,7 +30,6 @@ print("Finished the vid\n")
 
 
 function do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
-	#=
         close(compac_frac_file)
         close(mean_a_file)
         close(rot_o_file)
@@ -42,7 +41,6 @@ function do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, 
         rot_o_file = open("rot_order.txt", "r")
         rot_o_alt_file = open("rot_order_alt.txt", "r")
         mean_speed_file = open("mean_speed.txt", "r")
-	=#	
 
 cf_array = []
 ma_array = []
@@ -116,20 +114,19 @@ for i in 0:no_steps
         write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
         write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
 end
-
 	#=
 	close(compac_frac_file)
         close(mean_a_file)
         close(rot_o_file)
         close(rot_o_alt_file)
         close(mean_speed_file)
-
+	=#
+	
 	close(cf_ave_file)
 	close(ma_ave_file)
 	close(rot_o_ave_file)
 	close(rot_o_alt_ave_file)
 	close(mean_speed_file)
-	=#
 end
 
 

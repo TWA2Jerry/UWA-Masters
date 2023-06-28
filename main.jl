@@ -37,9 +37,9 @@ const no_birds = 100
 const rho = 100.0
 initialised = 0
 area_zero = zeros(Int64, 100)
-const rect_bound::Float64 = 1000.0
-const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
+const rect_bound::Float64 = 100.0
+const spawn_dim_x::Float64 = 50.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 50.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
@@ -384,14 +384,14 @@ end
 
 ###This is for the actual running of the model
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 5000
+const no_steps::Int64 = 500
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
-	global compac_frac_file
-        global mean_a_file
-        global rot_o_file
-        global rot_o_alt_file
-	global mean_speed_file
+	#global compac_frac_file
+        #global mean_a_file
+        #global rot_o_file
+        #global rot_o_alt_file
+	#global mean_speed_file
 	model = initialise(target_area, i, no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)

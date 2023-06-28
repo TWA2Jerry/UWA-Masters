@@ -23,3 +23,10 @@ end
 
 out_file_4 = open("io_test_3.txt", "a")
 write(out_file_4, "Uh, hello\n")
+
+out_file_5 = open("io_test_4.txt", "w+")
+write(out_file_5, "Yo\n")
+close(out_file_5)
+thing = open("io_test_4.txt", "r")
+bro = readlines(thing)
+print(bro[1])
