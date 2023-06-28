@@ -1,10 +1,5 @@
 ###Function that determines the gradient of movement
 function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
-	#=if(model.n == 3 && model.simulation_number == 2) 
-		print("Yo, this is the load tester\n")
-		AgentsIO.save_checkpoint("simulation_save.jld2", model)
-                exit()
-	end=#
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
@@ -38,7 +33,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
         relic_angle::Float64 = atan(relic_y, relic_x)
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
-
+	no_positions_considered = 0
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
 		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
@@ -55,18 +50,18 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
 				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
-					if(j == 1)
+					#=if(j == 1)
 						angular_conflict = 1
-					end
+					end=#
 					conflict = 1
 					break
 				end			
 			end
 			
-			if (conflict == 1 || angular_conflict == 1)		
+			if (conflict == 1 #=|| angular_conflict == 1=#)		
 				continue
 			end
-
+			no_positions_considered += 1
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			agent_voronoi_cell =  voronoi_cell(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
@@ -181,7 +176,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
         #It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
         kn[1] = (min_direction .* agent_speed)[1]
         kn[2] = (min_direction .* agent_speed)[2]
-
+	print("No positions considered was $no_positions_considered\n")
 	return move_made
 end
 

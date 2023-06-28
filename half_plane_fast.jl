@@ -149,7 +149,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	#print("\n\n\nCommencing bounded DOD calculation\n")	
 	i = 1
 	while (i <= length(dq))
-		if(dq[i][4]==1 || norm(dq[i][3] .- ri) >= rho || abs(norm(dq[i][3] .- ri)-rho) < 10^(-12))
+		if(dq[i][4]== -1 || norm(dq[i][3] .- ri) >= rho || abs(norm(dq[i][3] .- ri)-rho) < 10^(-12))
 			deleteat!(dq, i)
 			continue
 		end
@@ -176,7 +176,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	for i in 1:dql
 		#print("Single fence agent detected\n")
 		m::Float64 = 0.0
-		if(dq[i][4] == 1)
+		if(dq[i][4] == -1)
 			print("Bounding box fence detected\n")
 			AgentsIO.save_checkpoint("simulation_save.jld2", model)
 			exit()
@@ -283,7 +283,6 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			forward_after_inter = intersect_i .+ 1.0 .* dq[i][2]
 			if(intersect_info[2] == -1 || outside(newdq[len], forward_after_inter, eps, inf))
 				invalid = 1
-	global mean_speed_file
 			end
 
 			if(is_outside == 0 && invalid == 0)

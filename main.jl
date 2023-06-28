@@ -32,7 +32,7 @@ include("rot_ord.jl")
 include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
-
+print("Hello\n")
 const no_birds = 100
 const rho = 100.0
 initialised = 0
@@ -214,11 +214,11 @@ savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
 	print("About to do the figure thing\n")
-	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
+	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, marksersize = 20, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
-	Colorbar(figure[1,2], colorbarthing)
+	#Colorbar(figure[1,2], colorbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	print("finished figure\n")
 
@@ -309,6 +309,10 @@ function model_step!(model)
 		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
 		true_new_cell_i =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
+		if(abs(true_new_area - new_area) > 0.000000001) 
+			print("Difference detected. True new area was $true_new_area, the other was new_area\n")
+			exit
+		end
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
@@ -335,11 +339,11 @@ function model_step!(model)
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	print("About to do the figure\n")
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, markersize = 20,  color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
-	Colorbar(figure[1,2], colourbarthing)
+	#Colorbar(figure[1,2], colourbarthing)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 	print("Finished figure\n")	
 	=#
