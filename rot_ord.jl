@@ -3,7 +3,7 @@ function rot_ord(agents)
 	num_agents = length(agents)
 
 	##Calculate the group center
-	r_g = (0.0, 0.0)
+	r_g::Tuple{Float64, Float64} = (0.0, 0.0)
 	for agent in agents
 		r_g = r_g .+ agent.pos
 	end
@@ -11,7 +11,7 @@ function rot_ord(agents)
 	r_g = r_g ./ length(agents)
 
 	##Iterate through the agents again and find the absolute value of the sum of the cross products r_ig \times v_i
-	rot_order = 0.0
+	rot_order::Float64 = 0.0
 	for agent in agents
 		rot_order += cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed)
 	end

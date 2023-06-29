@@ -14,12 +14,12 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			continue
 		end
 		pushfirst!(positions, neighbour.pos)	
-	end		
+	end	
 	#min_area = inf  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made::Int64 = 0
-	pos_area_array = []
+	pos_area_array::Vector{Tuple{Tuple{Float64,Float64}, Float64}}  = []
 	no_angles_considered::Int64 = 0
 
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
@@ -34,36 +34,38 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 	for i::Int64 in 0:(q-1) #For every direction
-		direction_of_move = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
-		angle_of_move = atan(direction_of_move[2], direction_of_move[1])
-		rel_angle = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
-		angular_conflict = 0
+		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
+		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
+		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
+		angular_conflict::Int64 = 0
 		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
-		for j in 1:m #For every position up to m
-			conflict = 0
-			new_agent_pos = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
+		for j::Int64 in 1:m #For every position up to m
+			if(angular_conflict == 1) break
+			conflict::Int64 = 0
+			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position in positions
 				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
-					(j == 1)
+					if(j == 1)
 						angular_conflict = 1
 					end
 					conflict = 1
 					break
 				end			
-			end
-			
+			end			
 			if (conflict == 1 || angular_conflict == 1)		
 				continue
 			end
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-                	#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell =  voronoi_cell(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-                	new_area = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+                	
+			###
+			print("\nThe time to calculate a voronoi cell in move gradient is ")
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  @time voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			##Some error detection stuff
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
@@ -149,9 +151,9 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	end
 	
 	#Create the noise addition
-	epsilon = randn(model.rng, Float64, 2)
-	epsilon_prime = randn(model.rng, Float64, 2)
-	dW = sqrt(model.dt) .* (epsilon .- epsilon_prime)
+	epsilon::Vector{Float64} = randn(model.rng, Float64, 2)
+	epsilon_prime::Vector{Float64} = randn(model.rng, Float64, 2)
+	dW::Vector{Float64} = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
@@ -164,7 +166,6 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	#=if(min_area > pi*rho^2)
 		print("Conventional area exceeded by agent $(agent.id)\n")
 	end=#
-	
 	if(move_made == 0)
 		turn = rand([-1, 1])
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)

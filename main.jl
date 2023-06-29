@@ -33,18 +33,18 @@ include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
-const no_birds = 100
-const rho = 100.0
-initialised = 0
-area_zero = zeros(Int64, 100)
-const rect_bound::Float64 = 100.0
-const spawn_dim_x::Float64 = 50.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 50.0 #This gives the y dimension size of the initial spawning area for the agents
+const no_birds::Int32 = 100
+const rho::Float64 = 100.0
+initialised::Int32 = 0
+area_zero = zeros(Int32, 100)
+const rect_bound::Float64 = 1000.0
+const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
-no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
+no_move = ones(Int32, 100) #An array which will allow us to keep track of which agents never move
 new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An array that will store the new positions of the agents for movement when we go to the model step
-convex_hull_point = zeros(Int64, 100)
+convex_hull_point = zeros(Int32, 100)
 last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
 const sigma = 0.0
 
@@ -86,8 +86,8 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 
 
 	#Generate random initial positions for each bird, then calculate the DoDs
-	initial_positions = []
-	initial_vels = []
+	initial_positions::Vector{Tuple{Float64, Float64}} = []
+	initial_vels::Vector{Tuple{Float64, Float64}} = []
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
@@ -96,7 +96,7 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
-		rand_vel = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+		rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
 		rand_vel = rand_vel ./norm(rand_vel)
 		#push!(initial_positions, rand_position)
 		push!(initial_vels, rand_vel)
@@ -114,32 +114,32 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 
 	#Calculate the DoDs based off the initial positions
 	#initial_dods = voronoi_area(model, initial_positions, rho)
-	initial_dods = []
-	true_initial_dods = []
-	for i in 1:no_birds
+	initial_dods::Vector{Float64} = []
+	true_initial_dods::Vector{Float64} = []
+	for i::Int32 in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
-		ri  = Tuple(initial_positions[i])
+		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
-		for j in 1:no_birds
+		for j::Int32 in 1:no_birds
 			if(i == j)
 				continue 
 			end
 			push!(neighbouring_positions, Tuple(initial_positions[j]))
 		end
-		vix = initial_vels[i][1]
-		viy = initial_vels[i][2]
-		relic_x = -1.0*(-viy)
-        	relic_y = -vix
-        	relic_pq = (relic_x, relic_y)
-        	relic_angle = atan(relic_y, relic_x)
-        	relic_is_box = 2
-        	relic_half_plane = (relic_angle, relic_pq, ri, relic_is_box)
+		vix::Float64 = initial_vels[i][1]
+		viy::Float64 = initial_vels[i][2]
+		relic_x::Float64 = -1.0*(-viy)
+        	relic_y::Float64 = -vix
+        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+        	relic_angle::Float64 = atan(relic_y, relic_x)
+        	relic_is_box::Int64 = 2
+        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
 
-		initial_cell = @time voronoi_cell(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
-		initial_A = voronoi_area(model, ri, initial_cell, rho) 
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
+		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 	
-		true_initial_cell = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
-                true_initial_A = voronoi_area(model, ri, true_initial_cell, rho)
+		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
+                true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
 
 
 		last_half_planes[i], (initial_cell, temp_hp, ri)
@@ -168,9 +168,9 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 
 	end
 	#Now make the agents with their respective DoDs and add to the model
-	total_area = 0.0
-	total_speed = 0.0
-	for i in 1:no_birds
+	total_area::Float64 = 0.0
+	total_speed::Float64 = 0.0
+	for i::Int32 in 1:no_birds
 		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
@@ -181,16 +181,16 @@ function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123
 
 	#Calculate the actual area of the convex hull of the group of birds
 	convexhullbro = update_convex_hull(model)
-	initial_convex_hull_area = voronoi_area(model, -1, convexhullbro, rho)
+	initial_convex_hull_area::Float64 = voronoi_area(model, -1, convexhullbro, rho)
 	model.CHA = initial_convex_hull_area
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
-	init_rot_ord = rot_ord(allagents(model))
-	init_rot_ord_alt = rot_ord_alt(allagents(model))
+	init_rot_ord::Float64 = rot_ord(allagents(model))
+	init_rot_ord_alt::Float64 = rot_ord_alt(allagents(model))
 	print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	write(compac_frac_file, "$packing_fraction ")
-	average_area = total_area / nagents(model)
+	average_area::Float64 = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
-	average_speed = total_speed/no_birds
+	average_speed::Float64 = total_speed/no_birds
 	write(mean_speed_file, "$average_speed ")
 	write(rot_o_file, "$init_rot_ord ")
 	write(rot_o_alt_file, "$init_rot_ord_alt ")
@@ -231,18 +231,18 @@ end
 function agent_step!(agent, model)		
 	#Update the agent position and velocities, but only if it is a 
 	#print("Step!\n", agent.planet)
-	dt = model.dt
+	dt::Float64 = model.dt
 	k1::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 100, rho, target_area)
+        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 100, rho, target_area)
 	
 	#Update the agent position and velocity
-	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
-	change_in_position = new_agent_pos .- (agent.pos)
-	if(move_made==1)
+	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
+        new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
+	if(move_made_main==1)
 		agent.vel = new_agent_vel
 		agent.speed = 1.0
 	else 
@@ -263,8 +263,8 @@ end
 function model_step!(model)
 	#Calculate the rotational order of the agents. After some debate, we've decided that position \times desired_velocity is the way to go. 
         all_agents_iterable = allagents(model)
-	rot_order = rot_ord(allagents(model))
-        rot_order_alt = rot_ord_alt(allagents(model))
+	rot_order::Float64 = rot_ord(allagents(model))
+        rot_order_alt::Float64 = rot_ord_alt(allagents(model))
 	print("Alternate rotational order returned as $rot_order_alt\n")	
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
@@ -273,8 +273,8 @@ function model_step!(model)
         end
 	
         #Now recalculate the agent DODs based off their new positions
-        total_area = 0.0
-	total_speed = 0.0
+        total_area::Float64 = 0.0
+	total_speed::Float64 = 0.0
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	previous_areas::Vector{Float64} = zeros(nagents(model))
 	actual_areas::Vector{Float64} = zeros(nagents(model))
@@ -288,18 +288,18 @@ function model_step!(model)
                         end
                         push!(neighbour_positions, agent_j.pos)
                 end
-                ri = agent_i.pos
-		vix = agent_i.vel[1]
-		viy = agent_i.vel[2]
-		relic_x = -1.0*(-viy)
-        	relic_y = -vix
-        	relic_pq = (relic_x, relic_y)
-        	relic_angle = atan(relic_y, relic_x)
-        	relic_is_box = 2
-        	relic_half_plane = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
+                ri::Tuple{Float64, Float64} = agent_i.pos
+		vix::Float64 = agent_i.vel[1]
+		viy::Float64 = agent_i.vel[2]
+		relic_x::Float64 = -1.0*(-viy)
+        	relic_y::Float64 = -vix
+        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+        	relic_angle::Float64 = atan(relic_y, relic_x)
+        	relic_is_box::Int64 = 2
+        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
-                new_cell_i = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-                new_area = voronoi_area(model, ri, new_cell_i, rho)
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		if(agent_i.A > pi*rho^2)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
@@ -307,12 +307,9 @@ function model_step!(model)
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
 		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
-		true_new_cell_i =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
+		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
-		if(abs(true_new_area - new_area) > 0.000000001) 
-			print("Difference detected. True new area was $true_new_area, the other was new_area\n")
-			exit
-		end
+		
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
@@ -388,7 +385,7 @@ end
 
 ###This is for the actual running of the model
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 500
+const no_steps::Int64 = 5000
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
 	#global compac_frac_file
