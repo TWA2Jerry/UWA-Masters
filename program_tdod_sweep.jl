@@ -27,10 +27,11 @@ for target_DOD in [0.0, sqrt(12), 2*sqrt(12), 10*sqrt(12), 20*sqrt(12),sqrt(12)*
 	for i in 1:no_simulations
 		run_ABM(i, target_DOD)
 	end
-	close(compac_frac_file)
+	#=close(compac_frac_file)
 	compac_frac_file = open("compaction_frac.txt", "r")
 	bro = readlines(compac_frac_file)
 	print(bro[1])
+	exit()=#
 	do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 	
 	###Do the stuff specific for target_DOD plotting
