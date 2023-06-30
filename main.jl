@@ -345,7 +345,9 @@ function model_step!(model)
 	print("Finished figure\n")	
 	=#
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
-	draw_figures(model, actual_areas, previous_areas, delta_max, new_pos)
+	if(model.simulation_number == 1)
+		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos)
+	end	
 
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
@@ -384,8 +386,8 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 1
-const no_steps::Int64 = 5000
+const no_simulations::Int64 = 10
+const no_steps::Int64 = 5
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
 	#global compac_frac_file

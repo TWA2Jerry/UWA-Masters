@@ -114,13 +114,11 @@ for i in 0:no_steps
         write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
         write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
 end
-	#=
 	close(compac_frac_file)
         close(mean_a_file)
         close(rot_o_file)
         close(rot_o_alt_file)
         close(mean_speed_file)
-	=#
 	
 	close(cf_ave_file)
 	close(ma_ave_file)
