@@ -386,7 +386,7 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 5
+const no_simulations::Int64 = 2
 const no_steps::Int64 = 500
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 

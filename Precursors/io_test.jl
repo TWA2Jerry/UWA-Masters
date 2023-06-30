@@ -46,6 +46,7 @@ for i in 1:10
 	close(outfile6)
 	outfile6 = open("io_test_5.txt", "r")
 	bro = readlines(outfile6)
-	print(bro[1])	
+	print(bro[1])
+	print(bro[2], "\n")	
 end 
 
