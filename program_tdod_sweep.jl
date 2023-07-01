@@ -12,7 +12,7 @@ include("io_file.jl")
 include("main.jl")
 
 ###Run ABM
-for target_DOD in [0.0, sqrt(12), 2*sqrt(12), 10*sqrt(12), 20*sqrt(12),sqrt(12)*100, 450.0, 200*sqrt(12), sqrt(12)*1000,  sqrt(12)*1000*2] 
+for target_DOD in [0.0, sqrt(12), 2*sqrt(12), 10*sqrt(12), 20*sqrt(12), 50*sqrt(12), sqrt(12)*100, 450.0, 200*sqrt(12), 2000.0, sqrt(12)*1000,  sqrt(12)*1000*2] 
 	#truncate the file between each target DOD 
 	global compac_frac_file = open("compaction_frac.txt", "w")
 	global mean_a_file = open("mean_area.txt", "w")

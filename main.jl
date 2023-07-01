@@ -386,8 +386,8 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 2
-const no_steps::Int64 = 500
+const no_simulations::Int64 = 10
+const no_steps::Int64 = 5000
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
 	#global compac_frac_file
