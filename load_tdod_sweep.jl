@@ -59,7 +59,7 @@ rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "r")
 =#
 
 ###And now, resume running the simulation as usual for the rest of the target areas
-for target_DOD in [4000.0, 4500.0]
+for target_DOD in [4500.0, 5000.0, 2*sqrt(12)*1000]
 	#truncate the file between each target DOD
         global compac_frac_file = open("compaction_frac.txt", "w")
         global mean_a_file = open("mean_area.txt", "w")
