@@ -43,7 +43,7 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			chord_length = norm(cell[j][1] .- cell[i][1]) #Calculates the length of the chord between the two vertices lying on the bounding circle
 			r = 0.0
 			if(rho^2 < (0.5*chord_length)^2)
-				print("Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri. Chord length calculated to be $chord_length, against a rho value of $rho\n")
+				print("Voronoi area file: Half chord length is longer than radius of vision. Offending vertices were $(cell[i]) and $(cell[j]) for an agent position of $ri. Chord length calculated to be $chord_length, against a rho value of $rho\n")
 				print("The vertices of the cell were\n")
 				for i in 1:num_points
 					print(cell[i], "\n")				
