@@ -1,4 +1,4 @@
-###Introduction
+##Introduction
 #In this template, we generate an agent, but now it moves with some velocity and acceleration. However, the acceleration will be randomised at each time step and the velocity updated accordingly
 #One thing that we're looking out for in particular is if we can update position, velocity and acceleration, which will be N tuples, with vectors generated from our ODE or movement gradient function. Actually no, in accordance with RK4, or even Euler integration, acceleration isn't an quantity we need to keep track of.
 
@@ -21,12 +21,12 @@ mutable struct bird <: AbstractAgent
 	true_A::Float64 #The true area of the agent's DOD
 end
 
-include("half_plane_fast.jl")
-include("half_plane_bounded.jl")
-include("convex_hull.jl")
-include("rot_ord.jl")
-include("rot_ord_check.jl")
-include("init_pos.jl")
+include("../half_plane_fast.jl")
+include("../half_plane_bounded.jl")
+include("../convex_hull.jl")
+include("../rot_ord.jl")
+include("../rot_ord_check.jl")
+include("../init_pos.jl")
 print("All homemade files included\n")
 
 const rho = 100.0
@@ -54,8 +54,8 @@ function mean(v)
 	return total/length(v)
 end
 
-include("voronoi_area_file.jl")
-include("move_gradient_file.jl")
+include("../voronoi_area_file.jl")
+include("../move_gradient_file.jl")
 
 print("Agent template created\n")
 
@@ -90,7 +90,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
 
-	for i in 1:no_birds
+	#=for i in 1:no_birds
 		angle_per_bird = 2*pi/no_birds
 		initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)	
 		rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1))) 
@@ -102,7 +102,21 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 		push!(moves_areas, [])
 		push!(last_half_planes, [])
 		push!(new_pos, (0.0, 0.0))
-	end
+	end=#
+
+
+	for i in 1:no_birds
+		bird_angle = rand(Float64)*2*pi
+		bird_radial = 200.0+randn()*25
+		initial_pos = (bird_radial*cos(bird_angle), bird_radial*sin(bird_angle)) .+ (300.0, 300.0)
+		initial_vel = (-sin(bird_angle), cos(bird_angle)) .+ 0.1 .* Tuple(rand(Float64, 2))
+		push!(initial_positions, initial_pos)
+                push!(initial_vels, initial_vel)
+		pack_positions[i] = initial_positions[i]
+                push!(moves_areas, [])
+                push!(last_half_planes, [])
+                push!(new_pos, (0.0, 0.0)) 
+	end	
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -386,7 +400,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 2000
+no_steps = 1000
 no_simulations = 1
 
 using ColorSchemes
