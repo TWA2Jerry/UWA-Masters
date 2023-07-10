@@ -143,7 +143,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
@@ -155,7 +155,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	for id in 1:nagents(model)
                 colours[id] = actual_areas[id]/(pi*rho^2)
         end
-	figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+	figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
@@ -167,7 +167,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                 #print("Current A is $(model[id].A), previous areas was $(previous_areas[id])\n")
 		colours[id] = (abs(model[id].A - model.target_area)-abs(previous_areas[id]-model.target_area)+delta_max)/(2*delta_max)
         end
-        figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+        figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#

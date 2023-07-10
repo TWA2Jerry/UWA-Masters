@@ -37,7 +37,7 @@ const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 2000.0
+const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -214,7 +214,7 @@ savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
 	print("About to do the figure thing\n")
-	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, marksersize = 20, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
+	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, marksersize = 20, color = colours, colormap = :viridis, colorrange = (0.0, 0.25))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -337,7 +337,7 @@ function model_step!(model)
 	#figure, _ = abmplot(model)
 	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
 	print("About to do the figure\n")
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, markersize = 20,  color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, markersize = 20,  color = colours, colormap = :viridis, colorrange = (0.0, 0.25)) #Note that I have no idea what the colorbarthing is for
 	#=for i in 1:nagents(model)
 		text!(new_pos[i], text = "$i", align = (:center, :top))
 	end=#
@@ -387,7 +387,7 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 10
+const no_simulations::Int64 = 1
 const no_steps::Int64 = 5000
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
