@@ -67,7 +67,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg, simulation_number_arg, no_birds; seed = 123)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -387,8 +387,8 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 1
-const no_steps::Int64 = 5000
+#const no_simulations::Int64 = 1
+#const no_steps::Int64 = 5000
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
 	#global compac_frac_file
@@ -396,7 +396,7 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
         #global rot_o_file
         #global rot_o_alt_file
 	#global mean_speed_file
-	model = initialise(target_area, i, no_birds)
+	model = initialise(target_area_arg = target_area, simulation_number = i, no_bird = no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
