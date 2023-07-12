@@ -8,7 +8,7 @@ using Random
 using VoronoiCells
 using GeometryBasics
 using Plots
-
+using Statistics
 print("Packages loaded\n")
 
 ###Create the agent
@@ -63,7 +63,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(target_area_arg; seed = 123, no_birds = 100)
+function initialise(; target_area_arg = 1000*sqrt(12),  seed = 123, no_birds = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -90,7 +90,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
 
-	#=for i in 1:no_birds
+	for i in 1:no_birds
 		angle_per_bird = 2*pi/no_birds
 		initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)	
 		rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1))) 
@@ -102,10 +102,10 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
 		push!(moves_areas, [])
 		push!(last_half_planes, [])
 		push!(new_pos, (0.0, 0.0))
-	end=#
+	end
 
 
-	for i in 1:no_birds
+	#=for i in 1:no_birds
 		bird_angle = rand(Float64)*2*pi
 		bird_radial = 200.0+randn()*25
 		initial_pos = (bird_radial*cos(bird_angle), bird_radial*sin(bird_angle)) .+ (300.0, 300.0)
@@ -116,7 +116,7 @@ function initialise(target_area_arg; seed = 123, no_birds = 100)
                 push!(moves_areas, [])
                 push!(last_half_planes, [])
                 push!(new_pos, (0.0, 0.0)) 
-	end	
+	end =#	
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -224,7 +224,7 @@ savefig("voronoi_pack_init_tess.png")
         =#              
         #Finally, plot the figure
         print("About to do the figure thing\n")
-        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
+        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -338,7 +338,7 @@ function model_step!(model)
         end     
         #Finally, plot the figure
         #print("About to do the figure thing\n")
-        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0))
+        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -400,7 +400,7 @@ mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 1000
+no_steps = 5000
 no_simulations = 1
 
 using ColorSchemes
@@ -432,7 +432,7 @@ function run_ABM()
         global rot_o_alt_file
 	global mean_speed_file
 for i in 1:no_simulations
-	model = initialise(1000.0*sqrt(12))
+	model = initialise(target_area_arg = 1000.0*sqrt(12))
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
@@ -534,4 +534,48 @@ end
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-run_ABM()
+#run_ABM()
+
+function mean_radial_distance(model)
+        com::Tuple{Float64, Float64} = (0.0, 0.0)
+        n::Int64 = nagents(model)
+        for i in 1:n
+                com =  (com .+ 1/n .* (model[i].pos))
+        end
+
+        mrd::Float64 = 0.0
+        for i in 1:n
+                mrd += 1/n*norm(model[i].pos .- com)
+        end
+
+        return mrd
+end
+
+function happiness(agent)
+        return abs((agent.A - 1000*sqrt(12))/(pi/2*rho^2-1000*sqrt(12)))
+end
+
+function rot_o_alt(model)
+        agents_iterable = allagents(model)
+        return rot_ord_alt(agents_iterable)
+end
+
+adata = [(happiness, Statistics.mean)]
+mdata = [mean_radial_distance, rot_o_alt]
+
+parameters = Dict(
+        :target_area_arg => [1000*sqrt(12)]
+)
+
+##Run the ABM using paramscan, and with changing the seed
+adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
+
+rot_o_alt_ave_file = open("ensemble_rot_o_alt.txt", "w")
+for i in 1:no_steps+1
+        write(rot_o_alt_ave_file, "$(i-1) $(mdf[i, 3])\n")
+end
+
+radial_dist_file = open("circ_radial.txt", "w")
+for i in 1:no_steps+1
+	write(radial_dist_file, "$(i-1) $(mdf[i, 2])\n") 
+end
