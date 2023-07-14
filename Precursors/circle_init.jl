@@ -224,7 +224,7 @@ savefig("voronoi_pack_init_tess.png")
         =#              
         #Finally, plot the figure
         print("About to do the figure thing\n")
-        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
+        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -338,7 +338,7 @@ function model_step!(model)
         end     
         #Finally, plot the figure
         #print("About to do the figure thing\n")
-        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', marksersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
+        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
@@ -569,6 +569,24 @@ parameters = Dict(
 
 ##Run the ABM using paramscan, and with changing the seed
 adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
+
+mean_happiness_file = open("mean_happiness.txt", "w")
+std_happiness_file = open("std_happiness.txt", "w")
+
+for step in 1:no_steps+1
+        new_mean::Float64 = 0.0
+        mean_squared::Float64 = 0.0
+        for sim_n in 0:no_simulations-1
+                new_mean += adf[sim_n*(no_steps+1)+step , 2]/no_simulations
+                mean_squared += (adf[sim_n*(no_steps+1)+step, 2])^2/no_simulations
+                #print("New mean was $new_mean, mean squared was $mean_squared\n")
+        end
+        write(mean_happiness_file, "$(step-1) $(new_mean)\n")
+        std_happiness = sqrt(mean_squared - new_mean^2)
+        #std_happiness = sqrt(mean_squared)
+        write(std_happiness_file, "$(step-1) $(std_happiness)\n")
+end
+
 
 rot_o_alt_ave_file = open("ensemble_rot_o_alt.txt", "w")
 for i in 1:no_steps+1
