@@ -130,7 +130,7 @@ end
 
 
 ###Function for drawing the plots for model step
-function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}})
+function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
 	##Draw the standard figure of the agents with their DODs after the step
 	colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
@@ -147,7 +147,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
-        Colorbar(figure[1,2], colourbarthing)
+        draw_path(path_points)
+	Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 
 
@@ -171,6 +172,12 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
-        Colorbar(figure[1,2], colourbarthing)
-        save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure)
+        #Makie.scatter!([Tuple(point) for point in path_points], marker = :circle, color = :black, markersize = 20)
+	#draw_path(path_points)
+	Colorbar(figure[1,2], colourbarthing) 
+	save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure)
+end
+
+function draw_path(points)
+	Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
 end

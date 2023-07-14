@@ -1,5 +1,5 @@
 ##Define the no_simulations and steps
-const no_steps = 5
+const no_steps = 500
 const no_simulations = 1
 
 ##Include the IO files for the previous order parameters that we wanted. 
@@ -15,6 +15,7 @@ include("io_file.jl")
 include("main.jl")
 
 using Statistics
+
 
 #Define the data we want
 function happiness(agent)
@@ -82,4 +83,4 @@ for step in 1:no_steps+1
 	std_happiness = sqrt(mean_squared - new_mean^2)
 	#std_happiness = sqrt(mean_squared)
 	write(std_happiness_file, "$(step-1) $(std_happiness)\n")
-end
+end 

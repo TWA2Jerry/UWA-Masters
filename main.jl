@@ -47,6 +47,8 @@ new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An 
 convex_hull_point = zeros(Int32, 100)
 last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
 const sigma = 0.0
+const tracked_agent::Int64 = rand(1:no_birds)
+tracked_path::Vector{Tuple{Float64, Float64}} = []
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -106,6 +108,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		#=if(model.simulation_number==1)
 			push!(new_pos, (0.0, 0.0))
 		end=#
+		if(i == tracked_agent)
+			push!(tracked_path, initial_positions[i])
+		end
 	end
 
 	#Calculate the DOD based off the initial positions
@@ -164,7 +169,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 
 		#print("The initial vertices for agent $i is \n")
 		#print("$(last_half_planes[i][1])\n")
-
+ 
 
 	end
 	#Now make the agents with their respective DoDs and add to the model
@@ -347,9 +352,10 @@ function model_step!(model)
 	=#
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos)
+		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 	end	
-
+	push!(tracked_path, new_pos[tracked_agent])
+	
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
@@ -396,7 +402,7 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
         #global rot_o_file
         #global rot_o_alt_file
 	#global mean_speed_file
-	model = initialise(target_area_arg = target_area, simulation_number = i, no_bird = no_birds)
+	model = initialise(target_area_arg = target_area, simulation_number_arg = i, no_bird = no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
