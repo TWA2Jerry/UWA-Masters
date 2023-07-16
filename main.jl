@@ -329,27 +329,8 @@ function model_step!(model)
 	model.CHA = convex_hull_area
 	model.t += model.dt
         model.n += 1
-
-	#=
-	#Finally, plot the model after the step
-	colours::Vector{Float64} = []
-	rotations::Vector{Float64} = []
-        allagents_iterable = allagents(model)
-	for id in 1:nagents(model)
-                push!(colours, abs(model[id].A-model.target_area)/(delta_max))
-                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
-        end     
-	#figure, _ = abmplot(model)
-	print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-	print("About to do the figure\n")
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, markersize = 20,  color = colours, colormap = :viridis, colorrange = (0.0, 0.25)) #Note that I have no idea what the colorbarthing is for
-	#=for i in 1:nagents(model)
-		text!(new_pos[i], text = "$i", align = (:center, :top))
-	end=#
-	#Colorbar(figure[1,2], colourbarthing)
-	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
-	print("Finished figure\n")	
-	=#
+	
+	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
 		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)

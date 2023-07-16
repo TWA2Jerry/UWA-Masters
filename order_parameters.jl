@@ -10,6 +10,7 @@ function center_of_mass(model)
         for i in 1:n
                 com =  (com .+ 1/n .* (model[i].pos))
         end
+	return com
 end
 
 function radial_distance(agent, com)
