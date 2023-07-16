@@ -1,5 +1,5 @@
 ##Define the no_simulations and steps
-const no_steps = 500
+const no_steps = 5000
 const no_simulations = 1
 
 ##Include the IO files for the previous order parameters that we wanted. 
@@ -12,30 +12,10 @@ rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "w")
 
 ##Include the main functions
 include("io_file.jl")
+include("order_parameters.jl")
 include("main.jl")
 
 using Statistics
-
-
-#Define the data we want
-function happiness(agent)
- 	return abs((agent.A - 1000*sqrt(12))/(pi/2*rho^2-1000*sqrt(12)))
-end
-
-function mean_radial_distance(model)
-	com::Tuple{Float64, Float64} = (0.0, 0.0)
-	n::Int64 = nagents(model)
-	for i in 1:n
-		com =  (com .+ 1/n .* (model[i].pos))	
-	end
-
-	mrd::Float64 = 0.0
-	for i in 1:n
-		mrd += 1/n*norm(model[i].pos .- com)	
-	end
-	
-	return mrd
-end
 
 function rot_o_alt(model)
 	agents_iterable = allagents(model)
@@ -83,4 +63,9 @@ for step in 1:no_steps+1
 	std_happiness = sqrt(mean_squared - new_mean^2)
 	#std_happiness = sqrt(mean_squared)
 	write(std_happiness_file, "$(step-1) $(std_happiness)\n")
+end
+
+radial_dist_file = open("circ_radial.txt", "w")
+for i in 1:no_steps+1
+        write(radial_dist_file, "$(i-1) $(mdf[i, 2])\n")
 end 
