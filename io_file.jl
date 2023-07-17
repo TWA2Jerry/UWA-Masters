@@ -162,22 +162,22 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
-        Colorbar(figure[1,2], colourbarthing)
-        save("./Simulation_Images_Actual_Areas/shannon_flock_n_=_$(model.n).png", figure)
+        Colorbar(figure_actual[1,2], colourbarthing)
+        save("./Simulation_Images_Actual_Areas/shannon_flock_n_=_$(model.n).png", figure_actual)
 
 	##Draw the figure of the agents with their change in DOD
 	for id in 1:nagents(model)
                 #print("Current A is $(model[id].A), previous areas was $(previous_areas[id])\n")
-		colours[id] = (abs(model[id].A - model.target_area)-abs(previous_areas[id]-model.target_area)+delta_max)/(2*delta_max)
+		colours[id] = (abs(model[id].A - model.target_area)-abs(previous_areas[id]-model.target_area))/(2*delta_max)
         end
-        figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
+        figure_difference, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (-0.1, 0.1)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
         #Makie.scatter!([Tuple(point) for point in path_points], marker = :circle, color = :black, markersize = 20)
 	#draw_path(path_points)
-	Colorbar(figure[1,2], colourbarthing) 
-	save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure)
+	Colorbar(figure_difference[1,2], colourbarthing) 
+	save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure_difference)
 end
 
 function draw_path(points)
