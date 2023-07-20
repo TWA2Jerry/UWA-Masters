@@ -1,499 +1,499 @@
-Agent 1, position of (391.93651133903325, 586.4979696741491), considering position of (0.0, 0.0)
+Agent 1, position of (531.2141623219408, 416.7226151531431), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 2, position of (444.26782247157865, 575.2426797188617), considering position of (0.0, 0.0)
+Agent 2, position of (304.15197139437305, 613.9358920879635), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 3, position of (588.0487650061757, 682.8797437784297), considering position of (0.0, 0.0)
+Agent 3, position of (496.8807837314708, 301.7054839052198), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 4, position of (715.1985186085976, 687.84161064891), considering position of (0.0, 0.0)
+Agent 4, position of (287.3929692805122, 295.0417565010814), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 5, position of (782.7922385348772, 562.4898272708466), considering position of (0.0, 0.0)
+Agent 5, position of (698.2959828645066, 384.05731224398403), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 6, position of (518.742283747089, 761.623990295689), considering position of (0.0, 0.0)
+Agent 6, position of (246.54909982631142, 602.4639555418369), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 7, position of (409.8278264778471, 574.4619324278497), considering position of (0.0, 0.0)
+Agent 7, position of (676.0783292830685, 473.7630821876254), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 8, position of (379.31772770781794, 726.28708318409), considering position of (0.0, 0.0)
+Agent 8, position of (573.694145247422, 350.1938616135507), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 9, position of (635.8961931715753, 853.2185587910275), considering position of (0.0, 0.0)
+Agent 9, position of (619.9953300011657, 341.74806166551036), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 10, position of (791.0958100332248, 784.9050794499008), considering position of (0.0, 0.0)
+Agent 10, position of (249.01300999564023, 605.8474583458724), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 11, position of (789.4423294582153, 572.7222319338211), considering position of (0.0, 0.0)
+Agent 11, position of (247.5537726214894, 604.5218668990279), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 12, position of (722.4595567733111, 668.5132367477186), considering position of (0.0, 0.0)
+Agent 12, position of (264.80993383596933, 469.62379151593404), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 13, position of (605.474022186236, 494.89776641436816), considering position of (0.0, 0.0)
+Agent 13, position of (534.604681201097, 617.0995221140034), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 14, position of (801.334385216514, 586.2603757392715), considering position of (0.0, 0.0)
+Agent 14, position of (248.85184785202523, 387.5835281631492), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 15, position of (346.589210253972, 613.1726936730854), considering position of (0.0, 0.0)
+Agent 15, position of (473.2189209411477, 413.0069846966423), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 16, position of (781.3214229707345, 796.056508448132), considering position of (0.0, 0.0)
+Agent 16, position of (335.27933273745685, 362.2114158662784), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 17, position of (834.538273737196, 679.5617686323625), considering position of (0.0, 0.0)
+Agent 17, position of (324.7866457935556, 263.0145671803915), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 18, position of (520.268398656421, 445.62214120742146), considering position of (0.0, 0.0)
+Agent 18, position of (512.6517860974366, 276.5836138257835), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 19, position of (548.7631036127899, 813.956251279064), considering position of (0.0, 0.0)
+Agent 19, position of (240.05943278838527, 374.0715983224121), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 20, position of (501.708801313881, 650.9411687779809), considering position of (0.0, 0.0)
+Agent 20, position of (507.52037326519275, 444.52203923962344), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 21, position of (491.5821278938692, 545.1538552766697), considering position of (0.0, 0.0)
+Agent 21, position of (401.8417802773016, 272.8411464361039), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 22, position of (531.6516478426239, 527.562756220105), considering position of (0.0, 0.0)
+Agent 22, position of (640.0744034275494, 366.5972056874602), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 23, position of (487.222170932107, 805.0106752024722), considering position of (0.0, 0.0)
+Agent 23, position of (516.42339331883, 624.1108017523933), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 24, position of (563.3405201116421, 747.8216784753713), considering position of (0.0, 0.0)
+Agent 24, position of (392.0841049103867, 551.8155585420361), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 25, position of (489.2407161736153, 451.5191724208063), considering position of (0.0, 0.0)
+Agent 25, position of (462.6349566826557, 419.97755331403596), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 26, position of (447.91238508988386, 464.0478660359433), considering position of (0.0, 0.0)
+Agent 26, position of (214.0110417824937, 541.6968638860703), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 27, position of (607.7247378304338, 789.3394148031555), considering position of (0.0, 0.0)
+Agent 27, position of (649.3109159053026, 349.5014217860203), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 28, position of (644.3751698415018, 671.3317500581392), considering position of (0.0, 0.0)
+Agent 28, position of (640.4865665087185, 369.4931235378207), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 29, position of (441.9793107411507, 545.8141932760273), considering position of (0.0, 0.0)
+Agent 29, position of (312.9053894135544, 641.8816145602418), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 30, position of (640.0658612096976, 814.8838765873038), considering position of (0.0, 0.0)
+Agent 30, position of (316.93170710009036, 380.0972129430138), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 31, position of (594.2500655726367, 824.3522290985903), considering position of (0.0, 0.0)
+Agent 31, position of (505.02139418689904, 344.8984664552166), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 32, position of (525.4028396953918, 804.1871872672593), considering position of (0.0, 0.0)
+Agent 32, position of (725.9568129392168, 483.789421183184), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 33, position of (513.925267839581, 808.0085619013611), considering position of (0.0, 0.0)
+Agent 33, position of (634.7196133506959, 338.19171721581284), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 34, position of (806.263907033829, 718.9352961523116), considering position of (0.0, 0.0)
+Agent 34, position of (698.649026793561, 502.86287815297766), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 35, position of (550.5288654470384, 465.07393689566845), considering position of (0.0, 0.0)
+Agent 35, position of (478.79453850182375, 486.72924382247623), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 36, position of (403.6170341698086, 521.9362105985132), considering position of (0.0, 0.0)
+Agent 36, position of (220.98268137226717, 520.2559327243076), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 37, position of (654.0165987121898, 841.445905696802), considering position of (0.0, 0.0)
+Agent 37, position of (612.0513752185458, 381.33956717541184), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 38, position of (828.5331041058838, 639.2752612820585), considering position of (0.0, 0.0)
+Agent 38, position of (240.5452302847894, 582.2678449713512), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 39, position of (664.4074414515559, 570.3303943258065), considering position of (0.0, 0.0)
+Agent 39, position of (638.8968085286283, 348.57602392011813), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 40, position of (355.40071218924624, 648.3394964174337), considering position of (0.0, 0.0)
+Agent 40, position of (694.3445097898655, 391.79176600330345), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 41, position of (608.8640015368077, 504.9625158793492), considering position of (0.0, 0.0)
+Agent 41, position of (430.99947405033635, 532.9133637778737), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 42, position of (729.876594594861, 599.3685621138081), considering position of (0.0, 0.0)
+Agent 42, position of (249.15978828307465, 351.7637111156767), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 43, position of (359.1030867068233, 592.4978266026782), considering position of (0.0, 0.0)
+Agent 43, position of (455.97724885654503, 356.7878655539716), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 44, position of (451.6154317415384, 752.3885793129787), considering position of (0.0, 0.0)
+Agent 44, position of (662.2316972398668, 548.0505881887698), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 45, position of (370.2636320223181, 664.6926480655034), considering position of (0.0, 0.0)
+Agent 45, position of (313.70378811284894, 383.77155777285606), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 46, position of (836.0350751872462, 665.4264033398639), considering position of (0.0, 0.0)
+Agent 46, position of (458.6677299399843, 646.2274963089183), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 47, position of (582.1818299176302, 615.9141390340094), considering position of (0.0, 0.0)
+Agent 47, position of (242.5587485530252, 413.88207011944945), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 48, position of (729.5483972597924, 697.664314244956), considering position of (0.0, 0.0)
+Agent 48, position of (479.51623594754113, 259.9253814534744), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 49, position of (398.37514085122194, 757.8394837519085), considering position of (0.0, 0.0)
+Agent 49, position of (260.35896742534, 602.8670694412697), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 50, position of (679.5039166017445, 712.8602522092851), considering position of (0.0, 0.0)
+Agent 50, position of (289.3360177992424, 262.96620515351725), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 51, position of (420.45536865151365, 564.0153487408483), considering position of (0.0, 0.0)
+Agent 51, position of (303.6622813767611, 243.2357769884061), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 52, position of (674.0675380456743, 654.9372186616126), considering position of (0.0, 0.0)
+Agent 52, position of (248.6668564802169, 400.7393551927887), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 53, position of (683.7806048149668, 835.042927079793), considering position of (0.0, 0.0)
+Agent 53, position of (344.10601582240463, 592.1078032458865), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 54, position of (730.447739349411, 817.7172977789049), considering position of (0.0, 0.0)
+Agent 54, position of (249.2593780262309, 598.2538513384432), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 55, position of (610.5029087780566, 634.90752670566), considering position of (0.0, 0.0)
+Agent 55, position of (498.3511363301573, 531.0418410914793), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 56, position of (392.85909591697526, 710.7655824608507), considering position of (0.0, 0.0)
+Agent 56, position of (320.8423862903935, 360.06163524981525), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 57, position of (592.657695627481, 626.4697943178195), considering position of (0.0, 0.0)
+Agent 57, position of (466.0606065647526, 645.4513411050917), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 58, position of (600.0261993869684, 819.610030680436), considering position of (0.0, 0.0)
+Agent 58, position of (240.30513107676086, 397.1512179787055), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 59, position of (799.6673942054445, 608.0611075810729), considering position of (0.0, 0.0)
+Agent 59, position of (380.3429538829587, 629.859525006121), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 60, position of (419.2595887631121, 493.77798385197957), considering position of (0.0, 0.0)
+Agent 60, position of (387.96433159711694, 366.00080832258107), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 61, position of (714.7486380122886, 635.5874227556243), considering position of (0.0, 0.0)
+Agent 61, position of (739.7066732235048, 487.66493174184717), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 62, position of (587.647424851297, 482.6000686384309), considering position of (0.0, 0.0)
+Agent 62, position of (707.6712435326418, 428.47004252765214), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 63, position of (485.01004395361315, 749.6623891061), considering position of (0.0, 0.0)
+Agent 63, position of (536.4008866829561, 584.4464639835676), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 64, position of (608.8278457797337, 725.1343577596315), considering position of (0.0, 0.0)
+Agent 64, position of (684.6385437355852, 368.90693034051617), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 65, position of (407.88258307487666, 582.0321169613358), considering position of (0.0, 0.0)
+Agent 65, position of (657.9659671120789, 351.71015025084904), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 66, position of (517.7008238545646, 655.1870021421751), considering position of (0.0, 0.0)
+Agent 66, position of (647.7672276212796, 469.39595243933064), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 67, position of (371.7524966432618, 749.3237173760056), considering position of (0.0, 0.0)
+Agent 67, position of (316.07386469135196, 231.9583331469933), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 68, position of (514.9498778785825, 606.1062386484704), considering position of (0.0, 0.0)
+Agent 68, position of (277.4384618647466, 504.50381579455865), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 69, position of (469.25805132444157, 767.1776466914175), considering position of (0.0, 0.0)
+Agent 69, position of (482.71444105526103, 484.4064624237955), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 70, position of (569.8377848548977, 524.0040118158927), considering position of (0.0, 0.0)
+Agent 70, position of (356.18618887706754, 497.4066562267983), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 71, position of (755.528853909513, 794.0894849758877), considering position of (0.0, 0.0)
+Agent 71, position of (499.60203384234006, 553.1865985423515), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 72, position of (391.62091242054925, 644.3432135066539), considering position of (0.0, 0.0)
+Agent 72, position of (377.00954788696095, 231.8961483087695), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 73, position of (523.2271876977613, 654.9348103203287), considering position of (0.0, 0.0)
+Agent 73, position of (294.8341599765026, 302.53790612435347), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 74, position of (650.9850340064661, 851.0562386636302), considering position of (0.0, 0.0)
+Agent 74, position of (424.5759726638458, 440.71044570379973), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 75, position of (460.93613296830114, 486.6634697940985), considering position of (0.0, 0.0)
+Agent 75, position of (427.2799761555496, 567.0851078058599), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 76, position of (665.5802701954498, 844.2661178646147), considering position of (0.0, 0.0)
+Agent 76, position of (546.2933371752309, 497.2196985694452), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 77, position of (595.7444801144607, 516.5248288961982), considering position of (0.0, 0.0)
+Agent 77, position of (301.7465951784093, 621.4454264157947), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 78, position of (705.8525983429664, 820.1824141557018), considering position of (0.0, 0.0)
+Agent 78, position of (433.72762948488077, 333.726786789988), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 79, position of (352.1946710311295, 639.2642163464901), considering position of (0.0, 0.0)
+Agent 79, position of (375.6643479215941, 496.0976461403717), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 80, position of (717.7174727933586, 539.6451430689528), considering position of (0.0, 0.0)
+Agent 80, position of (327.04156387719746, 357.049135979436), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 81, position of (358.5771616841644, 758.9097697881277), considering position of (0.0, 0.0)
+Agent 81, position of (595.3680119744382, 457.36992790917697), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 82, position of (465.04878551613115, 454.5882353956956), considering position of (0.0, 0.0)
+Agent 82, position of (361.8921669327884, 447.39322946075436), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 83, position of (748.6289835116612, 701.561816746455), considering position of (0.0, 0.0)
+Agent 83, position of (479.6221419741516, 638.3714627552973), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 84, position of (477.86112850351, 719.5049934160529), considering position of (0.0, 0.0)
+Agent 84, position of (528.8961825803591, 476.0908036455462), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 85, position of (399.78417611927404, 632.6205539730425), considering position of (0.0, 0.0)
+Agent 85, position of (520.5561044177814, 560.2851484541156), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 86, position of (597.068323472609, 638.5184146932195), considering position of (0.0, 0.0)
+Agent 86, position of (672.8321242559367, 488.9148813773899), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 87, position of (746.5380997493696, 695.8544683083411), considering position of (0.0, 0.0)
+Agent 87, position of (221.70537140254982, 564.0338331584599), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 88, position of (642.0655165129806, 553.5459754990322), considering position of (0.0, 0.0)
+Agent 88, position of (646.1950422301251, 366.61306419522674), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 89, position of (367.3040029281691, 733.5829292297184), considering position of (0.0, 0.0)
+Agent 89, position of (426.4686427566553, 375.7812466951655), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 90, position of (813.5991642834438, 690.566095074418), considering position of (0.0, 0.0)
+Agent 90, position of (481.32258643058157, 472.776124228158), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 91, position of (366.84674710063035, 764.6273306986245), considering position of (0.0, 0.0)
+Agent 91, position of (284.8621360588491, 273.21060175659727), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 92, position of (360.9080745623797, 702.208510751349), considering position of (0.0, 0.0)
+Agent 92, position of (615.4398164787098, 549.7926625002877), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 93, position of (730.0579061796761, 669.5745385362513), considering position of (0.0, 0.0)
+Agent 93, position of (494.777312040298, 484.56738908056656), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 94, position of (743.9842993087303, 544.7084786543932), considering position of (0.0, 0.0)
+Agent 94, position of (576.3298677190475, 595.5715132364794), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 95, position of (418.50697946681504, 695.4322725629702), considering position of (0.0, 0.0)
+Agent 95, position of (509.52025450263216, 326.08753377872335), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 96, position of (471.96524424114324, 621.7269994141161), considering position of (0.0, 0.0)
+Agent 96, position of (419.80539736401, 231.0576762199445), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 97, position of (469.38331977490077, 718.1230240964838), considering position of (0.0, 0.0)
+Agent 97, position of (336.3582883093232, 638.5746647573176), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 98, position of (363.45003497357817, 651.059002762874), considering position of (0.0, 0.0)
+Agent 98, position of (467.3785278152009, 248.43592386652054), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 99, position of (830.8290640976356, 701.9026827649047), considering position of (0.0, 0.0)
+Agent 99, position of (359.4322949355754, 243.2732332748774), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 
 
-Agent 100, position of (661.3950252898384, 524.5287428318679), considering position of (0.0, 0.0)
+Agent 100, position of (653.7877710144763, 573.5925458519677), considering position of (0.0, 0.0)
 0.0
 (0.0, 0.0)
 

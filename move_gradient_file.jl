@@ -38,7 +38,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -68,6 +68,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			
+
 			##Some error detection stuff
 			if(new_area > pi*rho^2)
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
@@ -120,7 +122,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                         	min_diff = abs(new_area-target_area)
 				#min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
-                        	min_direction = direction_of_move
+                        	min_direction = i*2*pi/q < pi ? (cos(1*2*pi/q/5)*vix - sin(1*2*pi/q/5)*viy, sin(1*2*pi/q/5)*vix + cos(1*2*pi/q/5)*viy) : (cos(-1*2*pi/q/5)*vix - sin(-1*2*pi/q/5)*viy, sin(-1*2*pi/q/5)*vix + cos(-1*2*pi/q/5)*viy)
+				#min_direction = direction_of_move
                         	move_made = 1
 				#=replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
