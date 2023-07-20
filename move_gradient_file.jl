@@ -165,7 +165,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                 #print("No movement made, agent area was $(agent.A)\n")
                 turn = rand([-1, 1])
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-                agent.speed = 0.0
+                #agent.speed = 0.0
         end
 
 
