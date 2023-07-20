@@ -42,7 +42,7 @@ const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initi
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
-no_move = ones(Int32, 100) #An array which will allow us to keep track of which agents never move
+no_move = ones(Int32, no_birds) #An array which will allow us to keep track of which agents never move
 new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An array that will store the new positions of the agents for movement when we go to the model step
 convex_hull_point = zeros(Int32, 100)
 last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
@@ -69,11 +69,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -242,7 +242,7 @@ function agent_step!(agent, model)
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
         move_made_main::Int32 = move_gradient(agent, model, k1, 8, 100, rho, target_area)
-
+	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -250,11 +250,11 @@ function agent_step!(agent, model)
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
 		agent.vel = new_agent_vel
-		agent.speed = 1.0
+		#agent.speed = 1.0
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
 		agent.vel = new_agent_vel
-		agent.speed = 0.0
+		#agent.speed = 0.0
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -284,6 +284,7 @@ function model_step!(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	previous_areas::Vector{Float64} = zeros(nagents(model))
 	actual_areas::Vector{Float64} = zeros(nagents(model))
+	model.no_moves = 0
 	for agent_i in all_agents_iterable
 		previous_areas[agent_i.id] = agent_i.A #Just stores the area for the agent in the previous step for plotting
                 
@@ -321,6 +322,7 @@ function model_step!(model)
 		agent_i.true_A = true_new_area
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
+		model.no_moves += no_move[agent_i.id]
         end
         
 	#Now update the model's convex hull

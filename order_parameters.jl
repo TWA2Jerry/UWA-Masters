@@ -1,5 +1,6 @@
 include("agent_definition.jl")
 #Define the data we want
+
 function happiness(agent::bird)
         return abs((agent.A - 1000*sqrt(12))/(pi/2*rho^2-1000*sqrt(12)))
 end
@@ -40,4 +41,12 @@ function polarisation(model)
 
 	polarisation_order::Float64 = norm(sum_of_vels)
 	return polarisation_order
+end
+
+function random_happiness(model)
+	return happiness(model[model.tracked_agent]) 
+end
+
+function mean_no_moves(model)
+	return 1-model.no_moves/nagents(model)
 end

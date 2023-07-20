@@ -150,6 +150,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	#push!(moves_areas[agent.id], (model.n, agent.A, pos_area_array))
 	if(move_made == 1)
 		no_move[agent.id] = 0
+	else 
+		no_move[agent.id] = 1
 	end
 	
 	#Create the noise addition
@@ -157,8 +159,18 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	epsilon_prime::Vector{Float64} = randn(model.rng, Float64, 2)
 	dW::Vector{Float64} = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
+	if(move_made==1)
+                agent.speed = 1.0
+        else
+                #print("No movement made, agent area was $(agent.A)\n")
+                turn = rand([-1, 1])
+                min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
+                agent.speed = 0.0
+        end
+
+
 	#Store the new position for updating in model step
-	new_pos[agent.id] = Tuple(min_direction .* agent_speed .* model.dt .+ agent.pos .+ sigma*dW)
+	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		exit()
@@ -168,10 +180,6 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	#=if(min_area > pi*rho^2)
 		print("Conventional area exceeded by agent $(agent.id)\n")
 	end=#
-	if(move_made == 0)
-		turn = rand([-1, 1])
-		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-	end
 
 	 #print("The number of angles considered was $no_angles_considered\n")
         #It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity

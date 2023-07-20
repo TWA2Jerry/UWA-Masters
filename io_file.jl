@@ -183,3 +183,72 @@ end
 function draw_path(points)
 	Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
 end
+
+function do_more_io_stuff(adf, mdf)
+	rot_o_alt_ave_file = open("ensemble_rot_o_alt.txt", "w")
+	for i in 1:no_steps+1
+        	write(rot_o_alt_ave_file, "$(i-1) $(mdf[i, 3])\n")
+	end
+
+	close(rot_o_alt_ave_file)
+
+	###This section is for ensembles
+	mean_happiness_file = open("mean_happiness.txt", "w")
+	std_happiness_file = open("std_happiness.txt", "w")
+
+	for step in 1:no_steps+1
+        	new_mean::Float64 = 0.0
+        	mean_squared::Float64 = 0.0
+        	for sim_n in 0:no_simulations-1
+                	new_mean += adf[sim_n*(no_steps+1)+step , 2]/no_simulations
+                	mean_squared += (adf[sim_n*(no_steps+1)+step, 2])^2/no_simulations
+                	#print("New mean was $new_mean, mean squared was $mean_squared\n")
+        	end
+        	write(mean_happiness_file, "$(step-1) $(new_mean)\n")
+        	std_happiness = sqrt(mean_squared - new_mean^2)
+        	#std_happiness = sqrt(mean_squared)
+        	write(std_happiness_file, "$(step-1) $(std_happiness)\n")
+	end
+
+	radial_dist_file = open("circ_radial.txt", "w")
+	for i in 1:no_steps+1
+        	write(radial_dist_file, "$(i-1) $(mdf[i, 2])\n")
+	end
+
+	rand_happiness_file = open("rand_happpiness.txt", "w")
+	for i in 1:no_steps+1
+		write(rand_happiness_file, "$(i-1) $(mdf[1,4])\n")
+	end
+
+	no_moves_file = open("no_moves.txt", "w")
+	for i in 1:no_steps+1
+                write(no_moves_file, "$(i-1) $(mdf[i,5])\n")
+        end
+
+	
+	close(rot_o_alt_ave_file)
+	close(mean_happiness_file)
+	close(std_happiness_file)
+	close(radial_dist_file)
+	close(rand_happiness_file)
+	close(no_moves_file)
+end
+
+function step_statistics(no_move::Vector{Int64}, model_step::Int64, n::Int64, no_steps::Int64, no_birds::Int64)
+	no_no_moves::Int64 = 0
+	for i in 1:length(no_move)
+		no_no_moves += no_move[i]/no_birds
+	end	
+	if(n < no_steps)
+                write(no_moves_file, "$no_no_moves ")
+		#write(compac_frac_file, "$packing_fraction ")
+                #write(rot_o_file, "$rot_order ")
+                #write(rot_o_alt_file, "$rot_order_alt ")
+        else
+                write(no_moves_file, "$no_no_moves\n")
+		#write(compac_frac_file, "$packing_fraction")
+                #write(rot_o_file, "$rot_order")
+                #write(rot_o_alt_file, "$rot_order_alt")
+        end
+	
+end
