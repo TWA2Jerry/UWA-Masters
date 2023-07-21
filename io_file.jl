@@ -138,14 +138,14 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	target_area::Float64 = model.target_area
 	com::Tuple{Float64, Float64} = center_of_mass(model)
         for id in 1:nagents(model)
-                #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
-                push!(colours, radial_distance(model[id], com)/200.0)
+                push!(colours, abs(model[id].A-model.target_area)/(delta_max))
+                #push!(colours, radial_distance(model[id], com)/200.0)
 		push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
         end
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
@@ -153,7 +153,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 
-
+	#=
 	##Draw the figure of the agents with their actual DODs
 	for id in 1:nagents(model)
                 colours[id] = actual_areas[id]/(pi*rho^2)
@@ -178,6 +178,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	#draw_path(path_points)
 	Colorbar(figure_difference[1,2], colourbarthing) 
 	save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure_difference)
+	=#
 end
 
 function draw_path(points)
