@@ -38,7 +38,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
-		if(abs(rel_angle) > (2)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -122,8 +122,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                         	min_diff = abs(new_area-target_area)
 				#min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
-                        	min_direction = i*2*pi/q < pi ? (cos(1*2*pi/q/5)*vix - sin(1*2*pi/q/5)*viy, sin(1*2*pi/q/5)*vix + cos(1*2*pi/q/5)*viy) : (cos(-1*2*pi/q/5)*vix - sin(-1*2*pi/q/5)*viy, sin(-1*2*pi/q/5)*vix + cos(-1*2*pi/q/5)*viy)
-				#min_direction = direction_of_move
+                        	#min_direction = i*2*pi/q < pi ? (cos(1*2*pi/q/5)*vix - sin(1*2*pi/q/5)*viy, sin(1*2*pi/q/5)*vix + cos(1*2*pi/q/5)*viy) : (cos(-1*2*pi/q/5)*vix - sin(-1*2*pi/q/5)*viy, sin(-1*2*pi/q/5)*vix + cos(-1*2*pi/q/5)*viy)
+				min_direction = direction_of_move
                         	move_made = 1
 				#=replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)

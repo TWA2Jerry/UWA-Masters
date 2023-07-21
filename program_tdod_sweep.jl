@@ -1,3 +1,7 @@
+###
+const no_steps::Int64 = 5000
+const no_simulations::Int64 = 7
+
 ###Define IO. files
 rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "w") #This is the file that'll allow us to track DOD vs target DOD
 mean_speed_tave_file = open("mean_speed_tave.txt", "w")
@@ -12,7 +16,7 @@ include("io_file.jl")
 include("main.jl")
 
 ###Run ABM
-for target_DOD in [0.0, sqrt(12), 2*sqrt(12), 10*sqrt(12), 20*sqrt(12), 50*sqrt(12), sqrt(12)*100, 450.0, 200*sqrt(12), 2000.0, sqrt(12)*1000,  sqrt(12)*1000*2] 
+for target_DOD in [0.0, sqrt(12), 2*sqrt(12), 10*sqrt(12), 20*sqrt(12), 100.0, 50*sqrt(12), sqrt(12)*100, 450.0, 200*sqrt(12), 2000.0, sqrt(12)*1000,  sqrt(12)*1000*2] 
 	#truncate the file between each target DOD 
 	global compac_frac_file = open("compaction_frac.txt", "w")
 	global mean_a_file = open("mean_area.txt", "w")
