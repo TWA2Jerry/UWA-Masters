@@ -71,7 +71,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			
 
 			##Some error detection stuff
-			if(new_area > pi*rho^2)
+			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
 				print("\n\n\nThe dq for this position was \n")
                         	for i in 1:length(temp_hp)
@@ -168,7 +168,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                 #print("No movement made, agent area was $(agent.A)\n")
                 turn = rand([-1, 1])
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-                #agent.speed = 0.0
+                agent.speed = 0.0
         end
 
 
@@ -176,6 +176,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+		AgentsIO.save_checkpoint("simulation_save.jld2", model)	
 		exit()
 	end
 	

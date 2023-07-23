@@ -90,7 +90,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 			AgentsIO.save_checkpoint("simulation_save.jld2", model)
 			exit()
 		end
-		if(abs(abs(dq[i][1])-pi/2) > 0.000001) 
+		if(abs(abs(dq[i][1])-pi/2) > 0.00001) 
 			m = dq[i][2][2]/dq[i][2][1]
 		else 
 			m = inf

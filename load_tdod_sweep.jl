@@ -1,3 +1,7 @@
+###Define some constants
+const no_steps::Int64 = 5000
+const no_simulations::Int64 = 7
+
 ###Define the IO files for loading
 rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "a") #This is the file that'll allow us to track DOD vs target DOD
 mean_speed_tave_file = open("mean_speed_tave.txt", "a")
@@ -11,7 +15,6 @@ mean_speed_file = open("mean_speed.txt", "a")
 include("io_file.jl")
 include("main.jl")
 
-#=
 ###Do the loading
 loaded_model = AgentsIO.load_checkpoint("simulation_save.jld2")
 print("Model loaded\n")
@@ -24,6 +27,7 @@ write(rot_o_file, "\n")
 write(rot_o_alt_file, "\n")
 write(mean_speed_file, "\n")
 
+#=
 ###Simulate for however many more simulations you need to do
 for i in loaded_model.simulation_number+1:no_simulations
 	run_ABM(i, loaded_model.target_area)
@@ -59,7 +63,7 @@ rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "r")
 =#
 
 ###And now, resume running the simulation as usual for the rest of the target areas
-for target_DOD in [4500.0, 5000.0, 2*sqrt(12)*1000]
+for target_DOD in [450.0, 200*sqrt(12), 1000.0, 500*sqrt(12)]
 	#truncate the file between each target DOD
         global compac_frac_file = open("compaction_frac.txt", "w")
         global mean_a_file = open("mean_area.txt", "w")
