@@ -149,7 +149,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
-        draw_path(path_points)
+        print("The number of points in path points is $(length(path_points))\n")
+	draw_path(path_points)
 	Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 

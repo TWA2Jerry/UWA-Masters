@@ -175,7 +175,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
-		print("Agent $(agent.id) will step overbounds. This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+		print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		AgentsIO.save_checkpoint("simulation_save.jld2", model)	
 		exit()
 	end

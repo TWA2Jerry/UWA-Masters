@@ -103,7 +103,7 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	end
 		#=	
 		if(abs(Area)+circle_area > pi*rho^2 && initialised == 0)
-			print("Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
+			print("Voronoi_area file here. Conventional area exceeded for agent, circle detected? $circle_detected. Balloon detected? $balloon_detected. Segment detected? $segment_detected. The circle area was $circle_area and the normal area was $(abs(Area)).\n")
 			AgentsIO.save_checkpoint("simulation_save.jld2", model)
 			exit()
 		end
