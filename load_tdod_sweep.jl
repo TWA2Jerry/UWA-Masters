@@ -15,11 +15,11 @@ mean_speed_file = open("mean_speed.txt", "a")
 include("io_file.jl")
 include("main.jl")
 
+#=
 ###Do the loading
 loaded_model = AgentsIO.load_checkpoint("simulation_save.jld2")
 print("Model loaded\n")
 
-#=
 ###Simulate the model for however many more steps as necessary
 step!(loaded_model, agent_step!, model_step!, no_steps-loaded_model.n)
 write(compac_frac_file, "\n")
@@ -64,7 +64,7 @@ rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "r")
 =#
 
 ###And now, resume running the simulation as usual for the rest of the target areas
-for target_DOD in [450.0, 200*sqrt(12), 1000.0, 500*sqrt(12)]
+for target_DOD in [500*sqrt(12)]
 	#truncate the file between each target DOD
         global compac_frac_file = open("compaction_frac.txt", "w")
         global mean_a_file = open("mean_area.txt", "w")
