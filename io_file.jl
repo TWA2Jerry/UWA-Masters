@@ -219,7 +219,7 @@ function do_more_io_stuff(adf, mdf)
 
 	rand_happiness_file = open("rand_happpiness.txt", "w")
 	for i in 1:no_steps+1
-		write(rand_happiness_file, "$(i-1) $(mdf[1,4])\n")
+		write(rand_happiness_file, "$(i-1) $(mdf[i,4])\n")
 	end
 
 	no_moves_file = open("no_moves.txt", "w")
@@ -232,6 +232,17 @@ function do_more_io_stuff(adf, mdf)
                 write(polarisation_file, "$(i-1) $(mdf[i,6])\n")
         end
 
+	mdf_file = open("mdf_file.txt")
+	for i in 1:nrow(mdf)
+		for j in 2:ncol(mdf)
+			if(j < ncol(mdf)) 
+				write(mdf_file, "$(mdf[i, j]) ")
+			else 
+				write(mdf_file, "$(mdf[i, j])") 
+			end
+		end	
+		write(mdf_file, "\n")
+	end
 	
 	close(rot_o_alt_ave_file)
 	close(mean_happiness_file)
@@ -240,6 +251,7 @@ function do_more_io_stuff(adf, mdf)
 	close(rand_happiness_file)
 	close(no_moves_file)
 	close(polarisation_file)
+	close(mdf_file)
 end
 
 function step_statistics(no_move::Vector{Int64}, model_step::Int64, n::Int64, no_steps::Int64, no_birds::Int64)

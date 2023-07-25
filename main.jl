@@ -34,12 +34,12 @@ include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
 const no_birds::Int32 = 100
-const rho::Float64 = 20.0
+const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 15000.0
-const spawn_dim_x::Float64 = 50.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 50.0 #This gives the y dimension size of the initial spawning area for the agents
+const rect_bound::Float64 = 1000.0
+const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int32, no_birds) #An array which will allow us to keep track of which agents never move
@@ -94,8 +94,23 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
+	R = 200.0
+	for i in 1:no_birds
+                angle_per_bird = 2*pi/no_birds
+                initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)
+                rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
+                rand_vel = rand_vel ./norm(rand_vel)
+                print("The bird $i's initial position is $initial_pos\n")
+                push!(initial_positions, initial_pos)
+                push!(initial_vels, rand_vel)
+                pack_positions[i] = initial_positions[i]
+                #push!(moves_areas, [])
+                #push!(last_half_planes, [])
+                #push!(new_pos, (0.0, 0.0))
+        end
 
+	#=
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
@@ -112,7 +127,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			push!(tracked_path, initial_positions[i])
 		end
 	end
-
+	=#
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
 	init_tess_areas = voronoiarea(init_tess)
@@ -241,7 +256,7 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 20, rho, target_area)
+        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 100, rho, target_area)
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity

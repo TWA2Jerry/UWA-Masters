@@ -28,13 +28,12 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 #Define the parameters we want to scan over
 parameters = Dict(
-	:target_area_arg => [4500.0],
+	:target_area_arg => [1000*sqrt(12)],
 	:seed => [i for i in 1:no_simulations]
 )
 
 ##Run the ABM using paramscan, and with changing the seed
 adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
-
 print(adf[5, 2])
 print(mdf[no_steps, 3])
 
