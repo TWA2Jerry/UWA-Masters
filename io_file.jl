@@ -62,7 +62,7 @@ rot_o_lines = readlines(rot_o_file)
 rot_o_alt_lines = readlines(rot_o_alt_file)
 ms_lines = readlines(mean_speed_file)
 
-print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
+#print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
 for line in cf_lines
         split_line = parse.(Float64, split(line, " "))
         for i in 1:length(split_line)
@@ -125,6 +125,7 @@ end
 	close(rot_o_ave_file)
 	close(rot_o_alt_ave_file)
 	close(mean_speed_file)
+	print("Finished statistics IO\n")
 end
 
 
@@ -151,6 +152,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         end=#
         print("The number of points in path points is $(length(path_points))\n")
 	draw_path(path_points)
+	text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
 	Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 
@@ -232,10 +234,10 @@ function do_more_io_stuff(adf, mdf)
                 write(polarisation_file, "$(i-1) $(mdf[i,6])\n")
         end
 
-	mdf_file = open("mdf_file.txt")
-	for i in 1:nrow(mdf)
-		for j in 2:ncol(mdf)
-			if(j < ncol(mdf)) 
+	mdf_file = open("mdf_file.txt", "w")
+	for i in 1:size(mdf, 1)
+		for j in 2:size(mdf, 2)
+			if(j < size(mdf,2)) 
 				write(mdf_file, "$(mdf[i, j]) ")
 			else 
 				write(mdf_file, "$(mdf[i, j])") 
