@@ -34,12 +34,12 @@ include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
 const no_birds::Int32 = 100
-const rho::Float64 = 20.0
+const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
 const rect_bound::Float64 = 5000.0
-const spawn_dim_x::Float64 = 50.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 50.0 #This gives the y dimension size of the initial spawning area for the agents
+const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
+const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
 no_move = ones(Int32, no_birds) #An array which will allow us to keep track of which agents never move
@@ -241,7 +241,7 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 20, rho, target_area)
+        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 100, rho, target_area)
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
