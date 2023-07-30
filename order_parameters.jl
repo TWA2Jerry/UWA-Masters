@@ -50,3 +50,7 @@ end
 function mean_no_moves(model)
 	return 1-model.no_moves/nagents(model)
 end
+
+function random_radius(model)
+        return radial_distance(model[model.tracked_agent], center_of_mass(model))
+end

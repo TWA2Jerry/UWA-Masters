@@ -24,7 +24,7 @@ function rot_o_alt(model)
 end
 
 adata = [(happiness, Statistics.mean)]
-mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation]
+mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius]
 
 #Define the parameters we want to scan over
 parameters = Dict(
