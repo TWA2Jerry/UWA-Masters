@@ -20,4 +20,4 @@ for i in 1:no_simulations
 end
 
 do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
-
+do_more_io_stuff(adf, mdf)
