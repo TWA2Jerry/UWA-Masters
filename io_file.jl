@@ -245,6 +245,19 @@ function do_more_io_stuff(adf, mdf)
 		end	
 		write(mdf_file, "\n")
 	end
+
+	adf_file = open("adf_file.txt", "w")
+	for i in 1:size(adf, 1)
+                for j in 2:size(adf, 2)
+                        if(j < size(adf,2))
+                                write(adf_file, "$(adf[i, j]) ")
+                        else
+                                write(adf_file, "$(adf[i, j])")
+                        end
+                end
+                write(adf_file, "\n")
+        end
+
 	
 	close(rot_o_alt_ave_file)
 	close(mean_happiness_file)
@@ -254,6 +267,7 @@ function do_more_io_stuff(adf, mdf)
 	close(no_moves_file)
 	close(polarisation_file)
 	close(mdf_file)
+	close(adf_file)
 end
 
 function step_statistics(no_move::Vector{Int64}, model_step::Int64, n::Int64, no_steps::Int64, no_birds::Int64)
