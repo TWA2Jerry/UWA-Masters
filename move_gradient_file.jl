@@ -16,7 +16,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		pushfirst!(positions, neighbour.pos)	
 	end	
 	#min_area = inf  #The agent's current DOD area
-	min_diff::Float64 = abs(agent.A - target_area)
+	min_diff::Float64 = abs(agent.A*2 - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made::Int64 = 0
 	pos_area_array::Vector{Tuple{Tuple{Float64,Float64}, Float64}}  = []
