@@ -248,7 +248,7 @@ function do_more_io_stuff(adf, mdf)
 
 	adf_file = open("adf_file.txt", "w")
 	for i in 1:size(adf, 1)
-                for j in 2:size(adf, 2)
+                for j in 1:size(adf, 2)
                         if(j < size(adf,2))
                                 write(adf_file, "$(adf[i, j]) ")
                         else

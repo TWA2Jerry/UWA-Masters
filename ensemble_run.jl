@@ -1,5 +1,5 @@
 ##Define the no_simulations and steps
-const no_steps = 15000
+const no_steps = 5000
 const no_simulations = 1
 
 ##Include the IO files for the previous order parameters that we wanted. 
@@ -25,7 +25,7 @@ end
 
 adata = [happiness]
 #adata = [(happiness, Statistics.mean)]
-mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius]
+mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness]
 
 #Define the parameters we want to scan over
 parameters = Dict(

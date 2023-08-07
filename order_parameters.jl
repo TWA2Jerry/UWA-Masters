@@ -54,3 +54,12 @@ end
 function random_radius(model)
         return radial_distance(model[model.tracked_agent], center_of_mass(model))
 end
+
+function mean_happiness(model)
+	meanhappiness::Float64 = 0.0
+	n::Int32 = nagents(model)
+	for i in 1:nagents(model)
+		meanhappiness += happiness(model[i])/n
+	end
+	return meanhappiness
+end
