@@ -5,7 +5,7 @@ set border 3
 
 set yzeroaxis
 
-set boxwidth 0.05 absolute
+set boxwidth 0.0025 absolute
 set style fill solid 1.0 noborder
 
 bin_width = 0.005
