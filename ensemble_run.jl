@@ -29,7 +29,7 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 #Define the parameters we want to scan over
 parameters = Dict(
-	:target_area_arg => [18*1000.0],
+	:target_area_arg => [22*1000.0],
 	:seed => [i for i in 1:no_simulations]
 )
 
