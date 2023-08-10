@@ -24,7 +24,7 @@ for line in last_pos_lines
 end
 
 for i in 1:no_simulations
-	run_ABM(i, sqrt(12)*1000.0)
+	run_ABM(i, sqrt(12)*150.0)
 end
 
 do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
