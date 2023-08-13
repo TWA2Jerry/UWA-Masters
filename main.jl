@@ -37,7 +37,7 @@ const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 1000.0
+const rect_bound::Float64 = 200.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -94,10 +94,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
-	for i in 1:no_birds
-		push!(initial_positions,last_pos_array[i])
-	end
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
+	
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 		rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
@@ -114,7 +112,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			push!(tracked_path, initial_positions[i])
 		end
 	end
-	
+
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
 	init_tess_areas = voronoiarea(init_tess)
@@ -396,12 +394,6 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
 	write(rot_o_file, "\n")
 	write(rot_o_alt_file, "\n")
 	write(mean_speed_file, "\n")
-	#=last_pos_file = open("last_pos.txt", "w")
-	for i in 1:nagents(model)
-		pos = model[i].pos
-		write(last_pos_file, "$(pos[1]) $(pos[2])\n")
-	end
-	close(last_pos_file) =# 
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
