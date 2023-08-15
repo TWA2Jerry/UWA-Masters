@@ -2,7 +2,7 @@ include("agent_definition.jl")
 #Define the data we want
 
 function happiness(agent::bird)
-        return abs((agent.A - 1000*sqrt(12))/(pi/2*rho^2-1000*sqrt(12)))
+        return abs((agent.A - agent.tdod)/(pi/2*rho^2-agent.tdod))
 end
 
 function center_of_mass(model)

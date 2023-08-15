@@ -146,7 +146,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 1.0)) #Note that I have no idea what the colorbarthing is for
+        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
@@ -204,7 +204,7 @@ function do_more_io_stuff(adf, mdf)
         	new_mean::Float64 = 0.0
         	mean_squared::Float64 = 0.0
         	for sim_n in 0:no_simulations-1
-                	new_mean += adf[sim_n*(no_steps+1)+step , 2]/no_simulations
+                	new_mean += adf[sim_n*(no_steps+1)+step , 3]/no_simulations
                 	mean_squared += (adf[sim_n*(no_steps+1)+step, 2])^2/no_simulations
                 	#print("New mean was $new_mean, mean squared was $mean_squared\n")
         	end

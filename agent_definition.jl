@@ -8,5 +8,6 @@ mutable struct bird <: AbstractAgent
         speed::Float64
         A::Float64 #The area of the agent's DOD, at least in their own eyes
         true_A::Float64 #The true area of the agent's DOD
+	tdod::Float64
 end
 

@@ -16,8 +16,12 @@ stats 'mh_wall.txt' using 1 name "A"
 x = A_mean
 set arrow from x, graph 0 to x, graph 1 nohead lc rgb "red" 
 
-plot "../adf_file.txt" using (rounded($3)):(1) every ::500000::1000100 smooth frequency with boxes 
+stats "../adf_file.txt" using 3 every ::250000::500100 name "B"
+y = B_mean
+print y
+
+plot "../adf_file.txt" using (rounded($3)):(1) every ::250000::500100 smooth frequency with boxes 
 set title "Frequency histogram of (un)happiness"
 set ylabel "Frequency"
 set xlabel "(un)happiness"
-
+set xrange [0.0:1.025]
