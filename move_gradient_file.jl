@@ -118,7 +118,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			print("\n")
 			=#
 
-			if (abs(new_area-target_area) < min_diff && new_area < target_area)
+			if (abs(new_area-target_area) < min_diff)
                         	min_diff = abs(new_area-target_area)
 				#min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
