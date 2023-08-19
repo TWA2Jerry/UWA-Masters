@@ -332,7 +332,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
                                         print("$(vq[i]), $(angle_of_vec)\n")
                                 end
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
-                                exit()
+                                #exit()
         end
 		
 	return vq

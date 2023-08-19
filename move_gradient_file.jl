@@ -94,7 +94,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                         		print("$(agent_voronoi_cell[i]), $(angle_of_vec)")
 				end
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
-				exit()
+				#exit()
 			end
 
 			#=		
