@@ -22,7 +22,7 @@ function rounded(x)
 end
 
 max_bin::Int64 = 0
-for i in 1:length(mh_array)
+for i in 500000:length(mh_array)
 	global max_bin = bin_number(mh_array[i]) > max_bin ? bin_number(mh_array[i]) : max_bin	
 end
 
