@@ -21,7 +21,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	move_made::Int64 = 0
 	pos_area_array::Vector{Tuple{Tuple{Float64,Float64}, Float64}}  = []
 	no_angles_considered::Int64 = 0
-
+	num_positions_better::Int32 = 0 #This is to implement and measure what Shannon wants, which is the number of positions the agent considers is better than its current position
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
@@ -121,6 +121,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			if (abs(new_area-target_area) < min_diff)
                         	min_diff = abs(new_area-target_area)
 				#min_area = new_area
+				num_positions_better += 1
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
 				min_direction = direction_of_move
@@ -162,6 +163,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	epsilon_prime::Vector{Float64} = randn(model.rng, Float64, 2)
 	dW::Vector{Float64} = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
+		
 	if(move_made==1)
                 agent.speed = 1.0
         else 
@@ -170,7 +172,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
                 agent.speed = 0.0
         end
-
+	agent.nospots = num_positions_better
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)

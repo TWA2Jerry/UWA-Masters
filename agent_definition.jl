@@ -9,5 +9,7 @@ mutable struct bird <: AbstractAgent
         A::Float64 #The area of the agent's DOD, at least in their own eyes
         true_A::Float64 #The true area of the agent's DOD
 	tdod::Float64
+	tdodr::Float64
+	nospots::Int32
 end
 
