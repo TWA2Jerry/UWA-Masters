@@ -205,7 +205,7 @@ function do_more_io_stuff(adf, mdf)
         	mean_squared::Float64 = 0.0
         	for sim_n in 0:no_simulations-1
                 	new_mean += adf[sim_n*(no_steps+1)+step , 3]/no_simulations
-                	mean_squared += (adf[sim_n*(no_steps+1)+step, 2])^2/no_simulations
+                	mean_squared += (adf[sim_n*(no_steps+1)+step, 3])^2/no_simulations
                 	#print("New mean was $new_mean, mean squared was $mean_squared\n")
         	end
         	write(mean_happiness_file, "$(step-1) $(new_mean)\n")

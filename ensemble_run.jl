@@ -23,13 +23,13 @@ function rot_o_alt(model)
 	return rot_ord_alt(agents_iterable)	
 end
 
-adata = [happiness]
+adata = [happiness, :tdodr, :nospots]
 #adata = [(happiness, Statistics.mean)]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness]
 
 #Define the parameters we want to scan over
 parameters = Dict(
-	:target_area_arg => [2000*sqrt(12)],
+	:target_area_arg => [3000*sqrt(12)],
 	:seed => [i for i in 1:no_simulations]
 )
 
