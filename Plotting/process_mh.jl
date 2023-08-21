@@ -27,7 +27,7 @@ for i in 500000:length(mh_array)
 end
 
 frequency = zeros(max_bin+1) #This creates a vector of zeroes representing the frequency of each bin of unhappiness 
-for i in 1:length(mh_array)
+for i in 500000:length(mh_array)
 	frequency[bin_number(mh_array[i])+1] += 1
 end
 
