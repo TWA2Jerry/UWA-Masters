@@ -121,7 +121,6 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			if (abs(new_area-target_area) < min_diff)
                         	min_diff = abs(new_area-target_area)
 				#min_area = new_area
-				num_positions_better += 1
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
 				min_direction = direction_of_move
@@ -131,7 +130,10 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
 				end=#
                 	end
-
+			
+			if(abs(new_area-target_area) < abs(agent.A - target_area)) 
+				num_positions_better += 1
+			end
 		end
 		
 		#Check area calculation through voronoi package
