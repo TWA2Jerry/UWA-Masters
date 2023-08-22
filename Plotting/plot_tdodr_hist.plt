@@ -5,10 +5,10 @@ set border 3
 
 set yzeroaxis
 
-set boxwidth 0.0025 absolute
+set boxwidth 10.0 absolute
 set style fill solid 1.0 noborder
 
-bin_width = 0.005
+bin_width = 10.0
 bin_number(x) = floor(x/bin_width)
 rounded(x) = bin_width * ( bin_number(x) + 0.5 )
 
@@ -20,7 +20,7 @@ rounded(x) = bin_width * ( bin_number(x) + 0.5 )
 #y = B_mean
 #print y
 
-plot "../adf_file.txt" using (rounded($4)):(1) every ::250000::500100 smooth frequency with boxes 
+plot "../adf_file.txt" using (rounded($4)):(1) every ::0::100000 smooth frequency with boxes 
 set title "Frequency histogram of measured area to tdod"
 set ylabel "Frequency"
 set xlabel "Ratio of the actual measured area to the tdod"
