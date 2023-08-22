@@ -23,7 +23,7 @@ set style fill solid 1.0 noborder
 
 identity(x) = x
 
-plot "../adf_file.txt" using (identity($5)):(1) every ::500100::1000100 smooth frequency with boxes 
+plot "../adf_file.txt" using (identity($5)):(1) every ::0::500100 smooth frequency with boxes 
 set title "Frequency histogram of number of spots available"
 set ylabel "Frequency"
 set xlabel "Number of spots available"
