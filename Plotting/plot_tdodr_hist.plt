@@ -5,10 +5,10 @@ set border 3
 
 set yzeroaxis
 
-set boxwidth 10.0 absolute
+set boxwidth 0.1 absolute
 set style fill solid 1.0 noborder
 
-bin_width = 10.0
+bin_width = 0.1
 bin_number(x) = floor(x/bin_width)
 rounded(x) = bin_width * ( bin_number(x) + 0.5 )
 
@@ -16,7 +16,7 @@ rounded(x) = bin_width * ( bin_number(x) + 0.5 )
 #x = A_mean
 #set arrow from x, graph 0 to x, graph 1 nohead lc rgb "red" 
 
-#stats "../adf_file.txt" using 3 every ::500000::1000100 name "B"
+#stats "../adf_file.txt" using 3 every ::250000::500100 name "B"
 #y = B_mean
 #print y
 
