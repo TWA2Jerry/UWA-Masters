@@ -20,7 +20,7 @@ stats "../adf_file.txt" using 3 every ::250000::500100 name "B"
 y = B_mean
 print y
 
-plot "../adf_file.txt" using (rounded($3)):(1) every ::250000::500100 smooth frequency with boxes 
+plot "../adf_file.txt" using (rounded($3)):(1) every ::500000::1000100 smooth frequency with boxes 
 set title "Frequency histogram of (un)happiness"
 set ylabel "Frequency"
 set xlabel "(un)happiness"

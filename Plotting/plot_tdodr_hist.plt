@@ -20,7 +20,7 @@ rounded(x) = bin_width * ( bin_number(x) + 0.5 )
 #y = B_mean
 #print y
 
-plot "../adf_file.txt" using (rounded($4)):(1) every ::0::100000 smooth frequency with boxes 
+plot "../adf_file.txt" using (rounded($4)):(1) every ::500000::1000000 smooth frequency with boxes 
 set title "Frequency histogram of measured area to tdod"
 set ylabel "Frequency"
 set xlabel "Ratio of the actual measured area to the tdod"
