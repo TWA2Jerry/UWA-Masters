@@ -37,7 +37,7 @@ const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 20000.0
+const rect_bound::Float64 = 500.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -49,7 +49,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 100.0
+const R::Float64 = 200.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -96,7 +96,6 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
-
 	#=
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
@@ -115,31 +114,22 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		if(i == tracked_agent)
 			push!(tracked_path, initial_positions[i])
 		end
-	end =#
-
-	###This is the circle initialisation
+	end 
+	=#
+	#R = 200.0
 	for i in 1:no_birds
-                #rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0)
-                angle_per_bird = 2*pi/(no_birds-1)
-                initial_pos::Tuple{Float64, Float64} = (i != tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (300.0, 300.0)
+                angle_per_bird = 2*pi/no_bird
+                initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)
                 rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
                 rand_vel = rand_vel ./norm(rand_vel)
-
-                #rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
-                #rand_vel = rand_vel ./norm(rand_vel)
+                #print("The bird $i's initial position is $initial_pos\n")
                 push!(initial_positions, initial_pos)
                 push!(initial_vels, rand_vel)
-                pack_positions[i] = initial_pos
+                pack_positions[i] = initial_positions[i]
                 #push!(moves_areas, [])
                 #push!(last_half_planes, [])
-                #=if(model.simulation_number==1)
-                        push!(new_pos, (0.0, 0.0))
-                end=#
-                if(i == tracked_agent)
-                        push!(tracked_path, initial_positions[i])
-                end
+                #push!(new_pos, (0.0, 0.0))
         end
-
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -179,7 +169,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
-			print("Conventional area exceeded by agent $(i)\n")
+			print("Main file here. Conventional area exceeded by agent $(i)in position $(initial_positions[i])\n")	
+			print("The cell was \n")
+			for i in 1:length(initial_cell)
+				print("$(initial_cell[i])\n")
+			end
 			exit()
 		elseif initial_A < eps
 			print("Effective area of 0. The cell was comprised of vertices $(initial_cell)\n")
