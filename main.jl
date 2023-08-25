@@ -49,6 +49,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
+const R::Float64 = 100.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -94,16 +95,18 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
 
-	
+	#=
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
+
 		rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
 		rand_vel = rand_vel ./norm(rand_vel)
 		#push!(initial_positions, rand_position)
 		push!(initial_vels, rand_vel)
 		pack_positions[i] = initial_positions[i]
+		print("Pack positions i is $(pack_positions[i])\n")
 		#push!(moves_areas, [])
 		#push!(last_half_planes, [])
 		#=if(model.simulation_number==1)
@@ -112,7 +115,31 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		if(i == tracked_agent)
 			push!(tracked_path, initial_positions[i])
 		end
-	end
+	end =#
+
+	###This is the circle initialisation
+	for i in 1:no_birds
+                #rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0)
+                angle_per_bird = 2*pi/(no_birds-1)
+                initial_pos::Tuple{Float64, Float64} = (i != tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (300.0, 300.0)
+                rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
+                rand_vel = rand_vel ./norm(rand_vel)
+
+                #rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+                #rand_vel = rand_vel ./norm(rand_vel)
+                push!(initial_positions, initial_pos)
+                push!(initial_vels, rand_vel)
+                pack_positions[i] = initial_pos
+                #push!(moves_areas, [])
+                #push!(last_half_planes, [])
+                #=if(model.simulation_number==1)
+                        push!(new_pos, (0.0, 0.0))
+                end=#
+                if(i == tracked_agent)
+                        push!(tracked_path, initial_positions[i])
+                end
+        end
+
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)

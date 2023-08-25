@@ -1,16 +1,20 @@
 ##Introduction
-#In this template, we generate an agent, but now it moves with some velocity and acceleration. However, the acceleration will be randomised at each time step and the velocity updated accordingly
-#One thing that we're looking out for in particular is if we can update position, velocity and acceleration, which will be N tuples, with vectors generated from our ODE or movement gradient function. Actually no, in accordance with RK4, or even Euler integration, acceleration isn't an quantity we need to keep track of.
+#Hello, this is the file that defines all of the main data structures and functions for simulating our program. If you want to actually run the program, use the program.jl file instead. Run using "julia program.jl".
 
 ###Preliminaries
-using Agents
+#using Agents
+include("../agent_definition.jl")
 using Random
 using VoronoiCells
 using GeometryBasics
 using Plots
-using Statistics
+using InteractiveDynamics
+using CairoMakie # choosing a plotting backend
+using ColorSchemes
+import ColorSchemes.balance
 print("Packages loaded\n")
 
+#=
 ###Create the agent
 mutable struct bird <: AbstractAgent
         id::Int
@@ -19,7 +23,7 @@ mutable struct bird <: AbstractAgent
         speed::Float64
         A::Float64 #The area of the agent's DOD, at least in their own eyes
 	true_A::Float64 #The true area of the agent's DOD
-end
+end =#
 
 include("../half_plane_fast.jl")
 include("../half_plane_bounded.jl")
@@ -27,22 +31,26 @@ include("../convex_hull.jl")
 include("../rot_ord.jl")
 include("../rot_ord_check.jl")
 include("../init_pos.jl")
+include("../io_file.jl")
 print("All homemade files included\n")
-
-const rho = 100.0
-initialised = 0
-area_zero = zeros(Int64, 100)
+print("Hello\n")
+const no_birds::Int32 = 100
+const rho::Float64 = 100.0
+initialised::Int32 = 0
+area_zero = zeros(Int32, 100)
 const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
-moves_areas = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
-no_move = ones(Int64, 100) #An array which will allow us to keep track of which agents never move
-new_pos = [] #An array that will store the new positions of the agents for movement when we go to the model step
-convex_hull_point = zeros(Int64, 100)
-last_half_planes = []
+moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
+no_move = ones(Int32, no_birds) #An array which will allow us to keep track of which agents never move
+new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An array that will store the new positions of the agents for movement when we go to the model step
+convex_hull_point = zeros(Int32, 100)
+last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
 const sigma = 0.0
-const R::Float64 = 200.0
+const tracked_agent::Int64 = rand(1:no_birds)
+tracked_path::Vector{Tuple{Float64, Float64}} = []
+const R::Float64 = 100.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -63,11 +71,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12),  seed = 123, no_birds = 100)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -82,77 +90,79 @@ function initialise(; target_area_arg = 1000*sqrt(12),  seed = 123, no_birds = 1
 
 
 	#Generate random initial positions for each bird, then calculate the DoDs
-	initial_positions = []
-	initial_vels = []
+	initial_positions::Vector{Tuple{Float64, Float64}} = []
+	initial_vels::Vector{Tuple{Float64, Float64}} = []
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
 
+	
 	for i in 1:no_birds
-		angle_per_bird = 2*pi/no_birds
-		initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)	
-		rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1))) 
-		rand_vel = rand_vel ./norm(rand_vel)
-		print("The bird $i's initial position is $initial_pos\n")
+		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
+		angle_per_bird = 2*pi/(no_birds-1)
+                initial_pos::Tuple{Float64, Float64} = (i != tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (300.0, 300.0)
+                rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
+                rand_vel = rand_vel ./norm(rand_vel)
+
+		#rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+		#rand_vel = rand_vel ./norm(rand_vel)
 		push!(initial_positions, initial_pos)
 		push!(initial_vels, rand_vel)
-		pack_positions[i] = initial_positions[i]
-		push!(moves_areas, [])
-		push!(last_half_planes, [])
-		push!(new_pos, (0.0, 0.0))
+		pack_positions[i] = initial_pos
+		#push!(moves_areas, [])
+		#push!(last_half_planes, [])
+		#=if(model.simulation_number==1)
+			push!(new_pos, (0.0, 0.0))
+		end=#
+		if(i == tracked_agent)
+			push!(tracked_path, initial_positions[i])
+		end
 	end
 
+	for i in 1:no_birds
+		print("the position of agent $i is $(initial_positions[i])\n")
+		print("The position of the i-th thang in pack positions is $(pack_positions[i])\n")
+	end
 
-	#=for i in 1:no_birds
-		bird_angle = rand(Float64)*2*pi
-		bird_radial = 200.0+randn()*25
-		initial_pos = (bird_radial*cos(bird_angle), bird_radial*sin(bird_angle)) .+ (300.0, 300.0)
-		initial_vel = (-sin(bird_angle), cos(bird_angle)) .+ 0.1 .* Tuple(rand(Float64, 2))
-		push!(initial_positions, initial_pos)
-                push!(initial_vels, initial_vel)
-		pack_positions[i] = initial_positions[i]
-                push!(moves_areas, [])
-                push!(last_half_planes, [])
-                push!(new_pos, (0.0, 0.0)) 
-	end =#	
-
+	print("Yo\n")
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
 	init_tess_areas = voronoiarea(init_tess)
-
+	print("Finished the package thang\n")
+	
 	#Calculate the DoDs based off the initial positions
 	#initial_dods = voronoi_area(model, initial_positions, rho)
-	initial_dods = []
-	true_initial_dods = []
-	for i in 1:no_birds
+	initial_dods::Vector{Float64} = []
+	true_initial_dods::Vector{Float64} = []
+	for i::Int32 in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
-		ri  = Tuple(initial_positions[i])
+		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
-		for j in 1:no_birds
+		for j::Int32 in 1:no_birds
 			if(i == j)
 				continue 
 			end
 			push!(neighbouring_positions, Tuple(initial_positions[j]))
 		end
-		vix = initial_vels[i][1]
-		viy = initial_vels[i][2]
-		relic_x = -1.0*(-viy)
-        	relic_y = -vix
-        	relic_pq = (relic_x, relic_y)
-        	relic_angle = atan(relic_y, relic_x)
-        	relic_is_box = 2
-        	relic_half_plane = (relic_angle, relic_pq, ri, relic_is_box)
+		vix::Float64 = initial_vels[i][1]
+		viy::Float64 = initial_vels[i][2]
+		relic_x::Float64 = -1.0*(-viy)
+        	relic_y::Float64 = -vix
+        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+        	relic_angle::Float64 = atan(relic_y, relic_x)
+        	relic_is_box::Int64 = 2
+        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
 
-		initial_cell = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
-		initial_A = voronoi_area(model, ri, initial_cell, rho) 
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
+		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 	
-		true_initial_cell = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
-                true_initial_A = voronoi_area(model, ri, true_initial_cell, rho)
+		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
+                true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
 
 
-		replace_vector(last_half_planes[i], [initial_cell, temp_hp, ri])
+		last_half_planes[i], (initial_cell, temp_hp, ri)
 			
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
@@ -174,14 +184,14 @@ function initialise(; target_area_arg = 1000*sqrt(12),  seed = 123, no_birds = 1
 
 		#print("The initial vertices for agent $i is \n")
 		#print("$(last_half_planes[i][1])\n")
-
+ 
 
 	end
 	#Now make the agents with their respective DoDs and add to the model
-	total_area = 0.0
-	total_speed = 0.0
-	for i in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i])
+	total_area::Float64 = 0.0
+	total_speed::Float64 = 0.0
+	for i::Int32 in 1:no_birds
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, initial_dods[i]/target_area_arg, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
@@ -191,16 +201,16 @@ function initialise(; target_area_arg = 1000*sqrt(12),  seed = 123, no_birds = 1
 
 	#Calculate the actual area of the convex hull of the group of birds
 	convexhullbro = update_convex_hull(model)
-	initial_convex_hull_area = voronoi_area(model, -1, convexhullbro, rho)
+	initial_convex_hull_area::Float64 = voronoi_area(model, -1, convexhullbro, rho)
 	model.CHA = initial_convex_hull_area
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
-	init_rot_ord = rot_ord(allagents(model))
-	init_rot_ord_alt = rot_ord_alt(allagents(model))
+	init_rot_ord::Float64 = rot_ord(allagents(model))
+	init_rot_ord_alt::Float64 = rot_ord_alt(allagents(model))
 	print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	write(compac_frac_file, "$packing_fraction ")
-	average_area = total_area / nagents(model)
+	average_area::Float64 = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
-	average_speed = total_speed/no_birds
+	average_speed::Float64 = total_speed/no_birds
 	write(mean_speed_file, "$average_speed ")
 	write(rot_o_file, "$init_rot_ord ")
 	write(rot_o_alt_file, "$init_rot_ord_alt ")
@@ -208,29 +218,29 @@ function initialise(; target_area_arg = 1000*sqrt(12),  seed = 123, no_birds = 1
 	global initialised = 1
 	
 
-	###Plotting 
-        colours::Vector{Float64} = []
-        rotations::Vector{Float64} = []
-        allagents_iterable = allagents(model)
-        for id in 1:nagents(model)
-                push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
-                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
-        end     
-        #=      
-        Plots.scatter(pack_positions, markersize = 6, label = "generators")
-annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])              
+	###Plotting
+	colours::Vector{Float64} = []
+	rotations::Vector{Float64} = []
+	allagents_iterable = allagents(model)
+	for id in 1:nagents(model)
+		push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
+		push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+	end	
+	#=
+	Plots.scatter(pack_positions, markersize = 6, label = "generators")
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
-        =#              
-        #Finally, plot the figure
-        print("About to do the figure thing\n")
-        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
+	=#
+	#Finally, plot the figure
+	print("About to do the figure thing\n")
+	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, marksersize = 20, color = colours, colormap = :viridis, colorrange = (0.0, 0.25))
         #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
                 text!(initial_positions[i], text = "$i", align = (:center, :top))
         end=#
-        Colorbar(figure[1,2], colorbarthing)
+	#Colorbar(figure[1,2], colorbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
-        print("finished figure\n")
+	print("finished figure\n")
 
 	return model
 end  
@@ -241,24 +251,25 @@ end
 function agent_step!(agent, model)		
 	#Update the agent position and velocities, but only if it is a 
 	#print("Step!\n", agent.planet)
-	dt = model.dt
+	dt::Float64 = model.dt
 	k1::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made = move_gradient(agent, model, k1, 8, 100, rho, target_area)
+        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 100, rho, target_area)
+	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
-	new_agent_pos = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
-	change_in_position = new_agent_pos .- (agent.pos)
-	if(move_made==1)
+	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
+        new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
+	if(move_made_main==1)
 		agent.vel = new_agent_vel
-		agent.speed = 1.0
+		#agent.speed = 1.0
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
 		agent.vel = new_agent_vel
-		agent.speed = 0.0
+		#agent.speed = 0.0
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -273,51 +284,61 @@ end
 function model_step!(model)
 	#Calculate the rotational order of the agents. After some debate, we've decided that position \times desired_velocity is the way to go. 
         all_agents_iterable = allagents(model)
-	rot_order = rot_ord(allagents(model))
-        rot_order_alt = rot_ord_alt(allagents(model))
+	rot_order::Float64 = rot_ord(allagents(model))
+        rot_order_alt::Float64 = rot_ord_alt(allagents(model))
 	print("Alternate rotational order returned as $rot_order_alt\n")	
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
+		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
-
+	
         #Now recalculate the agent DODs based off their new positions
-        total_area = 0.0
-	total_speed = 0.0
+        total_area::Float64 = 0.0
+	total_speed::Float64 = 0.0
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+	previous_areas::Vector{Float64} = zeros(nagents(model))
+	actual_areas::Vector{Float64} = zeros(nagents(model))
+	model.no_moves = 0
 	for agent_i in all_agents_iterable
-                neighbour_positions::Vector{Tuple{Float64, Float64}} = []
+		previous_areas[agent_i.id] = agent_i.A #Just stores the area for the agent in the previous step for plotting
+                
+		neighbour_positions::Vector{Tuple{Float64, Float64}} = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
                                 continue
                         end
                         push!(neighbour_positions, agent_j.pos)
                 end
-                ri = agent_i.pos
-		vix = agent_i.vel[1]
-		viy = agent_i.vel[2]
-		relic_x = -1.0*(-viy)
-        	relic_y = -vix
-        	relic_pq = (relic_x, relic_y)
-        	relic_angle = atan(relic_y, relic_x)
-        	relic_is_box = 2
-        	relic_half_plane = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
+                ri::Tuple{Float64, Float64} = agent_i.pos
+		vix::Float64 = agent_i.vel[1]
+		viy::Float64 = agent_i.vel[2]
+		relic_x::Float64 = -1.0*(-viy)
+        	relic_y::Float64 = -vix
+        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+        	relic_angle::Float64 = atan(relic_y, relic_x)
+        	relic_is_box::Int64 = 2
+        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
-                new_cell_i = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-                new_area = voronoi_area(model, ri, new_cell_i, rho)
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
+		agent_i.tdodr = agent_i.A/agent_i.tdod
 		if(agent_i.A > pi*rho^2)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
                         exit()
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
-		print("\n\n\n The time for calulating the voronoi cell in model step is ")
-		true_new_cell_i =  @time voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
+		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
+		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
+		
+		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
+		model.no_moves += no_move[agent_i.id]
         end
         
 	#Now update the model's convex hull
@@ -326,26 +347,14 @@ function model_step!(model)
 	model.CHA = convex_hull_area
 	model.t += model.dt
         model.n += 1
-
-
-	###Plotting 
-        colours::Vector{Float64} = []
-        rotations::Vector{Float64} = []
-        allagents_iterable = allagents(model)
-        for id in 1:nagents(model)
-                push!(colours, abs(model[id].A-model.target_area)/(0.5*pi*rho^2))
-                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
-        end     
-        #Finally, plot the figure
-        #print("About to do the figure thing\n")
-        figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250))
-        #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
-                text!(initial_positions[i], text = "$i", align = (:center, :top))
-        end=#
-        Colorbar(figure[1,2], colorbarthing)
-        save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
-        print("finished figure\n")
-
+	
+	###Plotting
+	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
+	if(model.simulation_number == 1)
+		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+	end	
+	push!(tracked_path, new_pos[tracked_agent])
+	
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
@@ -377,62 +386,26 @@ function model_step!(model)
 	end
 	close(last_hp_vert)
 
-	print("Finished step $(model.n)\n\n\n")
+	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end
 
-###Test the model has been initialised and works
-using InteractiveDynamics
-using CairoMakie # choosing a plotting backend
 
 
-#=
-###Initialise the model
-model = initialise()
-print("Number of agents is $(nagents(model))\n")
-
-figure, _ = abmplot(model)
-figure # returning the figure displays it
-save("shannon_flock.png", figure)
-=#	
-
+###This is for the actual running of the model
+const no_simulations::Int64 = 1
+const no_steps::Int64 = 5000
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
 rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
-no_steps = 5000
-no_simulations = 1
-
-using ColorSchemes
-import ColorSchemes.balance
-print("Colors loaded\n")
-#=
-###Animate
-model = initialise(1000.0*sqrt(12));
-#ac(agent) =  get(balance, abs(agent.A-model.target_area)/(pi*rho^2))
-plotkwargs = (; ac = get(balance, 0.7), as  = 10, am = :diamond)
-
-print("Gone past the thang")
-
-abmvideo(
-    "Colour_Test.mp4", model, agent_step!, model_step!;
-    spf = 1,
-        framerate = 12, frames = 24,
-    title = "Shannon flock",
-        showstep = true,
-	ac = get(balance, 0.7), as = 10, am = :diamond
-)
-
-print("Finished the vid\n")
-=#
-function run_ABM()
+function run_ABM(i, target_area) #Note that we're asking to input no simulations 
 	global compac_frac_file
         global mean_a_file
         global rot_o_file
         global rot_o_alt_file
 	global mean_speed_file
-for i in 1:no_simulations
-	model = initialise(target_area_arg = 1000.0*sqrt(12))
+	model = initialise(target_area_arg = target_area, simulation_number_arg = i, no_bird = no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
@@ -441,159 +414,7 @@ for i in 1:no_simulations
 	write(rot_o_file, "\n")
 	write(rot_o_alt_file, "\n")
 	write(mean_speed_file, "\n")
-end
-
-	close(compac_frac_file)
-	close(mean_a_file)
-	close(rot_o_file)
-	close(rot_o_alt_file)
-	close(mean_speed_file)
-
-	compac_frac_file = open("compaction_frac.txt", "r")
-	mean_a_file = open("mean_area.txt", "r")
-	rot_o_file = open("rot_order.txt", "r")
-	rot_o_alt_file = open("rot_order_alt.txt", "r")
-	mean_speed_file = open("mean_speed.txt", "r")
-
-cf_array = []
-ma_array = []
-rot_o_array = []
-rot_o_alt_array = []
-ms_array = []
-
-for i in 0:no_steps
-	push!(cf_array, [])
-	push!(ma_array, [])
-	push!(rot_o_array, [])
-	push!(rot_o_alt_array, [])
-	push!(ms_array, [])
-end
-
-cf_lines = readlines(compac_frac_file)
-ma_lines = readlines(mean_a_file)
-rot_o_lines = readlines(rot_o_file)
-rot_o_alt_lines = readlines(rot_o_alt_file)
-ms_lines = readlines(mean_speed_file)
-
-print("The first thing read from the compac_frac_file was $(cf_lines[1])\n")
-for line in cf_lines
-	split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-		#print("The element read was $(split_line[i])\n")
-		push!(cf_array[i], split_line[i])
-        end
-end
-
-for line in ma_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(ma_array[i], split_line[i])
-        end
-end
-
-for line in rot_o_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(rot_o_array[i], split_line[i])
-        end
-end
-
-for line in rot_o_alt_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(rot_o_alt_array[i], split_line[i])
-		#print("The split line was $(split_line[i])\n")
-        end
-end
-
-for line in ms_lines
-        split_line = parse.(Float64, split(line, " "))
-        for i in 1:length(split_line)
-                push!(ms_array[i], split_line[i])
-                #print("The split line was $(split_line[i])\n")
-        end
-end
-
-
-
-cf_ave_file = open("cf_ave.txt", "w")
-ma_ave_file = open("ma_ave.txt", "w")
-rot_o_ave_file = open("rot_o_ave.txt", "w")
-rot_o_alt_ave_file = open("rot_o_alt_ave.txt", "w")
-mean_speed_file = open("mean_speed_ave.txt", "w")
-
-for i in 0:no_steps
-	write(cf_ave_file, "$i $(mean(cf_array[i+1]))\n")
-	write(ma_ave_file, "$i $(mean(ma_array[i+1]))\n")
-	write(rot_o_ave_file, "$i $(mean(rot_o_array[i+1]))\n")
-	write(rot_o_alt_ave_file, "$i $(mean(rot_o_alt_array[i+1]))\n")
-	write(mean_speed_file, "$i $(mean(ms_array[i+1]))\n")
-end
-
-
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-#run_ABM()
-
-function mean_radial_distance(model)
-        com::Tuple{Float64, Float64} = (0.0, 0.0)
-        n::Int64 = nagents(model)
-        for i in 1:n
-                com =  (com .+ 1/n .* (model[i].pos))
-        end
-
-        mrd::Float64 = 0.0
-        for i in 1:n
-                mrd += 1/n*norm(model[i].pos .- com)
-        end
-
-        return mrd
-end
-
-function happiness(agent)
-        return abs((agent.A - 1000*sqrt(12))/(pi/2*rho^2-1000*sqrt(12)))
-end
-
-function rot_o_alt(model)
-        agents_iterable = allagents(model)
-        return rot_ord_alt(agents_iterable)
-end
-
-adata = [(happiness, Statistics.mean)]
-mdata = [mean_radial_distance, rot_o_alt]
-
-parameters = Dict(
-        :target_area_arg => [1000*sqrt(12)]
-)
-
-##Run the ABM using paramscan, and with changing the seed
-adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
-
-mean_happiness_file = open("mean_happiness.txt", "w")
-std_happiness_file = open("std_happiness.txt", "w")
-
-for step in 1:no_steps+1
-        new_mean::Float64 = 0.0
-        mean_squared::Float64 = 0.0
-        for sim_n in 0:no_simulations-1
-                new_mean += adf[sim_n*(no_steps+1)+step , 2]/no_simulations
-                mean_squared += (adf[sim_n*(no_steps+1)+step, 2])^2/no_simulations
-                #print("New mean was $new_mean, mean squared was $mean_squared\n")
-        end
-        write(mean_happiness_file, "$(step-1) $(new_mean)\n")
-        std_happiness = sqrt(mean_squared - new_mean^2)
-        #std_happiness = sqrt(mean_squared)
-        write(std_happiness_file, "$(step-1) $(std_happiness)\n")
-end
-
-
-rot_o_alt_ave_file = open("ensemble_rot_o_alt.txt", "w")
-for i in 1:no_steps+1
-        write(rot_o_alt_ave_file, "$(i-1) $(mdf[i, 3])\n")
-end
-
-radial_dist_file = open("circ_radial.txt", "w")
-for i in 1:no_steps+1
-	write(radial_dist_file, "$(i-1) $(mdf[i, 2])\n") 
-end
+run_ABM(1, 1000*sqrt(12))
