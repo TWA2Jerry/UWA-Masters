@@ -277,10 +277,10 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
         end
 		
-	print("After cleanup, the final half planes were\n")
+	#=print("After cleanup, the final half planes were\n")
 	for hp in newdq
 		print("$hp\n")
-	end
+	end =#
 
 	#Finally, look at the link between the first and last half-planes, if it's valid, add it, if it's not, then the circle intersects would've already been added. 
 	#print("Commencing link between first and last planes\n")
