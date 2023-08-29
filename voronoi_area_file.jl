@@ -28,13 +28,13 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	for i in 1:length(cell)
 		#Use the shoestring formula to calcualte the area
 		j = (i)%num_points+1
-		print("i and j are $i $j\n")
+		#print("i and j are $i $j\n")
 		xi = cell[i][1][1]
 		yi = cell[i][1][2]
 		xj = cell[j][1][1]
 		yj = cell[j][1][2]
                 Area += 0.5 * (yi + yj)* (xi - xj)
-		print("Added area of $(0.5 * (yi + yj)* (xi - xj))\n")
+		#print("Added area of $(0.5 * (yi + yj)* (xi - xj))\n")
 		#If the two vertices are actually intersects with the circle, then in addition to the area calculated from the shoestring formula, you should also add the area of the circle segment 
 		if(cell[i][3] == 0 && cell[j][2] == 0) #If the forward line segment for intersect i aand the backward lines segment for intersect j is a circle, then we have a chord
 			#print("Circle segments detected\n")
