@@ -20,6 +20,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	for i::Int64 in 1:length(neighbouring_points)	
 		#Use the half-way point as the point p
 		point = neighbouring_points[i] 
+		#print("The neighbouring point was $point\n")
 		r_ji = point .- ri
 		half_plane_point = 0.5 .* r_ji .+ ri
 
@@ -66,14 +67,12 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		i += 1
 	end
 	
-	#=		
-	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
-	for half_plane in dq
-		print("The half plane is $half_plane\n")
-	end
-	=#	
 		
 	sort!(dq)
+        #=print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
+        for half_plane in dq
+                print("The half plane is $half_plane\n")
+        end=# 
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
@@ -278,12 +277,10 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
         end
 		
-	#=	
 	print("After cleanup, the final half planes were\n")
 	for hp in newdq
 		print("$hp\n")
 	end
-	=#
 
 	#Finally, look at the link between the first and last half-planes, if it's valid, add it, if it's not, then the circle intersects would've already been added. 
 	#print("Commencing link between first and last planes\n")
@@ -332,7 +329,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
                                         print("$(vq[i]), $(angle_of_vec)\n")
                                 end
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
-                                #exit()
+                                exit()
         end
 		
 	return vq

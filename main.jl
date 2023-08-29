@@ -37,7 +37,7 @@ const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 500.0
+const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -49,7 +49,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 200.0
+const R::Float64 = 100.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -116,13 +116,14 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		end
 	end 
 	=#
-	#R = 200.0
+	
 	for i in 1:no_birds
-                angle_per_bird = 2*pi/no_bird
+                angle_per_bird = 2*pi/(no_birds)
+                #initial_pos = (i == tracked_agent) ? (300.0, 300.0) : (i < tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (R*cos(angle_per_bird*(i-2)), R*sin(angle_per_bird*(i-2))) .+ (300.0, 300.0)
                 initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)
-                rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
+		rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
                 rand_vel = rand_vel ./norm(rand_vel)
-                #print("The bird $i's initial position is $initial_pos\n")
+                print("The bird $i's initial position is $initial_pos\n")
                 push!(initial_positions, initial_pos)
                 push!(initial_vels, rand_vel)
                 pack_positions[i] = initial_positions[i]
@@ -155,7 +156,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = 2
+        	relic_is_box::Int64 = -1
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
 
 		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
@@ -164,15 +165,23 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
 
-
-		last_half_planes[i], (initial_cell, temp_hp, ri)
+		#=print("The half planes that generated the cell for agent $i were \n")
+                        for i in 1:length(temp_hp)
+                                print("$(temp_hp[i])\n")
+                        end
+		=#
+		#What is this? last_half_planes[i], (initial_cell, temp_hp, ri)
 			
 		print("Initial DOD calculated to be $initial_A\n")
-		if(abs(initial_A) > pi*rho^2)
+		if(abs(initial_A) > pi*rho^2/2)
 			print("Main file here. Conventional area exceeded by agent $(i)in position $(initial_positions[i])\n")	
 			print("The cell was \n")
 			for i in 1:length(initial_cell)
 				print("$(initial_cell[i])\n")
+			end
+			print("The half planes that generated it were \n")
+			for i in 1:length(temp_hp)
+				print("$(temp_hp[i])\n")
 			end
 			exit()
 		elseif initial_A < eps

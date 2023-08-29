@@ -1,9 +1,9 @@
-##Introduction
+###Introduction
 #Hello, this is the file that defines all of the main data structures and functions for simulating our program. If you want to actually run the program, use the program.jl file instead. Run using "julia program.jl".
 
 ###Preliminaries
 #using Agents
-include("../agent_definition.jl")
+include("agent_definition.jl")
 using Random
 using VoronoiCells
 using GeometryBasics
@@ -25,13 +25,12 @@ mutable struct bird <: AbstractAgent
 	true_A::Float64 #The true area of the agent's DOD
 end =#
 
-include("../half_plane_fast.jl")
-include("../half_plane_bounded.jl")
-include("../convex_hull.jl")
-include("../rot_ord.jl")
-include("../rot_ord_check.jl")
-include("../init_pos.jl")
-include("../io_file.jl")
+include("half_plane_fast.jl")
+include("half_plane_bounded.jl")
+include("convex_hull.jl")
+include("rot_ord.jl")
+include("rot_ord_check.jl")
+include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
 const no_birds::Int32 = 100
@@ -62,8 +61,8 @@ function mean(v)
 	return total/length(v)
 end
 
-include("../voronoi_area_file.jl")
-include("../move_gradient_file.jl")
+include("voronoi_area_file.jl")
+include("move_gradient_file.jl")
 
 print("Agent template created\n")
 
@@ -97,20 +96,16 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
-
-	
+	#=
 	for i in 1:no_birds
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
-		angle_per_bird = 2*pi/(no_birds-1)
-                initial_pos::Tuple{Float64, Float64} = (i != tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (300.0, 300.0)
-                rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
-                rand_vel = rand_vel ./norm(rand_vel)
 
-		#rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
-		#rand_vel = rand_vel ./norm(rand_vel)
-		push!(initial_positions, initial_pos)
+		rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+		rand_vel = rand_vel ./norm(rand_vel)
+		#push!(initial_positions, rand_position)
 		push!(initial_vels, rand_vel)
-		pack_positions[i] = initial_pos
+		pack_positions[i] = initial_positions[i]
+		print("Pack positions i is $(pack_positions[i])\n")
 		#push!(moves_areas, [])
 		#push!(last_half_planes, [])
 		#=if(model.simulation_number==1)
@@ -119,19 +114,29 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		if(i == tracked_agent)
 			push!(tracked_path, initial_positions[i])
 		end
-	end
-
+	end 
+	=#
+	#R = 200.0
+	
 	for i in 1:no_birds
-		print("the position of agent $i is $(initial_positions[i])\n")
-		print("The position of the i-th thang in pack positions is $(pack_positions[i])\n")
-	end
+                angle_per_bird = 2*pi/(no_birds-1)
+                initial_pos = (i == tracked_agent) ? (300.0, 300.0) : (i < tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (R*cos(angle_per_bird*(i-2)), R*sin(angle_per_bird*(i-2))) .+ (300.0, 300.0)
+                #initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)
+		rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
+                rand_vel = rand_vel ./norm(rand_vel)
+                print("The bird $i's initial position is $initial_pos\n")
+                push!(initial_positions, initial_pos)
+                push!(initial_vels, rand_vel)
+                pack_positions[i] = initial_positions[i]
+                #push!(moves_areas, [])
+                #push!(last_half_planes, [])
+                #push!(new_pos, (0.0, 0.0))
+        end
 
-	print("Yo\n")
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
 	init_tess_areas = voronoiarea(init_tess)
-	print("Finished the package thang\n")
-	
+
 	#Calculate the DoDs based off the initial positions
 	#initial_dods = voronoi_area(model, initial_positions, rho)
 	initial_dods::Vector{Float64} = []
@@ -152,7 +157,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = 2
+        	relic_is_box::Int64 = -1
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
 
 		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
@@ -166,16 +171,20 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			
 		print("Initial DOD calculated to be $initial_A\n")
 		if(abs(initial_A) > pi*rho^2)
-			print("Conventional area exceeded by agent $(i)\n")
+			print("Main file here. Conventional area exceeded by agent $(i)in position $(initial_positions[i])\n")	
+			print("The cell was \n")
+			for i in 1:length(initial_cell)
+				print("$(initial_cell[i])\n")
+			end
 			exit()
 		elseif initial_A < eps
 			print("Effective area of 0. The cell was comprised of vertices $(initial_cell)\n")
 			
 			area_zero[i] = 1
 		end
-		if(abs(initial_A-init_tess_areas[i]) > eps)
+		#=if(abs(initial_A-init_tess_areas[i]) > eps)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
-		end
+		end=#
 		push!(initial_dods, initial_A)
 		push!(true_initial_dods, true_initial_A)
 			
@@ -392,19 +401,15 @@ end
 
 
 ###This is for the actual running of the model
-const no_simulations::Int64 = 1
-const no_steps::Int64 = 5000
-compac_frac_file = open("compaction_frac.txt", "w")
-mean_a_file = open("mean_area.txt", "w")
-rot_o_file = open("rot_order.txt", "w")
-rot_o_alt_file = open("rot_order_alt.txt", "w")
-mean_speed_file = open("mean_speed.txt", "w")
+#const no_simulations::Int64 = 1
+#const no_steps::Int64 = 5000
+
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
-	global compac_frac_file
-        global mean_a_file
-        global rot_o_file
-        global rot_o_alt_file
-	global mean_speed_file
+	#global compac_frac_file
+        #global mean_a_file
+        #global rot_o_file
+        #global rot_o_alt_file
+	#global mean_speed_file
 	model = initialise(target_area_arg = target_area, simulation_number_arg = i, no_bird = no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
@@ -417,4 +422,4 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-run_ABM(1, 1000*sqrt(12))
+#run_ABM()

@@ -1,5 +1,5 @@
 ##Define the no_simulations and steps
-const no_steps = 500
+const no_steps = 0
 const no_simulations = 1
 
 ##Include the IO files for the previous order parameters that we wanted. 
