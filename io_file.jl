@@ -139,22 +139,35 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	target_area::Float64 = model.target_area
 	com::Tuple{Float64, Float64} = center_of_mass(model)
         for id in 1:nagents(model)
-                push!(colours, abs(model[id].A-model.target_area)/(delta_max))
+                #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
+		push!(colours, model[id].nospots)
 		push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
         end
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
         figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
-        #=for i in 1:nagents(model)
+        
+	
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
+	#=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
         print("The number of points in path points is $(length(path_points))\n")
 	draw_path(path_points)
 	text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
+	###tracking the radial distance of each agent from group center
+        radial_distances::Vector{Float64}  = []
+        #=for i in 1:nagents(model)
+                push!(radial_distances, radial_distance(model[i], com))
+        end
+	for i in 1:nagents(model)
+                text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
+        end=#
 	Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+
 
 	#=
 	##Draw the figure of the agents with their actual DODs

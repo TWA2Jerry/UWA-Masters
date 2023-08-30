@@ -49,7 +49,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 100.0
+const R::Float64 = 80.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -116,13 +116,12 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		end
 	end 
 	=#
-	#R = 200.0
 	
 	for i in 1:no_birds
                 angle_per_bird = 2*pi/(no_birds-1)
                 initial_pos = (i == tracked_agent) ? (300.0, 300.0) : (i < tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (R*cos(angle_per_bird*(i-2)), R*sin(angle_per_bird*(i-2))) .+ (300.0, 300.0)
                 #initial_pos = (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0)
-		rand_vel = (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1)))
+		rand_vel = i < tracked_agent ?  (-R*sin(angle_per_bird*(i-1)), R*cos(angle_per_bird*(i-1))) : (-R*sin(angle_per_bird*(i-2)), R*cos(angle_per_bird*(i-2)))
                 rand_vel = rand_vel ./norm(rand_vel)
                 print("The bird $i's initial position is $initial_pos\n")
                 push!(initial_positions, initial_pos)
@@ -166,15 +165,23 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
 
-
-		last_half_planes[i], (initial_cell, temp_hp, ri)
+		#=print("The half planes that generated the cell for agent $i were \n")
+                        for i in 1:length(temp_hp)
+                                print("$(temp_hp[i])\n")
+                        end
+		=#
+		#What is this? last_half_planes[i], (initial_cell, temp_hp, ri)
 			
 		print("Initial DOD calculated to be $initial_A\n")
-		if(abs(initial_A) > pi*rho^2)
+		if(abs(initial_A) > pi*rho^2/2)
 			print("Main file here. Conventional area exceeded by agent $(i)in position $(initial_positions[i])\n")	
 			print("The cell was \n")
 			for i in 1:length(initial_cell)
 				print("$(initial_cell[i])\n")
+			end
+			print("The half planes that generated it were \n")
+			for i in 1:length(temp_hp)
+				print("$(temp_hp[i])\n")
 			end
 			exit()
 		elseif initial_A < eps
@@ -182,9 +189,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			
 			area_zero[i] = 1
 		end
-		#=if(abs(initial_A-init_tess_areas[i]) > eps)
+		if(abs(initial_A-init_tess_areas[i]) > eps)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
-		end=#
+		end
 		push!(initial_dods, initial_A)
 		push!(true_initial_dods, true_initial_A)
 			
