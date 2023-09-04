@@ -7,13 +7,13 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	agent_speed::Float64 = 1.0
 	vix::Float64 = unit_v[1]
 	viy::Float64 = unit_v[2]
-	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
 	all_agents_iterable = allagents(model)
 	for neighbour in all_agents_iterable
 		if(neighbour.id == agent.id)
 			continue
 		end
-		pushfirst!(positions, neighbour.pos)	
+		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
 	#min_area = inf  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
@@ -50,7 +50,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
-			for neighbour_position in positions
+			for neighbour_position_tup in positions
+				neighbour_position::Tuple{Float64, Float64} = neighbour_position_tup[1]
 				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
 					if(j == 1)
 						angular_conflict = 1

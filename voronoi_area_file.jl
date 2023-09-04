@@ -13,16 +13,15 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		return Area
 	end
 	
-	#=
-	print(" The vertices for the cell are ")
+	#=print("Top of voronoi_area_file here. The vertices for the cell are ")
 	for i in 1:num_points
-        	vector_to_vertex = cell[i][1] .- ri
+        	print("$(cell[i])\n")
+		vector_to_vertex = cell[i][1] .- ri
         	angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
-        	print("$angle_to_vertex ")
+        	#print("$angle_to_vertex ")
                 #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
         end
-                                print("\n")
-	=#
+                                print("\n") =#
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)
@@ -71,7 +70,7 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			theta = min((angle_to_ip1 - angle_to_i + 2*pi)%(2*pi), (angle_to_i - angle_to_ip1 + 2*pi)%(2*pi))
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
 			if(abs(alt_circle_segment_area - circle_segment_area)/circle_segment_area > 0.01)
-				print("Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area.\n")
+				print("Voronoi area file here. Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area.\n")
 				#exit()
 			end
 

@@ -1,5 +1,5 @@
 ##Define the no_simulations and steps
-const no_steps = 5000
+const no_steps = 5
 const no_simulations = 1
 
 ##Include the IO files for the previous order parameters that we wanted. 
@@ -29,7 +29,7 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 #Define the parameters we want to scan over
 parameters = Dict(
-	:target_area_arg => [1000*sqrt(12)],
+	:target_area_arg => [1.0*sqrt(12)],
 	:seed => [i for i in 1:no_simulations]
 )
 

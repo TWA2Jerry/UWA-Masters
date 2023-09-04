@@ -2,8 +2,8 @@
 #Hello, this is the file that defines all of the main data structures and functions for simulating our program. If you want to actually run the program, use the program.jl file instead. Run using "julia program.jl".
 
 ###Preliminaries
-#using Agents
-include("agent_definition.jl")
+using Agents
+include("../agent_definition.jl")
 using Random
 using VoronoiCells
 using GeometryBasics
@@ -25,12 +25,13 @@ mutable struct bird <: AbstractAgent
 	true_A::Float64 #The true area of the agent's DOD
 end =#
 
-include("half_plane_fast.jl")
-include("half_plane_bounded.jl")
-include("convex_hull.jl")
-include("rot_ord.jl")
-include("rot_ord_check.jl")
-include("init_pos.jl")
+include("../half_plane_fast.jl")
+include("../half_plane_bounded.jl")
+include("../convex_hull.jl")
+include("../rot_ord.jl")
+include("../rot_ord_check.jl")
+include("../init_pos.jl")
+include("../io_file.jl")
 print("All homemade files included\n")
 print("Hello\n")
 const no_birds::Int32 = 100
@@ -49,7 +50,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 80.0
+const R::Float64 = 100.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -61,8 +62,8 @@ function mean(v)
 	return total/length(v)
 end
 
-include("voronoi_area_file.jl")
-include("move_gradient_file.jl")
+include("../voronoi_area_file.jl")
+include("../move_gradient_file.jl")
 
 print("Agent template created\n")
 
@@ -143,12 +144,12 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	for i::Int32 in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
-		neighbouring_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
+		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
 		for j::Int32 in 1:no_birds
 			if(i == j)
 				continue 
 			end
-			push!(neighbouring_positions, Tuple(initial_positions[j]))
+			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
 		vix::Float64 = initial_vels[i][1]
 		viy::Float64 = initial_vels[i][2]
@@ -319,12 +320,12 @@ function model_step!(model)
 	for agent_i in all_agents_iterable
 		previous_areas[agent_i.id] = agent_i.A #Just stores the area for the agent in the previous step for plotting
                 
-		neighbour_positions::Vector{Tuple{Float64, Float64}} = []
+		neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
                                 continue
                         end
-                        push!(neighbour_positions, agent_j.pos)
+                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
                 ri::Tuple{Float64, Float64} = agent_i.pos
 		vix::Float64 = agent_i.vel[1]
@@ -408,15 +409,23 @@ end
 
 
 ###This is for the actual running of the model
-#const no_simulations::Int64 = 1
-#const no_steps::Int64 = 5000
+const no_simulations::Int64 = 1
+const no_steps::Int64 = 5000
+compac_frac_file = open("compaction_frac.txt", "w")
+mean_a_file = open("mean_area.txt", "w")
+rot_o_file = open("rot_order.txt", "w")
+rot_o_alt_file = open("rot_order_alt.txt", "w")
+mean_speed_file = open("mean_speed.txt", "w")
+rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "w")
+no_moves_file = open("no_moves.txt", "w")
+
 
 function run_ABM(i, target_area) #Note that we're asking to input no simulations 
-	#global compac_frac_file
-        #global mean_a_file
-        #global rot_o_file
-        #global rot_o_alt_file
-	#global mean_speed_file
+	global compac_frac_file
+        global mean_a_file
+        global rot_o_file
+        global rot_o_alt_file
+	global mean_speed_file
 	model = initialise(target_area_arg = target_area, simulation_number_arg = i, no_bird = no_birds)
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
@@ -429,4 +438,4 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-#run_ABM()
+run_ABM(1, 1000*sqrt(12))

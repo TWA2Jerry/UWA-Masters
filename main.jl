@@ -126,12 +126,12 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	for i::Int32 in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
-		neighbouring_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
+		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
 		for j::Int32 in 1:no_birds
 			if(i == j)
 				continue 
 			end
-			push!(neighbouring_positions, Tuple(initial_positions[j]))
+			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
 		vix::Float64 = initial_vels[i][1]
 		viy::Float64 = initial_vels[i][2]
@@ -302,12 +302,12 @@ function model_step!(model)
 	for agent_i in all_agents_iterable
 		previous_areas[agent_i.id] = agent_i.A #Just stores the area for the agent in the previous step for plotting
                 
-		neighbour_positions::Vector{Tuple{Float64, Float64}} = []
+		neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
                                 continue
                         end
-                        push!(neighbour_positions, agent_j.pos)
+                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
                 ri::Tuple{Float64, Float64} = agent_i.pos
 		vix::Float64 = agent_i.vel[1]

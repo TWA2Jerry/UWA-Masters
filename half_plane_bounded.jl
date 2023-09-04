@@ -1,7 +1,7 @@
 include("half_plane_fast.jl")
-
+include("intersect_check.jl")
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
+function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -17,9 +17,11 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	is_box::Int64 = -100000
 	half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), -10000)
 	angle::Float64 = 0.0
+	neighbour_id::Int64 = 1
 	for i::Int64 in 1:length(neighbouring_points)	
 		#Use the half-way point as the point p
-		point = neighbouring_points[i] 
+		point = neighbouring_points[i][1]
+		neighbour_id = neighbouring_points[i][2] 
 		#print("The neighbouring point was $point\n")
 		r_ji = point .- ri
 		half_plane_point = 0.5 .* r_ji .+ ri
@@ -30,7 +32,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		pq = (v_jix, v_jiy)
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
-		is_box = i #This is just to differentiate between the box and actual line segments later
+		is_box = neighbour_id #This is just to differentiate between the box and actual line segments later
 		half_plane = (angle, pq, half_plane_point, is_box)
 		push!(half_planes, half_plane)
 		push!(dq, half_plane)
@@ -276,12 +278,13 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
                 vlen -= 1
 
         end
-		
-	#=print("After cleanup, the final half planes were\n")
+
+	#=		
 	for hp in newdq
 		print("$hp\n")
-	end =#
-
+	end 
+	=#
+	
 	#Finally, look at the link between the first and last half-planes, if it's valid, add it, if it's not, then the circle intersects would've already been added. 
 	#print("Commencing link between first and last planes\n")
 	if (len > 1)
@@ -310,6 +313,9 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	end
 
 	replace_vector(temp_half_planes, newdq) #Replace the temp_half_planes with newdq, which gives the relevant half planes
+
+	###Check that the intersect truly is the intersect. 
+	flag = intersect_check(vq, dq)
 
 	#Final check before we send vq off for processing: rotational order check
 	if(rot_ord_check(ri, vq) != 1)

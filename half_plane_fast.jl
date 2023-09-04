@@ -1,3 +1,4 @@
+include("intersect_check.jl")
 const eps::Float64 = 0.0000000001
 const inf::Float64 = 1000000000000.0
 function norm(v::Tuple{Float64, Float64})
@@ -101,7 +102,7 @@ end
 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Float64, Float64}}, rho::Float64,eps::Float64, inf::Float64 ,temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
+function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64 ,temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -109,9 +110,12 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	
 	#deque for the half planes/lines, I mean, technically you could just use Julia vectors with pushfirst and whatnot, but eh
 	dq::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
-	
-	for point in neighbouring_points	
+	point::Tuple{Float64, Float64} = (0.0, 0.0) 
+	id::Int64 = 0
+	for point_tup in neighbouring_points	
 		#Use the half-way point as the point p
+		point = point_tup[1]
+		id = point_tup[2]
 		r_ji = point .- ri
 		half_plane_point = 0.5 .* r_ji .+ ri
 
@@ -121,7 +125,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		pq = (v_jix, v_jiy)
 		#print("$pq\n")
 		angle = atan(v_jiy, v_jix)
-		is_box = 0 #This is just to differentiate between the box and actual line segments later
+		is_box = id #This is just to differentiate between the box and actual line segments later
 		half_plane = (angle, pq, half_plane_point, is_box)
 		push!(dq, half_plane)
 	end
@@ -286,14 +290,14 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			end
 
 			if(is_outside == 0 && invalid == 0)
-				push!(vq, (intersect_i, i-1, i))
+				push!(vq, (intersect_i, dq[i-1][4], dq[i][4]))
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
-				if(dq[i][4] == 2)
+				if(dq[i][4] == -1)
 					push!(vq, (b_circle_intersect_i, 0, -1))
 				else
-					push!(vq, (b_circle_intersect_i, 0, i))
+					push!(vq, (b_circle_intersect_i, 0, dq[i][4]))
 				end
 				vlen += 1
 				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
@@ -305,7 +309,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			if(dq[i][4] == 2)
                                         push!(vq, (b_circle_intersect_i, 0, -1))
                         else
-                                        push!(vq, (b_circle_intersect_i, 0, i))                                
+                                        push!(vq, (b_circle_intersect_i, 0, dq[i][4]))                                
 			end
 
 			vlen += 1
@@ -320,7 +324,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		if(dq[i][4] == 2)
 			push!(vq, (f_circle_intersect_i, -1, 0))
                 else
-                       	push!(vq, (f_circle_intersect_i, i, 0))
+                       	push!(vq, (f_circle_intersect_i, dq[i][4], 0))
                 end
 
 		vlen += 1
@@ -394,7 +398,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                         end
 
                         if(is_outside == 0 && invalid == 0)
-                                push!(vq, (intersect_last, len, 1))
+                                push!(vq, (intersect_last, newdq[len][4], 1))
                                 vlen += 1
                         end
 	end
@@ -403,6 +407,8 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		#print("Single intersect calculated (area of 0). The dq which generated this was $dq\n")
 	end
 
+	###Check that the cell is indeed the intersection of all half planes
+	flag::Int32 = intersect_check(vq, dq)	
 	
 	return vq
 
