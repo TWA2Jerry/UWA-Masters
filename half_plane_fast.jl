@@ -306,7 +306,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			end	
 
 		else #Note that we've changed the format to account for what to label the forwards half plane is if it was the artifical bounding half plane
-			if(dq[i][4] == 2)
+			if(dq[i][4] == -1)
                                         push!(vq, (b_circle_intersect_i, 0, -1))
                         else
                                         push!(vq, (b_circle_intersect_i, 0, dq[i][4]))                                
@@ -321,7 +321,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		end
 
 		#Add the foward intersect
-		if(dq[i][4] == 2)
+		if(dq[i][4] == -1)
 			push!(vq, (f_circle_intersect_i, -1, 0))
                 else
                        	push!(vq, (f_circle_intersect_i, dq[i][4], 0))
@@ -398,7 +398,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                         end
 
                         if(is_outside == 0 && invalid == 0)
-                                push!(vq, (intersect_last, newdq[len][4], 1))
+                                push!(vq, (intersect_last, newdq[len][4], newdq[1][4]))
                                 vlen += 1
                         end
 	end

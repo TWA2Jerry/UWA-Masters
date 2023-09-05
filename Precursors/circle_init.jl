@@ -50,7 +50,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 100.0
+const R::Float64 = 99.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -410,7 +410,7 @@ end
 
 ###This is for the actual running of the model
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 5000
+const no_steps::Int64 = 0
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")
 rot_o_file = open("rot_order.txt", "w")
