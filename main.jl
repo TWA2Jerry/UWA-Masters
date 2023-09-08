@@ -93,6 +93,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	initial_vels::Vector{Tuple{Float64, Float64}} = []
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
+	empty!(tracked_path)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
@@ -233,13 +234,21 @@ savefig("voronoi_pack_init_tess.png")
 	=#
 	#Finally, plot the figure
 	print("About to do the figure thing\n")
-	figure, ax, colorbarthing = Makie.scatter([Tuple(point) for point in initial_positions], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle, marksersize = 20, color = colours, colormap = :viridis, colorrange = (0.0, 0.25))
-        #=for i in 1:nagents(model) #This is for labelling each dot with the agent number in plot
-                text!(initial_positions[i], text = "$i", align = (:center, :top))
-        end=#
-	#Colorbar(figure[1,2], colorbarthing)
-        save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
-	print("finished figure\n")
+
+	previous_areas::Vector{Float64} = zeros(nagents(model))
+        actual_areas::Vector{Float64} = zeros(nagents(model))
+	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
+	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	print("Finished initial figure\n")	
+
+	###Saving the state of the model for replays
+	positions::Vector{Tuple{Float64, Float64}} = []
+	velocities::Vector{Tuple{Float64, Float64}} = []
+	for i in 1:nagents(model)
+		push!(positions, model[i].pos)
+		push!(velocities, model[i].vel)
+	end
+	write_pos_vel(positions, velocities, pos_vels_file, 0)
 
 	return model
 end  
@@ -346,6 +355,7 @@ function model_step!(model)
 	model.CHA = convex_hull_area
 	model.t += model.dt
         model.n += 1
+
 	
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
@@ -354,7 +364,14 @@ function model_step!(model)
 	end	
 	push!(tracked_path, new_pos[tracked_agent])
 	
+
 	##Statistics recording
+	positions::Vector{Tuple{Float64, Float64}} = []
+	velocities::Vector{Tuple{Float64, Float64}} = []
+	for i in 1:nagents(model)
+		push!(positions, model[i].pos)
+		push!(velocities, model[i].vel)
+	end
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	if(model.n < no_steps)
@@ -362,9 +379,9 @@ function model_step!(model)
 		write(rot_o_file, "$rot_order ")
 		write(rot_o_alt_file, "$rot_order_alt ")
 	else
-		write(compac_frac_file, "$packing_fraction")
-		write(rot_o_file, "$rot_order")
-		write(rot_o_alt_file, "$rot_order_alt")
+		write(compac_frac_file, "$packing_fraction\n")
+		write(rot_o_file, "$rot_order\n")
+		write(rot_o_alt_file, "$rot_order_alt\n")
 	end
 	average_area = total_area / nagents(model)
 	average_speed = total_speed/nagents(model)
@@ -372,8 +389,8 @@ function model_step!(model)
 		write(mean_a_file, "$average_area ")
 		write(mean_speed_file, "$average_speed ")
 	else 
-		write(mean_a_file, "$average_area")
-		write(mean_speed_file, "$average_speed")
+		write(mean_a_file, "$average_area\n")
+		write(mean_speed_file, "$average_speed\n")
 	end
 
 	last_hp_vert = open("Last_hp_vert.txt", "w")
@@ -384,7 +401,9 @@ function model_step!(model)
 		write(last_hp_vert, "\n\n")
 	end
 	close(last_hp_vert)
-
+	
+	write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end
 

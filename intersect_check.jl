@@ -1,5 +1,6 @@
 function intersect_check(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}}, half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}})
 	flag = 0
+	#print("Intersect checking\n")
 	for i in 1:length(cell)
 		vertex_tup = cell[i]
 		vertex = vertex_tup[1]

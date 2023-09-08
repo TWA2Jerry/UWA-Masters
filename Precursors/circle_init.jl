@@ -50,7 +50,7 @@ last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, 
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 99.0
+const R::Float64 = 100.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)

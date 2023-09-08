@@ -147,15 +147,16 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0, 0.250)) #Note that I have no idea what the colorbarthing is for
+        #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0, 0.250), title = "Model state at step $(model.n)") #Note that I have no idea what the colorbarthing is for
         
 	
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
 	#=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
         print("The number of points in path points is $(length(path_points))\n")
 	draw_path(path_points)
+	title!("Model state at step $(model.n)")
 	text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
 	###tracking the radial distance of each agent from group center
         radial_distances::Vector{Float64}  = []
@@ -231,6 +232,8 @@ function do_more_io_stuff(adf, mdf)
 	for i in 1:no_steps+1
         	write(radial_dist_file, "$(i-1) $(mdf[i, 2])\n")
 	end
+	
+	
 
 	rand_happiness_file = open("rand_happpiness.txt", "w")
 	for i in 1:no_steps+1
@@ -271,7 +274,6 @@ function do_more_io_stuff(adf, mdf)
                 write(adf_file, "\n")
         end
 
-	
 	close(rot_o_alt_ave_file)
 	close(mean_happiness_file)
 	close(std_happiness_file)
@@ -301,3 +303,44 @@ function step_statistics(no_move::Vector{Int64}, model_step::Int64, n::Int64, no
         end
 	
 end
+
+function write_rtave(mdf, tdods)
+	###Do some tdod ave recording for radius
+        radius_tave_file = open("radius_tave.txt", "w")
+        #tdods = Set() #Create a set that will keep track of the tdods that were passed down
+        #=for i in 1:size(mdf, 1)
+                push!(tdods, mdf[i, size(mdf, 2)-1])
+                print("Added to tdods a tdod of $(mdf[i, size(mdf, 2)-1])\n")
+        end =#
+
+        no_tdods::Int32 = length(tdods)
+        print("The number of tdods registered is $no_tdods\n")
+        for i in 1:no_tdods
+                average_r::Float64 = 0.0
+                r::Float64 = 0.0
+                for j in 1:no_simulations
+                        for k in trunc(Int, (no_steps+1)/2):no_steps+1
+                                #print("The value of i, j k is $i $j $k\n")
+                                #r = mdf[((i-1)*no_simulations*(no_steps+1))+(j-1)*(no_steps+1)+(k), 2]
+                                r = mdf[(j-1)*no_tdods*(no_steps+1)+(i-1)*(no_steps+1)+(k), 2]
+                                #print("The mean radius was registered as $r\n")
+                                average_r += r
+                        end
+                end
+                average_r /= (no_simulations*(no_steps+1-(no_steps+1)/2 + 1))
+                write(radius_tave_file, "$(tdods[i]) $average_r\n")
+        end
+
+end
+
+function write_pos_vel(positions, velocities, pos_vels_file, n)
+	for i in 1:length(positions)
+		if(i < length(positions))
+			write(pos_vels_file, "$(positions[i][1]) $(positions[i][2]) $(velocities[i][1]) $(velocities[i][2]) ")
+		else
+			write(pos_vels_file, "$(positions[i][1]) $(positions[i][2]) $(velocities[i][1]) $(velocities[i][2]) $n\n")			
+		end
+	end
+end
+
+

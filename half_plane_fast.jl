@@ -290,7 +290,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			end
 
 			if(is_outside == 0 && invalid == 0)
-				push!(vq, (intersect_i, dq[i-1][4], dq[i][4]))
+				push!(vq, (intersect_i, newdq[len][4], dq[i][4]))
 				vlen += 1
 				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))

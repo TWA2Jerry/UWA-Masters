@@ -1,5 +1,5 @@
 ##Define the no_simulations and steps
-const no_steps = 5
+const no_steps = 2000
 const no_simulations = 1
 
 ##Include the IO files for the previous order parameters that we wanted. 
@@ -10,6 +10,8 @@ rot_o_alt_file = open("rot_order_alt.txt", "w")
 mean_speed_file = open("mean_speed.txt", "w")
 rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "w")
 no_moves_file = open("no_moves.txt", "w")
+r_tave_file = open("radius_tave.txt", "w")
+pos_vels_file = open("pos_vels.txt", "w")
 
 ##Include the main functions
 include("io_file.jl")
@@ -27,10 +29,14 @@ adata = [happiness, :tdodr, :nospots]
 #adata = [(happiness, Statistics.mean)]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness]
 
+
+
 #Define the parameters we want to scan over
+target_dods = [1000*sqrt(12)]
+
 parameters = Dict(
-	:target_area_arg => [1.0*sqrt(12)],
-	:seed => [i for i in 1:no_simulations]
+	:seed => [i for i in 1:no_simulations],
+	:target_area_arg => target_dods
 )
 
 ##Run the ABM using paramscan, and with changing the seed
@@ -40,3 +46,4 @@ print(mdf[no_steps, 3])
 
 do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 do_more_io_stuff(adf, mdf)
+write_rtave(mdf, target_dods)

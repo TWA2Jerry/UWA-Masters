@@ -25,3 +25,32 @@ function assign_positions(cellx, celly, no_agents, spacexspan, spaceyspan, offse
 		deleteat!(init_grid, rand_num)
 	end
 end
+
+
+###Function that assigns initial positions based off previously established thingo
+function assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, no_birds)
+	print("Assign_pos_vels called\n")
+	pos_vels_lines = readlines(pos_vels_file)
+	line_counter::Int32 = 0	
+	for line in pos_vels_lines
+		print("Line read\n")
+		if(line_counter == step)
+			split_line = parse.(Float64, split(line, " "))
+			for i in 1:no_birds #Yeah this is real dodgy, maybe pass in arg of noagents
+				x::Float64 = split_line[(i-1)*4 + 1]
+				y::Float64 = split_line[(i-1)*4 + 2]
+				vx::Float64 = split_line[(i-1)*4 + 3]
+				vy::Float64 = split_line[(i-1)*4 + 4]
+				push!(initial_positions, (x, y))
+				print("Pushed $((x,y)), initial pos is now $initial_positions\n")
+				push!(initial_vels, (vx, vy))
+			end
+			print("The step number read in was $(split_line[length(split_line)])\n")
+			break
+		else 
+			print("Line thingo incremented\n")
+			line_counter += 1
+			continue
+		end
+	end
+end
