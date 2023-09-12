@@ -151,11 +151,11 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         
 	
 	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-	#=for i in 1:nagents(model)
+	for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
-        end=#
+        end
         print("The number of points in path points is $(length(path_points))\n")
-	draw_path(path_points)
+	#draw_path(path_points)
 	title!("Model state at step $(model.n)")
 	text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
 	###tracking the radial distance of each agent from group center
