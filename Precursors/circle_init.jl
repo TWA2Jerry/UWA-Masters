@@ -35,7 +35,7 @@ include("../io_file.jl")
 print("All homemade files included\n")
 print("Hello\n")
 const no_birds::Int32 = 100
-const rho::Float64 = 100.0
+const rho::Float64 = 20.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
 const rect_bound::Float64 = 1000.0
@@ -49,8 +49,9 @@ convex_hull_point = zeros(Int32, 100)
 last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
 const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
+#const tracked_agent::Int64 = 38
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 100.0
+const R::Float64 = 20.0
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -141,6 +142,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#initial_dods = voronoi_area(model, initial_positions, rho)
 	initial_dods::Vector{Float64} = []
 	true_initial_dods::Vector{Float64} = []
+	current_streak::Int32 = 0
 	for i::Int32 in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
@@ -165,6 +167,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
+		
 
 		#=print("The half planes that generated the cell for agent $i were \n")
                         for i in 1:length(temp_hp)
@@ -202,7 +205,15 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		#print("The initial vertices for agent $i is \n")
 		#print("$(last_half_planes[i][1])\n")
  
-
+		if(i > 1 && abs(true_initial_A- initial_dods[i-1])/true_initial_A > 0.01 && current_streak >= 10)
+			print("Circle init here. Weird area calculated. The half planes were \n")
+			for half_plane in temp_hp
+				print("$(half_plane)\n")
+			end
+			current_streak = 0
+		end 
+		current_streak += 1
+		print("Current streak equal to $current_streak\n")
 	end
 	#Now make the agents with their respective DoDs and add to the model
 	total_area::Float64 = 0.0

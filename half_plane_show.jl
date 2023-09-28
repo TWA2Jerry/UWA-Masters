@@ -1,108 +1,8 @@
 include("intersect_check.jl")
-const eps::Float64 = 0.0000000001
-const inf::Float64 = 1000000000000.0
-function norm(v::Tuple{Float64, Float64})
-        sum_of_squares::Float64 = 0.0
-        for i in 1:length(v)
-                sum_of_squares += (v[i])^2
-        end
-
-        return sqrt(sum_of_squares)
-end
-
-function norm(v::Float64)
-        sum_of_squares::Float64 = 0.0
-        for i in 1:length(v)
-                sum_of_squares += (v[i])^2
-        end
-
-        return sqrt(sum_of_squares)
-end
-
-function norm(v::Vector{Float64})
-        sum_of_squares::Float64 = 0.0
-        for i in 1:length(v)
-                sum_of_squares += (v[i])^2
-        end
-
-        return sqrt(sum_of_squares)
-end
-
-function dot(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
-	if(length(v1) != length(v2))
-	   print("Bruh these vectors ain't got the same length no?\n")
-	   return -1
-	end
-
-	sum = 0.0
-	for i in 1:length(v1)
-		sum += v1[i]*v2[i]
-	end
-	return sum
-end
-
-###Function for calculating the intersection between two points
-function inter(h1::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}, h2::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}, eps::Float64, inf::Float64)
-        #h1 and h2 represent the half planes we want to calculate the line intersections for
-	#print("Calculating the intersection for $(h1[2]) and $(h2[2])\n")
-	#m1 = h1[2][2]/h1[2][1]
-	#m2 = h2[2][2]/h2[2][1]
-	m1::Float64 = 0.0
-	m2::Float64 = 0.0
-	if(abs(abs(h1[1]) - pi/2) < 0.000001)
-		#print("Infinite gradient detected for m1\n")
-		m1 = inf
-	else 
-		m1 = h1[2][2]/h1[2][1]
-	end
-	#print("m1 found to be $m1\n")
-	if(abs(abs(h2[1]) - pi/2) < 0.000001)
-		m2 = inf
-		#print("Infinite gradient detected for m2\n")
-	else
-		m2 = h2[2][2]/h2[2][1]
-	end	
-	if(abs(m1 - m2) < abs(eps))
-		print("Parallel planes yo\n")
-		#exit()
-		return ((-1.0, -1.0), -1)
-	end  
-	##print("m1 - m2 found to be $(m1-m2)\n")
-	c1::Float64 = h1[3][2] - m1*h1[3][1]
-	c2::Float64 = h2[3][2] - m2*h2[3][1]
-        xint::Float64 = (c2-c1)/(m1-m2)
-	yint::Float64 = -1.0
-	if(abs(m1 - inf) < abs(eps))
-		yint = m2 * xint + c2
-	else 
-		yint = m1 * xint + c1
-	end
-	#print("Intersect calculated as $([xint, yint])\n")
-	return ((xint, yint), 1)
-end
-
-
-
-###Function for calculating the magnitude of the cross product between two vectors v1 and v2
-function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
-	return v1[1] * v2[2] - v1[2]*v2[1]
-end
-
-
-
-###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
-
-function outside(half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}, point::Tuple{Float64, Float64}, eps::Float64, inf::Float64)
-        #What we're doing here is, we calculate the vector from the point on the half plane fence to the point that we're considering (which is the intersection). Call this vector b. The vector of the half plane is a. Now, according to the right hand rule for the calculation of the cross product, the point (intersection) will be to the right of the half-plane if the cross product points in the negative z direction, that is, ax*by-ay*bx < 0.
-        return cross(half_plane[2], point .- half_plane[3]) < -eps
-end
-
-#print(outside([1, [1,2], [3,4]], [5,6]))
-
-
+include("half_plane_fast.jl")
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64 ,temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
+function voronoi_cell_show(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64 = 100.0,eps::Float64 = 0.0000000001, inf::Float64 = 1000000000000.0, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0)], vel = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -237,16 +137,21 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
-			if(vq[vlen][3] != 0)
-				if(len <= 0)
-                                        print("Tried to delete a half plane from dequeue when there wasn't one\n")
-                                        AgentsIO.save_checkpoint("simulation_save.jld2", model)
-					exit()
-                                end
-				pop!(newdq)
-				len -= 1
-			end
 			#print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
+			if(vq[vlen][3] != 0)
+                                 if(len <= 0)
+                                        print("Tried to delete a half plane from dequeue when there wa    sn't one\n")                            
+                                        print("vq is given by $vq\n")
+                                         print("newdq is given by $newdq\n")
+                                         AgentsIO.save_checkpoint("simulation_save.jld2", model)
+                                         exit()
+                                 end
+                                 print("$(dq[i][4]) Popping the half plane $(newdq[len])\n")
+                                 pop!(newdq)
+                                 len -= 1
+                         end
+
+			print("$(dq[i][4]) Popping the vertex $(vq[vlen]) from vq\n")
 			pop!(vq)
                         vlen -= 1
                 end
@@ -254,15 +159,19 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                 #Remove any half planes from the back of the queue, again, don't do it if 
 		while(vlen >= 1 && outside(dq[i], vq[1][1], eps, inf))
 			if(vq[1][2] != 0)
-				if(len <= 0)
-					print("Tried to delete a half plane from dequeue when there wasn't one\n")
-					AgentsIO.save_checkpoint("simulation_save.jld2", model)
-					exit()
-				end
-				popfirst!(newdq)
-				len -= 1
-			end
-			#print("Popping from the front of the dequeue. The front is $(vq[1])\n")
+                                 if(len <= 0)
+                                         print("Tried to delete a half plane from dequeue when there wa    sn't one\n")
+                                         print("vq is given by $vq\n")
+                                        print("newdq is given by $newdq\n")
+                                         AgentsIO.save_checkpoint("simulation_save.jld2", model)
+                                         exit()
+                                 end
+                                 print("$(dq[i][4]) Popping from the front of the dequeue. The front is $(newdq[1])    \n")
+                                 popfirst!(newdq)
+                                 len -= 1
+                        end
+
+			print("$(dq[i][4]) Popping first the vertex $(vq[1]) from vq\n")
 			popfirst!(vq)
                         vlen -= 1
                 end
@@ -292,7 +201,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, (intersect_i, newdq[len][4], dq[i][4]))
 				vlen += 1
-				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				print("Normal intersect pushed for half plane $(dq[i][4]). Intersect was $intersect_i\n")
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
 				if(dq[i][4] == -1)
 					push!(vq, (b_circle_intersect_i, 0, -1))
@@ -300,7 +209,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 					push!(vq, (b_circle_intersect_i, 0, dq[i][4]))
 				end
 				vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				print("Circle intersect pushed for half plane $(dq[i][4]). Intersect was $b_circle_intersect_i\n")
 			else 
 				invalid_half_plane = 1
 			end	
@@ -313,10 +222,11 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			end
 
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			print("Circle intersect pushed for half plane $(dq[i][4]) . Intersect was $b_circle_intersect_i\n")
 		end
 		
 		if(invalid_half_plane == 1)
+			print("Half plane $(dq[i][4]) registered as invalid half plane\n")
 			continue
 		end
 
@@ -328,7 +238,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                 end
 
 		vlen += 1
-		#print("Forward intersect pushed for i = $i. Intersect was $f_circle_intersect_i\n")
+		print("Forward intersect pushed for half plane $(dq[i][4]). Intersect was $f_circle_intersect_i\n")
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
