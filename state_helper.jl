@@ -1,3 +1,4 @@
+include("half_plane_fast.jl")
 function draw_agent_cell(agent_i, model)
 	all_agents_iterable =  allagents(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
@@ -40,4 +41,36 @@ function draw_cell(cell)
 	figure = Plots.plot(points)
 	#display(Plots.plot(points))
 	return figure
+end
+
+function draw_model_cell(model)
+	##Scatter the agent positions
+	b_positions::Vector{Tuple{Float64, Float64}} = []
+	for i in 1:nagents(model)
+		push!(b_positions, model[i].pos)
+	end
+		
+	figure = Plots.scatter(b_positions)
+
+	##Draw the cells	
+	##For each agent, generate the cells and plot using the normal half plane bounded thingo. 
+	for i in 1:nagents(model)
+		temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+		positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
+		for j in 1:nagents(model)
+			if(j == i) continue
+			end
+			push!(positions, (model[j].pos, model[j].id))	
+		end		
+
+		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp) 
+		points::Vector{Tuple{Float64, Float64}} = []
+		for i in 1:length(cell)
+        	        push!(points, cell[i][1])
+	        end
+        	push!(points, cell[1][1])
+		Plots.plot!(points)
+	end 
+
+	display(figure)		
 end
