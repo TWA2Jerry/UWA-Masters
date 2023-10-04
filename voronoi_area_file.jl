@@ -12,7 +12,8 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		Area = pi*rho^2
 		return Area
 	end
-	
+
+	#=	
 	print("Top of voronoi_area_file here. The vertices for the cell are ")
 	for i in 1:num_points
         	print("$(cell[i])\n")
@@ -22,6 +23,7 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                 #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
         end
         print("\n") 
+	=#
 
 	#Iterate through successive pairs of vertices in the cell
 	for i in 1:length(cell)

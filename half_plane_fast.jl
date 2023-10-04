@@ -339,10 +339,14 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
 	#print("Commencing final cleanup\n")
         #Do a final cleanup
+
+	#=
 	print("Before cleanup, vq was \n")
 	for point in vq
 		print("$point \n")
-	end	
+	end
+	=#
+	
 	while(vlen >= 2 && outside(newdq[1], vq[vlen][1], eps, inf))
 
 		if(vq[vlen][3] != 0)
@@ -376,11 +380,13 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                 vlen -= 1
 
         end
-		
+
+	#=		
 	print("After cleanup, the final half planes were\n")
 	for hp in newdq
 		print("$hp\n")
 	end
+	=#
 
 	replace_vector(temp_half_planes, newdq)
 	

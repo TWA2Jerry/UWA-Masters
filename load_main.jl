@@ -14,7 +14,7 @@ using ColorSchemes
 import ColorSchemes.balance
 print("Packages loaded\n")
 
-#=
+#= This agent definition is no longer needed since we have it in agent_definition.jl
 ###Create the agent
 mutable struct bird <: AbstractAgent
         id::Int
@@ -74,7 +74,7 @@ function initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simula
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => step, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -330,9 +330,12 @@ function model_step!(model)
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
 		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		figure = draw_model_cell(model)	
+		save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
 	push!(tracked_path, new_pos[tracked_agent])
 	
+		
 	##Statistics recording
 	packing_fraction = nagents(model)*pi/model.CHA
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
