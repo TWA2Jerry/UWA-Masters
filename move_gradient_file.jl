@@ -38,9 +38,11 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		
+		#=if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
-		end
+		end=#
+		
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
 			if(angular_conflict == 1) 
@@ -381,7 +383,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn = rand([-1, 1])
+                turn = rand([1])
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
                 agent.speed = 0.0
         end

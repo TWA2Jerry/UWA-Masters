@@ -426,11 +426,11 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
 	#figure, _ = abmplot(model)
         #save("./Simulation_Images/shannon_flock_n_=_$(0).png", figure)
 	step!(model, agent_step!, model_step!, no_steps)
-	write(compac_frac_file, "\n")
-	write(mean_a_file, "\n")
-	write(rot_o_file, "\n")
-	write(rot_o_alt_file, "\n")
-	write(mean_speed_file, "\n")
+	#write(compac_frac_file, "\n")
+	#write(mean_a_file, "\n")
+	#write(rot_o_file, "\n")
+	#write(rot_o_alt_file, "\n")
+	#write(mean_speed_file, "\n")
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
