@@ -25,8 +25,9 @@ function draw_agent_cell(agent_i, model)
                 relic_is_box::Int64 = 2
                 relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-                figure = draw_cell(new_cell_i)
+                #new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(agent_i, model)
+		figure = draw_cell(new_cell_i)
 		Plots.scatter!(agent_i.pos)
 		display(figure)
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
@@ -58,7 +59,31 @@ function give_agent_cell(agent_i, model)
                 relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
                 new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-                return new_cell_i
+        	
+		##Procedure for adding the 
+		cell_including_circle = []
+		print("Starting\n")
+		for i in 1:length(new_cell_i)
+			point = new_cell_i[i]
+			point_pp = new_cell_i[(i)%length(new_cell_i)+1]
+			push!(cell_including_circle, point)
+			print("$(point[3]) $(point_pp[2])\n")
+			if(point[3] == 0 && point_pp[2] == 0)
+				print("State helper.jl here. Circle confirmed\n")
+				vec_to_point = point[1] .- agent_i.pos
+				vec_to_pointpp = point_pp[1] .- agent_i.pos
+				theta_1 = atan(vec_to_point[2], vec_to_point[1])
+				theta_2 = atan(vec_to_pointpp[2], vec_to_pointpp[1])
+				if(theta_2 < theta_1)
+					theta_2 += 2*pi
+				end
+				circle_points = circle_seg(agent_i.pos, rho, theta_1, theta_2)
+				for j in 1:length(circle_points[1])
+					push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
+				end
+			end
+		end        
+		return cell_including_circle
 end
 
 function draw_cell(cell)
