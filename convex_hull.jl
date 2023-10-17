@@ -1,4 +1,5 @@
 include("./half_plane_fast.jl")
+include("voronoi_area_file.jl")
 
 function convex_cross(v1, v2)
         return v1[1] * v2[2] - v1[2]*v2[1]
@@ -80,3 +81,47 @@ for point in CH
 	print(point)
 end
 =#
+
+
+function convex_hull_in_area(model, top_left, bottom_right)
+	relevant_points = []
+	for i in 1:nagents(model)
+		if (model[i].pos[1] > top_left[1] && model[i].pos[1] < bottom_right[1] && model[i].pos[2] < top_left[2] && model[i].pos[2] > bottom_right[2])
+			push!(relevant_points, (model[i].pos[1], model[i].pos[2], i))
+		end
+	end
+
+	CH = convex_hull(relevant_points)
+        
+	#=
+	CH_for_area = []
+	for point in CH
+                convex_hull_point[Int64(point[3])] = 1
+        	push!(CH_for_area, [[point[1], point[2]], 1, 1])
+	end
+	=#
+	return CH	
+end
+
+function convex_in_area(model, top_left, bottom_right)
+	CH  = convex_hull_in_area(model, top_left, bottom_right)
+	CH_for_area = []
+        for point in CH
+                convex_hull_point[Int64(point[3])] = 1
+                push!(CH_for_area, [[point[1], point[2]], 1, 1])
+        end
+	convex_hull_area = voronoi_area(model, -1, CH_for_area, rho)
+end
+
+function convex_density(model, top_left, bottom_right)
+	convex_area = convex_in_area(model, top_left, bottom_right)
+	no_agents_in_area = 0
+	for i in 1:nagents(model)
+                if (model[i].pos[1] > top_left[1] && model[i].pos[1] < bottom_right[1] && model[i].pos[2] < top_left[2] && model[i].pos[2] > bottom_right[2])
+                	no_agents_in_area += 1
+		end
+        end
+	density = convex_area/no_agents_in_area
+	print("The number of agents in area was $no_agents_in_area\n")	
+	return density
+end

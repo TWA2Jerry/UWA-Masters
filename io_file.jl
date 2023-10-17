@@ -343,4 +343,7 @@ function write_pos_vel(positions, velocities, pos_vels_file, n)
 	end
 end
 
-
+function calc_mean_std(values)
+	new_mean += adf[sim_n*(no_steps+1)+step , 3]/no_simulations
+        mean_squared += (adf[sim_n*(no_steps+1)+step, 3])^2/no_simulations
+end

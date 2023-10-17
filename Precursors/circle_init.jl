@@ -94,12 +94,17 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	initial_positions::Vector{Tuple{Float64, Float64}} = []
 	initial_vels::Vector{Tuple{Float64, Float64}} = []
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
-	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
+	pack_positions = Vector{Point2{Float64}}(undef, no_bird)
 	
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
-	#=
-	for i in 1:no_birds
+
+	push!(initial_positions, (5.0, 5.0))
+	push!(initial_positions, (10.0, 5.0))
+	push!(initial_positions, (10.0, 0.0))
+	push!(initial_positions, (5.0, 0.0))
+
+	for i in 1:no_bird
 		#rand_position = Tuple(100*rand(Float64, 2)) .+ (50.0, 50.0) 
 
 		rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
@@ -117,8 +122,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			push!(tracked_path, initial_positions[i])
 		end
 	end 
-	=#
-	
+
+	#=	
+	###Perfect circle initialisation
 	for i in 1:no_birds
                 angle_per_bird = 2*pi/(no_birds-1)
                 initial_pos = (i == tracked_agent) ? (300.0, 300.0) : (i < tracked_agent) ? (R*cos(angle_per_bird*(i-1)), R*sin(angle_per_bird*(i-1))) .+ (300.0, 300.0) : (R*cos(angle_per_bird*(i-2)), R*sin(angle_per_bird*(i-2))) .+ (300.0, 300.0)
@@ -133,6 +139,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
                 #push!(last_half_planes, [])
                 #push!(new_pos, (0.0, 0.0))
         end
+	=#
 
 	#Calculate the DOD based off the initial positions
 	init_tess = voronoicells(pack_positions, rect)
@@ -143,11 +150,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	initial_dods::Vector{Float64} = []
 	true_initial_dods::Vector{Float64} = []
 	current_streak::Int32 = 0
-	for i::Int32 in 1:no_birds
+	for i::Int32 in 1:no_bird
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
-		for j::Int32 in 1:no_birds
+		for j::Int32 in 1:no_bird
 			if(i == j)
 				continue 
 			end
@@ -218,7 +225,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Now make the agents with their respective DoDs and add to the model
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
-	for i::Int32 in 1:no_birds
+	for i::Int32 in 1:no_bird
 		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, initial_dods[i]/target_area_arg, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
@@ -238,7 +245,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	write(compac_frac_file, "$packing_fraction ")
 	average_area::Float64 = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
-	average_speed::Float64 = total_speed/no_birds
+	average_speed::Float64 = total_speed/no_bird
 	write(mean_speed_file, "$average_speed ")
 	write(rot_o_file, "$init_rot_ord ")
 	write(rot_o_alt_file, "$init_rot_ord_alt ")
@@ -449,4 +456,6 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model
-run_ABM(1, 1000*sqrt(12))
+#run_ABM(1, 1000*sqrt(12))
+
+

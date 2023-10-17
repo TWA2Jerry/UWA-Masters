@@ -37,7 +37,7 @@ const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 600.0
+const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -70,7 +70,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds)
+function initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = 42, no_moves_arg = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -98,7 +98,7 @@ function initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simula
 
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, no_birds) 
-	for i in 1:no_birds
+	for i in 1:no_bird
 
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")

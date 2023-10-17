@@ -39,9 +39,9 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
 		
-		#=if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
-		end=#
+		end
 		
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
@@ -410,7 +410,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         kn[2] = (min_direction .* agent_speed)[2]
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
-	return best_pos
+	return best_pos, min_area
 end
 
 

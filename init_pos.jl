@@ -30,7 +30,8 @@ end
 ###Function that assigns initial positions based off previously established thingo
 function assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, no_birds)
 	print("Assign_pos_vels called\n")
-	pos_vels_lines = readlines(pos_vels_file)
+	new_pos_vels_file = open("pos_vels.txt", "r")
+	pos_vels_lines = readlines(new_pos_vels_file)
 	line_counter::Int32 = 0	
 	for line in pos_vels_lines
 		print("Line read\n")
@@ -53,4 +54,5 @@ function assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, n
 			continue
 		end
 	end
+	close(new_pos_vels_file)
 end

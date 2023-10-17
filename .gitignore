@@ -3,3 +3,6 @@ Records/h43/h43_mdf_file.txt
 Records/**/*_mdf_file.txt
 #pos_vels.txt
 Cell_Images/*
+Simulation_Images/*
+*.txt
+!/pos_vels.txt

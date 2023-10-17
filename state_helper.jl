@@ -1,5 +1,7 @@
 include("half_plane_fast.jl")
 include("move_gradient_file.jl")
+include("draw_circle_part.jl")
+include("load_initialise.jl")
 function draw_agent_cell(agent_i, model)
 	all_agents_iterable =  allagents(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
@@ -23,13 +25,40 @@ function draw_agent_cell(agent_i, model)
                 relic_is_box::Int64 = 2
                 relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
                 figure = draw_cell(new_cell_i)
 		Plots.scatter!(agent_i.pos)
 		display(figure)
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
 		 print("Now calculating the voronoi area for agent $(agent_i.id), which was $new_area\n")	
 		return new_cell_i 
+end
+
+function give_agent_cell(agent_i, model)
+        all_agents_iterable =  allagents(model)
+        temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+        previous_areas::Vector{Float64} = zeros(nagents(model))
+        actual_areas::Vector{Float64} = zeros(nagents(model))
+
+                neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
+                for agent_j in all_agents_iterable
+                        if(agent_i.id == agent_j.id)
+                                continue
+                        end
+                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
+                end
+                ri::Tuple{Float64, Float64} = agent_i.pos
+                vix::Float64 = agent_i.vel[1]
+                viy::Float64 = agent_i.vel[2]
+                relic_x::Float64 = -1.0*(-viy)
+                relic_y::Float64 = -vix
+                relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+                relic_angle::Float64 = atan(relic_y, relic_x)
+                relic_is_box::Int64 = 2
+                relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
+
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+                return new_cell_i
 end
 
 function draw_cell(cell)
@@ -79,6 +108,10 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp) 
 		points::Vector{Tuple{Float64, Float64}} = []
+		if(length(cell) == 0)
+			draw_circle_seg(b_positions[i], rho, 0.0, 2*pi)
+			continue
+		end		
 		for i in 1:length(cell)
         	        push!(points, cell[i][1])
 	        end
@@ -117,7 +150,7 @@ function draw_tesselation(positions, model)
 
                 cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, positions[i], c_positions, rho, eps, inf, temp_hp)
                 points::Vector{Tuple{Float64, Float64}} = []
-                for i in 1:length(cell)
+		for i in 1:length(cell)
                         push!(points, cell[i][1])
                 end
                 push!(points, cell[1][1])
@@ -135,7 +168,7 @@ function show_move(model, id)
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
 	m::Int64 = 100
-	pot_pos::Tuple{Float64, Float64} = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area)   	
+	pot_pos::Tuple{Float64, Float64} = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area)[1]   	
 
 	##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent	
 	positions::Vector{Tuple{Float64, Float64}} = []
@@ -153,3 +186,38 @@ function show_move(model, id)
 	Makie.scatter!(model[id].pos, color = :red)
 	display(figure)
 end
+
+areas= []
+potential_areas = []
+function record_moves(model, pos_vels_file, start, agent_ids, no_steps)
+###Model is our model, agent_ids should be a vector of the ids of agents you want to track, and no_steps is the number of steps you want to evolve teh model by. We should preset the model to the starting step we want in interactive.			
+	for id in agent_ids
+		push!(areas, [])
+		push!(potential_areas, [])
+	end
+	
+	for i in 0:no_steps
+		model = load_initialise(pos_vels_file, start+i)
+		#Go through all the thangs, record their 
+		for j in 1:length(agent_ids)
+			id = agent_ids[j]
+			#write(current_areas_file, "($model[agent_ids[id]].A)\n")
+			print("The position of agent $(agent_ids[j]) is $(model[id].pos)\n")
+			push!(areas[j], model[agent_ids[j]].A) 
+		end
+	
+		#Go through the agents of interest, and use move_gradient_alt to find their best move in current position
+		for j in 1:length( agent_ids)
+			id = agent_ids[j]
+			kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
+		        q::Int64 = 8
+       			m::Int64 = 100
+			best_area =  move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area)[2]
+			best_difference = model[id].A - best_area
+			#write(best_areas_file, "$best_difference $id\n")
+			push!(potential_areas[j], best_area)
+		end
+		#step!(model, agent_step!, model_step!, 1)
+	end
+end
+

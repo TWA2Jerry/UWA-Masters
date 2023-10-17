@@ -37,7 +37,7 @@ const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 600.0
+const rect_bound::Float64 = 1000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
@@ -64,6 +64,7 @@ end
 include("voronoi_area_file.jl")
 include("move_gradient_file.jl")
 include("state_helper.jl")
+include("record_peripheral_agents.jl")
 
 print("Agent template created\n")
 
@@ -146,10 +147,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 
 		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
-	
+		detect_write_periphery(initial_A, initial_cell, model.n) 	
+
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
-
+		
 		#=print("The half planes that generated the cell for agent $i were \n")
                         for i in 1:length(temp_hp)
                                 print("$(temp_hp[i])\n")
@@ -328,8 +330,9 @@ function model_step!(model)
         	relic_angle::Float64 = atan(relic_y, relic_x)
         	relic_is_box::Int64 = 2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+		
+		print("The time for calculating a cell was\n")
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		agent_i.tdodr = agent_i.A/agent_i.tdod
@@ -341,7 +344,8 @@ function model_step!(model)
 		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
 		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
-		
+		detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
+	
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area
