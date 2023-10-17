@@ -131,7 +131,8 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 			push!(positions, (model[j].pos, model[j].id))	
 		end		
 
-		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp) 
+		#cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp) 
+		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		points::Vector{Tuple{Float64, Float64}} = []
 		if(length(cell) == 0)
 			draw_circle_seg(b_positions[i], rho, 0.0, 2*pi)
