@@ -13,18 +13,6 @@ using CairoMakie # choosing a plotting backend
 using ColorSchemes
 import ColorSchemes.balance
 print("Packages loaded\n")
-
-#=
-###Create the agent
-mutable struct bird <: AbstractAgent
-        id::Int
-        pos::NTuple{2, Float64}
-        vel::NTuple{2, Float64}
-        speed::Float64
-        A::Float64 #The area of the agent's DOD, at least in their own eyes
-	true_A::Float64 #The true area of the agent's DOD
-end =#
-
 include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
 include("convex_hull.jl")
@@ -33,6 +21,8 @@ include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
+
+#=
 const no_birds::Int32 = 100
 const rho::Float64 = 100.0
 initialised::Int32 = 0
@@ -50,6 +40,8 @@ const sigma = 0.0
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
 const R::Float64 = 80.0
+=#
+include("global_vars.jl")
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -251,7 +243,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	write_pos_vel(positions, velocities, pos_vels_file, 0)
+	#write_pos_vel(positions, velocities, pos_vels_file, 0)
 
 	return model
 end  
@@ -409,7 +401,7 @@ function model_step!(model)
 	end
 	close(last_hp_vert)
 	
-	write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end

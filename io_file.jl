@@ -344,6 +344,17 @@ function write_pos_vel(positions, velocities, pos_vels_file, n)
 end
 
 function calc_mean_std(values)
-	new_mean += adf[sim_n*(no_steps+1)+step , 3]/no_simulations
-        mean_squared += (adf[sim_n*(no_steps+1)+step, 3])^2/no_simulations
+	n::Int32 = length(values)
+	mean::Float64 = 0.0
+	mean_squared::Float64 = 0.0	
+	for i in 1:n
+		mean += values[i]/n
+        	mean_squared += values[i]^2/n
+	end
+	std_dev::Float64 = sqrt(mean^2 - mean_squared)
+	return new_mean, std_dev
+end
+
+function write_model
+	
 end
