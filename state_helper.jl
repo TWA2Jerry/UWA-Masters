@@ -217,6 +217,8 @@ areas= []
 potential_areas = []
 function record_moves(model, pos_vels_file, start, agent_ids, no_steps)
 ###Model is our model, agent_ids should be a vector of the ids of agents you want to track, and no_steps is the number of steps you want to evolve teh model by. We should preset the model to the starting step we want in interactive.			
+	empty!(areas)
+	empty!(potential_areas)
 	for id in agent_ids
 		push!(areas, [])
 		push!(potential_areas, [])
@@ -247,3 +249,6 @@ function record_moves(model, pos_vels_file, start, agent_ids, no_steps)
 	end
 end
 
+function plot_cave_ins(agent_ids)
+	Plots.plot([t for t in 1:length(areas[1])], areas, label = transpose(agents_to_track))
+end
