@@ -243,7 +243,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	#write_pos_vel(positions, velocities, pos_vels_file, 0)
+	write_pos_vel(positions, velocities, pos_vels_file, 0)
 
 	return model
 end  
@@ -399,9 +399,8 @@ function model_step!(model)
 		write(last_hp_vert, "$(last_half_planes[i][2])\n")
 		write(last_hp_vert, "\n\n")
 	end
-	close(last_hp_vert)
-	
-	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	close(last_hp_vert)	
+	write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end

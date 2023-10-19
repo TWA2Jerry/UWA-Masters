@@ -44,7 +44,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		end
 		
 		no_angles_considered += 1
-		for j::Int64 in m:m #For every position up to m
+		for j::Int64 in 1:m #For every position up to m
 			if(angular_conflict == 1) 
 				break
 			end
@@ -224,7 +224,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		end
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
-	min_area = inf  #The agent's current DOD area
+	min_area = agent.A  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
 	move_made::Int64 = 0
