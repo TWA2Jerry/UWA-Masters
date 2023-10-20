@@ -1,32 +1,8 @@
 include("intersect_check.jl")
+include("some_math_functions.jl")
 const eps::Float64 = 0.0000000001
 const inf::Float64 = 1000000000000.0
-function norm(v::Tuple{Float64, Float64})
-        sum_of_squares::Float64 = 0.0
-        for i in 1:length(v)
-                sum_of_squares += (v[i])^2
-        end
 
-        return sqrt(sum_of_squares)
-end
-
-function norm(v::Float64)
-        sum_of_squares::Float64 = 0.0
-        for i in 1:length(v)
-                sum_of_squares += (v[i])^2
-        end
-
-        return sqrt(sum_of_squares)
-end
-
-function norm(v::Vector{Float64})
-        sum_of_squares::Float64 = 0.0
-        for i in 1:length(v)
-                sum_of_squares += (v[i])^2
-        end
-
-        return sqrt(sum_of_squares)
-end
 
 function dot(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
 	if(length(v1) != length(v2))

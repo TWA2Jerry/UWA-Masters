@@ -1,5 +1,9 @@
 ###Function that assigns an initial position to each agent such that they 
-function assign_positions(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx, offsety, initial_positions)
+include("global_vars.jl")
+include("some_math_functions.jl")
+using Random
+
+function assign_positions(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx, offsety, initial_positions, initial_vels)
 	init_grid = []
 
 	#Find the number of cells given the minimum exclusion volume for each agent
@@ -23,6 +27,12 @@ function assign_positions(cellx, celly, no_agents, spacexspan, spaceyspan, offse
 		push!(initial_positions, init_grid[rand_num])
 		#Remove that coordinate from the vector
 		deleteat!(init_grid, rand_num)
+	end
+
+	for i in 1:no_agents
+                rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+                rand_vel = rand_vel ./norm(rand_vel)
+                push!(initial_vels, rand_vel)
 	end
 end
 
@@ -55,4 +65,8 @@ function assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, n
 		end
 	end
 	close(new_pos_vels_file)
+end
+
+function init_circle(circle_origin, circle_radius, initial_positions, )
+	
 end
