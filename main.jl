@@ -22,25 +22,8 @@ include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
 
-#=
-const no_birds::Int32 = 100
-const rho::Float64 = 100.0
-initialised::Int32 = 0
-area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 1000.0
-const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
-rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
-no_move = ones(Int32, no_birds) #An array which will allow us to keep track of which agents never move
-new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An array that will store the new positions of the agents for movement when we go to the model step
-convex_hull_point = zeros(Int32, 100)
-last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
-const sigma = 0.0
-const tracked_agent::Int64 = rand(1:no_birds)
-tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 80.0
-=#
 include("global_vars.jl")
+print("Global variables included\n")
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
@@ -87,13 +70,12 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	empty!(tracked_path)
-	
+	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions)
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	init_circle((rect_bound/2, rect_bound/2), 551.9874243835927, initial_positions, initial_vels)	
+	
 	for i in 1:no_birds
-		#rand_vel::Tuple{Float64, Float64} = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
-		#rand_vel = rand_vel ./norm(rand_vel)
-		#push!(initial_vels, rand_vel)
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
 		#push!(last_half_planes, [])
@@ -185,6 +167,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	for i::Int32 in 1:no_birds
 		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, initial_dods[i]/target_area_arg, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
+		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += true_initial_dods[i]/(pi*rho^2)
@@ -320,8 +303,8 @@ function model_step!(model)
         	relic_is_box::Int64 = 2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		
-		print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
+		#print("The time for calculating a cell was\n")
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		agent_i.tdodr = agent_i.A/agent_i.tdod
@@ -340,6 +323,10 @@ function model_step!(model)
 		agent_i.true_A = true_new_area
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
+		print("Agent speed was $(agent_i.speed)\n")
+		if(no_move[agent_i.id] == 1) 
+			print("Agent $(agent_i.id) will move\n")
+		end
 		model.no_moves += no_move[agent_i.id]
         end
         

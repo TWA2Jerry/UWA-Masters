@@ -14,17 +14,6 @@ using ColorSchemes
 import ColorSchemes.balance
 print("Packages loaded\n")
 
-#= This agent definition is no longer needed since we have it in agent_definition.jl
-###Create the agent
-mutable struct bird <: AbstractAgent
-        id::Int
-        pos::NTuple{2, Float64}
-        vel::NTuple{2, Float64}
-        speed::Float64
-        A::Float64 #The area of the agent's DOD, at least in their own eyes
-	true_A::Float64 #The true area of the agent's DOD
-end =#
-
 include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
 include("convex_hull.jl")
@@ -33,23 +22,7 @@ include("rot_ord_check.jl")
 include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
-const no_birds::Int32 = 100
-const rho::Float64 = 100.0
-initialised::Int32 = 0
-area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 1000.0
-const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
-const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
-rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
-moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent
-no_move = ones(Int32, no_birds) #An array which will allow us to keep track of which agents never move
-new_pos::Vector{Tuple{Float64, Float64}} = [(0.0, 0.0) for i in 1:no_birds] #An array that will store the new positions of the agents for movement when we go to the model step
-convex_hull_point = zeros(Int32, 100)
-last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
-const sigma = 0.0
-const tracked_agent::Int64 = rand(1:no_birds)
-tracked_path::Vector{Tuple{Float64, Float64}} = []
-const R::Float64 = 80.0
+include("global_vars.jl")
 
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)

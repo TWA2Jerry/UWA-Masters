@@ -63,14 +63,14 @@ function give_agent_cell(agent_i, model)
         	
 		##Procedure for adding the 
 		cell_including_circle = []
-		print("Starting\n")
+		#print("Starting\n")
 		for i in 1:length(new_cell_i)
 			point = new_cell_i[i]
 			point_pp = new_cell_i[(i)%length(new_cell_i)+1]
 			push!(cell_including_circle, point)
-			print("$(point[3]) $(point_pp[2])\n")
+			#print("$(point[3]) $(point_pp[2])\n")
 			if(point[3] == 0 && point_pp[2] == 0)
-				print("State helper.jl here. Circle confirmed\n")
+				#print("State helper.jl here. Circle confirmed\n")
 				vec_to_point = point[1] .- agent_i.pos
 				vec_to_pointpp = point_pp[1] .- agent_i.pos
 				theta_1 = atan(vec_to_point[2], vec_to_point[1])

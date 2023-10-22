@@ -67,6 +67,14 @@ function assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, n
 	close(new_pos_vels_file)
 end
 
-function init_circle(circle_origin, circle_radius, initial_positions, )
-	
+function init_circle(circle_origin, circle_radius, initial_positions, initial_vels)
+	for i in 1:no_birds
+                angle_per_bird = 2*pi/(no_birds)
+                initial_pos = (circle_radius*cos(angle_per_bird*(i-1)), circle_radius*sin(angle_per_bird*(i-1))) .+ circle_origin
+                rand_vel = (-circle_radius*sin(angle_per_bird*(i-1)), circle_radius*cos(angle_per_bird*(i-1))) 
+                rand_vel = rand_vel ./norm(rand_vel)
+                print("The bird $i's initial position is $initial_pos\n")
+                push!(initial_positions, initial_pos)
+                push!(initial_vels, rand_vel)
+        end	
 end

@@ -1,4 +1,5 @@
 ###Function that determines the gradient of movement
+include("record_peripheral_agents.jl")
 function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
@@ -242,7 +243,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         relic_angle::Float64 = atan(relic_y, relic_x)
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
-	best_pos::Tuple{Float64, Float64} = (0.0, 0.0)
+	best_pos::Tuple{Float64, Float64} = agent.pos
 	
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
