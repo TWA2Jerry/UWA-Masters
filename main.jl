@@ -39,6 +39,7 @@ include("voronoi_area_file.jl")
 include("move_gradient_file.jl")
 include("state_helper.jl")
 include("record_peripheral_agents.jl")
+include("write_agent_file.jl")
 
 print("Agent template created\n")
 
@@ -224,6 +225,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(velocities, model[i].vel)
 	end
 	write_pos_vel(positions, velocities, pos_vels_file, 0)
+	write_agent_vals(model)	
 
 	return model
 end  
@@ -385,6 +387,7 @@ function model_step!(model)
 	end
 	close(last_hp_vert)	
 	write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	write_agent_vals(model)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end

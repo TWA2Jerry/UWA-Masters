@@ -1,5 +1,6 @@
 ###Function that determines the gradient of movement
 include("record_peripheral_agents.jl")
+using VoronoiCells
 function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
@@ -279,7 +280,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			
 
@@ -411,6 +412,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         kn[2] = (min_direction .* agent_speed)[2]
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
+	
 	return best_pos, min_area
 end
 
