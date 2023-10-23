@@ -137,6 +137,7 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		points::Vector{Tuple{Float64, Float64}} = []
 		if(length(cell) == 0)
+			print("Agent $i was detected to have an unbounded cell\n")
 			draw_circle_seg(b_positions[i], rho, 0.0, 2*pi)
 			continue
 		end		

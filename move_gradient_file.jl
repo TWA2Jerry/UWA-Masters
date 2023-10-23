@@ -46,7 +46,7 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		end
 		
 		no_angles_considered += 1
-		for j::Int64 in 1:m #For every position up to m
+		for j::Int64 in 1:1 #For every position up to m
 			if(angular_conflict == 1) 
 				break
 			end
