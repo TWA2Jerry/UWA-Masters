@@ -411,7 +411,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         kn[1] = (min_direction .* agent_speed)[1]
         kn[2] = (min_direction .* agent_speed)[2]
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
-	print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
+	#print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
 	
 	return best_pos, min_area
 end

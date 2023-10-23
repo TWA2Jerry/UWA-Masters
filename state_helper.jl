@@ -3,6 +3,7 @@ include("half_plane_bounded.jl")
 include("move_gradient_file.jl")
 include("draw_circle_part.jl")
 include("load_initialise.jl")
+include("global_vars.jl")
 function draw_agent_cell(agent_i, model)
 	all_agents_iterable =  allagents(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []

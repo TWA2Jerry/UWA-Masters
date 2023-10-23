@@ -73,8 +73,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	init_circle((rect_bound/2, rect_bound/2), 551.9874243835927, initial_positions, initial_vels)	
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
 	
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
@@ -325,10 +324,6 @@ function model_step!(model)
 		agent_i.true_A = true_new_area
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
-		print("Agent speed was $(agent_i.speed)\n")
-		if(no_move[agent_i.id] == 1) 
-			print("Agent $(agent_i.id) will move\n")
-		end
 		model.no_moves += no_move[agent_i.id]
         end
         

@@ -5,7 +5,7 @@ include("state_helper.jl")
 agent_vals_file = open("agent_vals.txt", "w")
 
 function write_agent_vals(model)
-	for i in 1:nagent(model)
+	for i in 1:nagents(model)
 		write(agent_vals_file, "$(model.n) ")
 
 		write(agent_vals_file, "$i ")
