@@ -25,3 +25,13 @@ function norm(v::Vector{Float64})
         return sqrt(sum_of_squares)
 end
 
+###Function that takes a vector and calculates the mean of the elements in the vector
+function mean(v)
+        total = 0.0
+        for i in 1:length(v)
+                total += v[i]
+        end
+
+        return total/length(v)
+end
+

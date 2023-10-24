@@ -14,6 +14,10 @@ set style fill solid 1.0 noborder
 
 no_lines = floor(system("wc -l ../agent_vals.txt")/1)
 
+print no_lines
+stats '../agent_vals.txt' using 4 name "A"
+x = A
+
 plot "../agent_vals.txt" using (rounded($4)):(1) smooth frequency with boxes
 set title "Frequency histogram of distances of chosen future positions for agents"
 set ylabel "Frequency"

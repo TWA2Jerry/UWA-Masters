@@ -6,6 +6,7 @@
 include("agent_definition.jl")
 using Random
 using VoronoiCells
+rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 using GeometryBasics
 using Plots
 using InteractiveDynamics
@@ -27,15 +28,8 @@ print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
 
-###Function that takes a vector and calculates the mean of the elements in the vector
-function mean(v)
-	total = 0.0
-	for i in 1:length(v)
-		total += v[i]
-	end
-	
-	return total/length(v)
-end
+include("some_math_functions.jl")
+
 
 include("voronoi_area_file.jl")
 include("move_gradient_file.jl")
