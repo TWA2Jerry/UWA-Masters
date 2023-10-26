@@ -47,9 +47,12 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
+			#=
 			if(angular_conflict == 1) 
 				break
 			end
+			=#
+
 			conflict::Int64 = 0
 			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
 		
@@ -64,9 +67,11 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 					break
 				end			
 			end			
-			if (conflict == 1 || angular_conflict == 1)		
+			
+			if (conflict == 1)		
 				continue
 			end
+
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	
 			###
