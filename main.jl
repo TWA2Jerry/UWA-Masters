@@ -6,7 +6,6 @@
 include("agent_definition.jl")
 using Random
 using VoronoiCells
-rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 using GeometryBasics
 using Plots
 using InteractiveDynamics
@@ -27,6 +26,7 @@ include("global_vars.jl")
 print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
+rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 
 include("some_math_functions.jl")
 
