@@ -197,8 +197,11 @@ function show_move(model, id)
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
 	m::Int64 = 100
-	pot_pos::Tuple{Float64, Float64} = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area)[1]   	
-
+	move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area) 
+	pot_pos::Tuple{Float64, Float64} = move_tuple[1]
+	sampled_positions = move_tuple[3]
+	sampled_colours = move_tuple[4]	
+	best_area = move_tuple[2]
 	##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent	
 	positions::Vector{Tuple{Float64, Float64}} = []
 	for i in 1:nagents(model)
@@ -210,9 +213,10 @@ function show_move(model, id)
 	end
 
 	figure = draw_tesselation(positions, model)
-	print("Agent $id wanted to move to a new position of $pot_pos from its old position of $(model[id].pos)\n")
-	Makie.scatter!(pot_pos, color = :yellow)
-	Makie.scatter!(model[id].pos, color = :red)
+	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
+	Makie.scatter!(model[id].pos, color = :yellow)
+        Makie.scatter!(sampled_positions, color = sampled_colours)
+	Makie.scatter!(pot_pos, color = :cyan)
 	display(figure)
 end
 

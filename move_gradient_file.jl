@@ -176,8 +176,9 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
                 turn = rand([-1, 1])
-                min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-                agent.speed = 0.0
+                #min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
+                min_direction = unit_v
+		agent.speed = 0.0
         end
 	agent.nospots = num_positions_better
 
@@ -245,7 +246,9 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 	best_pos::Tuple{Float64, Float64} = agent.pos
-	
+	sampled_positions::Vector{Tuple{Float64, Float64}} = []
+	colours = []	
+
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
 		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
@@ -256,12 +259,14 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		end
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
+			#=
 			if(angular_conflict == 1) 
 				break
-			end
+			end 
+			=#
 			conflict::Int64 = 0
 			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
-		
+			push!(sampled_positions, new_agent_pos)	
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position_tup in positions
 				neighbour_position::Tuple{Float64, Float64} = neighbour_position_tup[1]
@@ -273,9 +278,11 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 					break
 				end			
 			end			
+			#=
 			if (conflict == 1 || angular_conflict == 1)		
 				continue
 			end
+			=#
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	
 			###
@@ -332,8 +339,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			print("\n")
 			=#
 
-			if (abs(new_area-target_area) < min_diff)
-                        	min_diff = abs(new_area-target_area)
+			if (abs(new_area-target_area) < min_diff && conflict != 1)
+				min_diff = abs(new_area-target_area)
 				min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
@@ -346,9 +353,14 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 				best_pos = new_agent_pos
                 	end
 			
+			colour = :black
 			if(abs(new_area-target_area) < abs(agent.A - target_area)) 
 				num_positions_better += 1
+				colour = (conflict == 1) ? :orange : :green
+			else
+				colour = :red
 			end
+			push!(colours, colour)
 		end
 		
 		#Check area calculation through voronoi package
@@ -414,7 +426,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	#print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
 	
-	return best_pos, min_area
+	return best_pos, min_area, sampled_positions, colours
 end
 
 

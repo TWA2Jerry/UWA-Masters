@@ -22,5 +22,3 @@ function detect_write_periphery(area, cell, model_n)
 	end
 	write(periphery_file, "$area $on_periphery\n")
 end
-
-
