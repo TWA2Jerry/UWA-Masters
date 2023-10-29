@@ -92,17 +92,17 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		#Use the half-way point as the point p
 		point = point_tup[1]
 		id = point_tup[2]
-		r_ji = point .- ri
-		half_plane_point = 0.5 .* r_ji .+ ri
+		r_ji::Tuple{Float64, Float64} = point .- ri
+		half_plane_point::Tuple{Float64, Float64} = 0.5 .* r_ji .+ ri
 
 		#Calculate the appropriate vector pq which lies parallel to the line in a direction such that the inner region is to the left of the vector
-		v_jix = -1.0 * (0.5 * r_ji[2])
-		v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
-		pq = (v_jix, v_jiy)
+		v_jix::Float64 = -1.0 * (0.5 * r_ji[2])
+		v_jiy::Float64 = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
+		pq::Tuple{Float64, Float64} = (v_jix, v_jiy)
 		#print("$pq\n")
-		angle = atan(v_jiy, v_jix)
-		is_box = id #This is just to differentiate between the box and actual line segments later
-		half_plane = (angle, pq, half_plane_point, is_box)
+		angle::Float64 = atan(v_jiy, v_jix)
+		is_box::Int32 = id #This is just to differentiate between the box and actual line segments later
+		half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int32} = (angle, pq, half_plane_point, is_box)
 		push!(dq, half_plane)
 	end
 
@@ -127,7 +127,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 ###This is the section where we account for the circle of vision
 	#Having found the voronoi cell with the bounded box method, we now account for the fact that we have a bounding circle and not a box, and so get rid of the box line segments first
 	#print("\n\n\nCommencing bounded DOD calculation\n")	
-	i = 1
+	i::Int32 = 1
 	while (i <= length(dq))
 		if(dq[i][4]== -1 || norm(dq[i][3] .- ri) >= rho || abs(norm(dq[i][3] .- ri)-rho) < 10^(-12))
 			deleteat!(dq, i)
@@ -206,7 +206,7 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
-		a1_a2 = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
+		a1_a2::Tuple{Float64, Float64} = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
                 f_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? (x1, y1) : (x2, y2) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? (x1, y1) : (x2, y2)

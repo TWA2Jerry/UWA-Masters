@@ -4,7 +4,7 @@ include("state_helper.jl")
 
 agent_vals_file = open("agent_vals.txt", "w")
 
-function write_agent_vals(model)
+function write_agent_vals(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
 	for i in 1:nagents(model)
 		write(agent_vals_file, "$(model.n) ")
 

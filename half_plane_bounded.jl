@@ -18,7 +18,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), -10000)
 	angle::Float64 = 0.0
 	neighbour_id::Int64 = 1
-	for i::Int64 in 1:length(neighbouring_points)	
+	tttt = @elapsed for i::Int64 in 1:length(neighbouring_points)	
 		#Use the half-way point as the point p
 		point = neighbouring_points[i][1]
 		neighbour_id = neighbouring_points[i][2] 
@@ -37,12 +37,13 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		push!(half_planes, half_plane)
 		push!(dq, half_plane)
 	end
+	#print("Time for calculating half plane points and whatnot is $tttt\n")
 
 	#=Add the half plane that bounds the area to the area in front of the agent
-        fw_point = ri
+        fw_point::Tuple{Float64, Float64} = ri
         fw_x::Float64 = -1.0*(-vel[2])
-        fw_y = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
-        fw_pq = [fw_x, fw_y]
+        fw_y::Float64 = -vel[1] #you might be confused about the negative sign, remember that this is meant to be the vector of the half plane, which is the vector fo the velocity rotated 90 degrees clockwise. 
+        fw_pq::Vector{Float64} = [fw_x, fw_y]
         angle = atan(fw_y, fw_x)
         fw_is_box = -1
         fw_half_plane = (angle, fw_pq, Tuple(ri), fw_is_box)
@@ -52,7 +53,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
-	#push!(dq, relic)
+	push!(dq, relic)
 
 
 
@@ -83,7 +84,8 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	dql::Int64 = length(dq)
 	len::Int64 = 0
 	vlen::Int64 = 0
-	for i::Int64 in 1:dql
+	
+	t = @elapsed for i::Int64 in 1:dql
 		#print("Single fence agent detected\n")
 		m::Float64 = 0.0
 		if(dq[i][4] == -5000)
@@ -242,10 +244,12 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		#print("$vq\n")
 		#print("$newdq\n")
         end
+	#print("$t\n")
+	
 
 	#print("Commencing final cleanup\n")
         #Do a final cleanup
-	while(vlen >= 2 && outside(newdq[1], vq[vlen][1], eps, inf))
+	tt = @elapsed while(vlen >= 2 && outside(newdq[1], vq[vlen][1], eps, inf))
 
 		if(vq[vlen][3] != 0)
 			#print("Popping from the back of the newdq because the intersect was $(vq[vlen]). The back is $(newdq[len])\n")
@@ -262,8 +266,9 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		vlen -= 1
 
         end
+	#print("Time for cleanup 1 is $tt\n")
 
-	while(vlen >= 2 && outside(newdq[len], vq[1][1], eps, inf))
+	ttt = @elapsed while(vlen >= 2 && outside(newdq[len], vq[1][1], eps, inf))
 		if(vq[1][2] != 0)
 			#print("Popping from the front of newdq. The front is $(vq[1])\n")
 			if(len <= 0)
@@ -278,6 +283,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
                 vlen -= 1
 
         end
+	#print("Time for cleanup 1 is $ttt\n")
 
 	#=		
 	for hp in newdq

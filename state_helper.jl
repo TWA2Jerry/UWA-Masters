@@ -4,7 +4,7 @@ include("move_gradient_file.jl")
 include("draw_circle_part.jl")
 include("load_initialise.jl")
 include("global_vars.jl")
-function draw_agent_cell(agent_i, model)
+function draw_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
 	all_agents_iterable =  allagents(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
         previous_areas::Vector{Float64} = zeros(nagents(model))
@@ -37,7 +37,7 @@ function draw_agent_cell(agent_i, model)
 		return new_cell_i 
 end
 
-function give_agent_cell(agent_i, model)
+function give_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
         all_agents_iterable =  allagents(model)
         temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
         previous_areas::Vector{Float64} = zeros(nagents(model))
@@ -117,17 +117,17 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 	end
 		
 	
-	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-	
+	#figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
 	
 	##Draw the cells	
 	##For each agent, generate the cells and plot using the normal half plane bounded thingo. 
-	for i in 1:nagents(model)
+	for i::Int32 in 1:nagents(model)
 		##Just some colour stuff for the plot
-		text!(model[i].pos, text = "$i", align = (:center, :top))
+		#text!(model[i].pos, text = "$i", align = (:center, :top))
 		temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 		positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
-		for j in 1:nagents(model)
+		for j::Int32 in 1:nagents(model)
 			if(j == i) continue
 			end
 			push!(positions, (model[j].pos, model[j].id))	
@@ -141,13 +141,13 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 			draw_circle_seg(b_positions[i], rho, 0.0, 2*pi)
 			continue
 		end		
-		for i in 1:length(cell)
-        	        push!(points, cell[i][1])
+		for j in 1:length(cell)
+        	        push!(points, cell[j][1])
 	        end
         	push!(points, cell[1][1])
 		Makie.lines!(points, color = :black)
 	end 
-	Colorbar(figure[1,2], colourbarthing)
+	#Colorbar(figure[1,2], colourbarthing)
 	#save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	#display(figure)
 	return figure		
@@ -161,7 +161,7 @@ function draw_tesselation(positions, model)
         end
 
 
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = :circle)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle)
 
 
         ##Draw the cells
@@ -192,7 +192,7 @@ function draw_tesselation(positions, model)
 
 end
 
-function show_move(model, id)
+function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int32)
 	##First, show the position that the agent with id of id will go to 
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
@@ -212,7 +212,7 @@ function show_move(model, id)
 		push!(positions, model[i].pos)
 	end
 
-	figure = draw_tesselation(positions, model)
+	figure = draw_model_cell(model)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
 	Makie.scatter!(model[id].pos, color = :yellow)
         Makie.scatter!(sampled_positions, color = sampled_colours)

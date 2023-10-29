@@ -1,7 +1,7 @@
 ###Function that determines the gradient of movement
 include("record_peripheral_agents.jl")
 using VoronoiCells
-function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
@@ -178,9 +178,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn = rand([-1, 1])
-                #min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-                min_direction = unit_v
+                turn::Int32 = 1
+                min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
 	agent.nospots = num_positions_better
@@ -401,8 +400,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
                 turn = rand([1])
-                #min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-                min_direction = unit_v
+                min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
 	agent.nospots = num_positions_better

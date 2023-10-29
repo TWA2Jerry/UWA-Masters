@@ -1,6 +1,6 @@
 ##Define the no_simulations and steps
 const no_steps = 5000
-const no_simulations = 1
+const no_simulations = 50
 
 ##Include the IO files for the previous order parameters that we wanted. 
 compac_frac_file = open("compaction_frac.txt", "w")
@@ -32,7 +32,7 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 
 #Define the parameters we want to scan over
-target_dods = [1000*sqrt(12)]
+target_dods = [0.0, 1*sqrt(12),2*sqrt(12), 5*sqrt(12), 10*sqrt(12), 20*sqrt(12), 1000*sqrt(12)]
 
 parameters = Dict(
 	:seed => [i for i in 1:no_simulations],
