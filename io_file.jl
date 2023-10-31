@@ -355,6 +355,14 @@ function calc_mean_std(values)
 	return new_mean, std_dev
 end
 
-function write_model
+function average_across_thing(agent_vals_file, dimension_to_average_across)
+	#Create a set that will hold the 
+
+	#Iterate through all sample instances 
+
+	#Create a map such that associated with each key, the values that the variable along which we average can take, is an array that holds all the values of the variable of interest for that value
 	
+	#
 end
+
+

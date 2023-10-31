@@ -4,6 +4,9 @@ include("move_gradient_file.jl")
 include("draw_circle_part.jl")
 include("load_initialise.jl")
 include("global_vars.jl")
+include("give_agent_cell.jl")
+
+
 function draw_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
 	all_agents_iterable =  allagents(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
@@ -37,56 +40,6 @@ function draw_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2,
 		return new_cell_i 
 end
 
-function give_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
-        all_agents_iterable =  allagents(model)
-        temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
-        previous_areas::Vector{Float64} = zeros(nagents(model))
-        actual_areas::Vector{Float64} = zeros(nagents(model))
-
-                neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
-                for agent_j in all_agents_iterable
-                        if(agent_i.id == agent_j.id)
-                                continue
-                        end
-                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
-                end
-                ri::Tuple{Float64, Float64} = agent_i.pos
-                vix::Float64 = agent_i.vel[1]
-                viy::Float64 = agent_i.vel[2]
-                relic_x::Float64 = -1.0*(-viy)
-                relic_y::Float64 = -vix
-                relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-                relic_angle::Float64 = atan(relic_y, relic_x)
-                relic_is_box::Int64 = 2
-                relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-        	
-		##Procedure for adding the 
-		cell_including_circle = []
-		#print("Starting\n")
-		for i in 1:length(new_cell_i)
-			point = new_cell_i[i]
-			point_pp = new_cell_i[(i)%length(new_cell_i)+1]
-			push!(cell_including_circle, point)
-			#print("$(point[3]) $(point_pp[2])\n")
-			if(point[3] == 0 && point_pp[2] == 0)
-				#print("State helper.jl here. Circle confirmed\n")
-				vec_to_point = point[1] .- agent_i.pos
-				vec_to_pointpp = point_pp[1] .- agent_i.pos
-				theta_1 = atan(vec_to_point[2], vec_to_point[1])
-				theta_2 = atan(vec_to_pointpp[2], vec_to_pointpp[1])
-				if(theta_2 < theta_1)
-					theta_2 += 2*pi
-				end
-				circle_points = circle_seg(agent_i.pos, rho, theta_1, theta_2)
-				for j in 1:length(circle_points[1])
-					push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
-				end
-			end
-		end        
-		return cell_including_circle
-end
 
 function draw_cell(cell)
 	print("Draw cell called\n")	
@@ -371,3 +324,32 @@ function draw_model_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, 
 	return figure		
 end
 
+function record_dod_distributions(pos_vels_file, start, agent_ids, no_steps)
+	for i in 0:no_steps
+               	model = load_initialise(pos_vels_file, start+i)
+		plot_dod_hist(model)		
+	end
+end
+
+function give_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int32)
+        ##First, show the position that the agent with id of id will go to
+        kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
+        q::Int64 = 8
+        m::Int64 = 100
+        move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area)
+        pot_pos::Tuple{Float64, Float64} = move_tuple[1]
+        sampled_positions = move_tuple[3]
+        sampled_colours = move_tuple[4]
+        best_area = move_tuple[2]
+        ##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent
+        positions::Vector{Tuple{Float64, Float64}} = []
+        for i in 1:nagents(model)
+                if(i == id)
+                        push!(positions, pot_pos)
+                        continue
+                end
+                push!(positions, model[i].pos)
+        end
+	return move_tuple
+end
+ 

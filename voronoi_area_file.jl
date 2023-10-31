@@ -75,10 +75,10 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 			angle_to_ip1 = atan(vec_to_ip1[2], vec_to_ip1[1])
 			theta = min((angle_to_ip1 - angle_to_i + 2*pi)%(2*pi), (angle_to_i - angle_to_ip1 + 2*pi)%(2*pi))
 			alt_circle_segment_area = 0.5* rho^2 * (theta - sin(theta))
-			if(abs(alt_circle_segment_area - circle_segment_area)/circle_segment_area > 0.01)
+			#= if(abs(alt_circle_segment_area - circle_segment_area)/circle_segment_area > 0.01)
 				print("Voronoi area file here. Divergence in area calculated, the angle formula calculated $alt_circle_segment_area, the other $circle_segment_area.\n")
 				#exit()
-			end
+			end =#
 
 			#Check, if the agent position is inside the chord half plane. 
 			chord_vector = cell[j][1] .- cell[i][1]
