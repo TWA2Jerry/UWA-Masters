@@ -355,14 +355,28 @@ function calc_mean_std(values)
 	return new_mean, std_dev
 end
 
-function average_across_thing(agent_vals_file, dimension_to_average_across)
+function average_across_thing(agent_vals_lines, dimension_to_average_across, var_of_interest)
 	#Create a set that will hold the 
-
+	s = Set([])
+		
 	#Iterate through all sample instances 
+	for i in 1:length(agent_vals_lines)
+		push!(s, agent_vals_lines[i][dimension_to_average_across])
+	end
 
 	#Create a map such that associated with each key, the values that the variable along which we average can take, is an array that holds all the values of the variable of interest for that value
-	
-	#
+	d = Dict([])
+	for element in s
+		d[element] = []
+	end	
+
+	#Now go through the lines again and add every lines value
+	for line in agent_vals_lines
+		xvar = line[dimension_to_average_across]
+		push!(d[xvar], line[var_of_interest])
+	end
+
+	return d
 end
 
 
