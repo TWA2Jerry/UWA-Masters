@@ -220,7 +220,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(velocities, model[i].vel)
 	end
 	write_pos_vel(positions, velocities, pos_vels_file, 0)
-	write_agent_vals(model)	
+	#write_agent_vals(model)	
 
 	return model
 end  
