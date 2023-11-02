@@ -178,7 +178,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn::Int32 = 1
+                turn::Int32 = rand([1, -1])
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
