@@ -138,7 +138,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         allagents_iterable = allagents(model)
 	target_area::Float64 = model.target_area
 	com::Tuple{Float64, Float64} = center_of_mass(model)
-        for id in 1:nagents(model)
+	for id in 1:nagents(model)
                 #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
 		push!(colours, model[id].nospots)

@@ -60,9 +60,10 @@ function do_stuff(pos_vels_file, start, no_steps)
                 end
 		
 		b_range = range(0.0, largest_area, 100)
-        	figure = histogram(areas_on_periphery, bins = b_range, label="Areas for agents on the periphery", color = :purple)
+        	figure = histogram(areas_on_periphery, bins = b_range, label="Areas for agents on the periphery", color = :purple, plot_title = "DOD hist for step $i")
         	histogram!(areas_on_interior, bins = b_range, label="Areas for agents on the interior", color = :green)	
-        	save("./Dod/dod_hist_step_$(i).png", figure)
+        	print("Bro\n")
+		save("./Dod/dod_hist_step_$(i).png", figure)
 	end
 
 end

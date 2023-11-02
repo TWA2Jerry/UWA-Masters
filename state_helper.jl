@@ -63,15 +63,23 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 	b_positions::Vector{Tuple{Float64, Float64}} = []
 	colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
+	minx = model[1].pos[1]
+	maxx = model[1].pos[1]
+	miny = model[1].pos[2]
+	maxy = model[2].pos[2]
 	for i in 1:nagents(model)
 		push!(colours, model[i].nospots)
                 push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
 		push!(b_positions, model[i].pos)
+		minx = min(minx, model[i].pos[1])	
+		maxx = max(maxx, model[i].pos[1])
+		miny = min(miny, model[i].pos[2])
+		maxy = max(maxy, model[i].pos[2])
 	end
 		
 	
-	#figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+	#figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
 	
 	##Draw the cells	
 	##For each agent, generate the cells and plot using the normal half plane bounded thingo. 
