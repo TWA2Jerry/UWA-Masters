@@ -34,7 +34,6 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		angle = atan(v_jiy, v_jix)
 		is_box = neighbour_id #This is just to differentiate between the box and actual line segments later
 		half_plane = (angle, pq, half_plane_point, is_box)
-		push!(half_planes, half_plane)
 		push!(dq, half_plane)
 	end
 	#print("Time for calculating half plane points and whatnot is $tttt\n")
@@ -138,7 +137,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		end
 		#print("x1, y1, x2, y2 calculated to be $x1, $y1, $x2, $y2\n")
 		
-		a1_a2::Tuple{Float64, Float64} = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
+		a1_a2 = (x1, y1) .- (x2, y2) #Calculate the vector from the second to first intersect with the circle
                 f_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? (x1, y1) : (x2, y2) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? (x1, y1) : (x2, y2)

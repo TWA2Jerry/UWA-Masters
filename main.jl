@@ -236,7 +236,7 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made_main::Int32 = move_gradient(agent, model, k1, 8, 100, rho, target_area)
+        move_made_main::Int32 =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
@@ -313,7 +313,7 @@ function model_step!(model)
 		#print("\n\n\n The time for calulating the voronoi cell in model step is ")
 		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
-		detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
+		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 	
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
@@ -335,8 +335,8 @@ function model_step!(model)
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
 		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
-		figure = draw_model_cell(model)
-                save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
+		#figure = draw_model_cell(model)
+                #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
 	push!(tracked_path, new_pos[tracked_agent])
 	
@@ -368,7 +368,8 @@ function model_step!(model)
 		write(mean_a_file, "$average_area\n")
 		write(mean_speed_file, "$average_speed\n")
 	end
-
+	
+	#=
 	last_hp_vert = open("Last_hp_vert.txt", "w")
 	for i in 1:nagents(model)
 		write(last_hp_vert, "Agent $i, position of $(new_pos[i]), considering position of $(last_half_planes[i][3])\n")
@@ -376,9 +377,11 @@ function model_step!(model)
 		write(last_hp_vert, "$(last_half_planes[i][2])\n")
 		write(last_hp_vert, "\n\n")
 	end
-	close(last_hp_vert)	
+	close(last_hp_vert) 
+	=#
+	
 	write_pos_vel(positions, velocities, pos_vels_file, model.n)
-	write_agent_vals(model)
+	#write_agent_vals(model)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end
