@@ -154,8 +154,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end
-        print("The number of points in path points is $(length(path_points))\n")
-	#draw_path(path_points)
+        #print("The number of points in path points is $(length(path_points))\n")
+	draw_path(path_points)
 	title!("Model state at step $(model.n)")
 	text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
 	###tracking the radial distance of each agent from group center
