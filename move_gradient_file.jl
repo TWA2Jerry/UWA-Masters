@@ -42,7 +42,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
 		
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (2)*2*pi/q + eps)
 			continue
 		end
 		
