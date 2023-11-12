@@ -3,7 +3,6 @@ include("record_peripheral_agents.jl")
 include("nearest_agents.jl")
 using VoronoiCells
 function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
-	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
 	theta_0::Float64 = atan(unit_v[2], unit_v[1])
@@ -42,7 +41,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
 		
-		if(abs(rel_angle) > (2)*2*pi/q + eps)
+		if(abs(rel_angle) > (1)*2*pi/q + eps)
 			continue
 		end
 		
@@ -179,14 +178,9 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn::Int32 = rand([1])
-                nearest_ids = find_nearest_agents(agent, model)
-		cov::Tuple{Float64, Float64} = (0.0, 0.0)
-		for i in 1:3
-			cov = cov .+ model[nearest_ids[i]].vel ./3
-		end
-		#min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-		min_direction = cov
+                #turn::Int32 = rand([1])
+		turn::Int32 =  find_turn(agent, model)
+		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
 	agent.nospots = num_positions_better
