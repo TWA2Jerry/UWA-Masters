@@ -74,3 +74,4 @@ function thingo(model)
                 next_pos::Tuple{Float64, Float64} = next_pos_area[1]
                 distance_to_next_pos::Float64 = norm(next_pos .- model[i].pos)
 end
+

@@ -34,4 +34,22 @@ function find_turn(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, F
 	end	
 
 	return left_turns >= 0 ? 1 : -1
+end
+
+function find_cop(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+	agent_angle::Float64 = atan(agent.vel[2], agent.vel[1])
+        positions::Vector{Tuple{Float64, Float64}} = []
+	for i in 1:nagents(model)
+                if(model[i].id == agent.id) continue end
+                neighbour = model[i]
+                neighbour_vector::Tuple{Float64, Float64} = neighbour.pos .- agent.pos
+                rnv::Tuple{Float64, Float64} = rotate_vector(-agent_angle, neighbour_vector)
+                neighbour_angle = atan(rnv[2], rnv[1])
+                if(abs(neighbour_angle) > pi/2) 
+                        continue
+        	else
+			push!(positions, neighbour.pos)
+		end
+	end     
+	return center_of_pos(positions)
 end	
