@@ -367,7 +367,7 @@ function average_across_thing(agent_vals_lines, dimension_to_average_across, var
 	#Create a map such that associated with each key, the values that the variable along which we average can take, is an array that holds all the values of the variable of interest for that value
 	d = Dict([])
 	for element in s
-		d[element] = []
+		d[element] = [] 
 	end	
 
 	#Now go through the lines again and add every lines value
@@ -375,8 +375,13 @@ function average_across_thing(agent_vals_lines, dimension_to_average_across, var
 		xvar = line[dimension_to_average_across]
 		push!(d[xvar], line[var_of_interest])
 	end
-
-	return d
+		
+	d_ave = Dict([])
+	for (key, value) in d
+		d_ave[key] = calc_mean_std(value)
+	end
+	
+	return d_ave
 end
 
 

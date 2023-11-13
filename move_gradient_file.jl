@@ -179,11 +179,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
                 #turn::Int32 = rand([1])
-		#turn::Int32 =  find_turn(agent, model)
 		#min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-		cop = find_cop(agent, model)
-		min_direction = cop .- agent.pos
-		min_direction = min_direction ./ norm(min_direction)
+		ids = find_nearest_agents(agent, model)
+		min_direction = model[ids[1]].pos .- agent.pos
+		min_direction = min_direction ./ norm(min_direction) 
 		agent.speed = 0.0
         end
 	agent.nospots = num_positions_better
