@@ -27,7 +27,7 @@ end
 
 adata = [happiness, :tdodr, :nospots]
 #adata = [(happiness, Statistics.mean)]
-mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness]
+mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o]
 
 
 

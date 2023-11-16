@@ -147,10 +147,12 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
-        #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0, 0.250), title = "Model state at step $(model.n)") #Note that I have no idea what the colorbarthing is for
         
 	
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+	#figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = :circle,  rotations = rotations, color = :black)
+
+
 	#=
 	for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
@@ -169,41 +171,14 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	for i in 1:nagents(model)
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
-	Colorbar(figure[1,2], colourbarthing)
+	#Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
-
-
-	#=
-	##Draw the figure of the agents with their actual DODs
-	for id in 1:nagents(model)
-                colours[id] = actual_areas[id]/(pi*rho^2)
-        end
-	figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
-        #=for i in 1:nagents(model)
-                text!(new_pos[i], text = "$i", align = (:center, :top))
-        end=#
-        Colorbar(figure_actual[1,2], colourbarthing)
-        save("./Simulation_Images_Actual_Areas/shannon_flock_n_=_$(model.n).png", figure_actual)
-
-	##Draw the figure of the agents with their change in DOD
-	for id in 1:nagents(model)
-                #print("Current A is $(model[id].A), previous areas was $(previous_areas[id])\n")
-		colours[id] = (abs(model[id].A - model.target_area)-abs(previous_areas[id]-model.target_area))/(2*delta_max)
-        end
-        figure_difference, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (-0.1, 0.1)) #Note that I have no idea what the colorbarthing is for
-        #=for i in 1:nagents(model)
-                text!(new_pos[i], text = "$i", align = (:center, :top))
-        end=#
-        #Makie.scatter!([Tuple(point) for point in path_points], marker = :circle, color = :black, markersize = 20)
-	#draw_path(path_points)
-	Colorbar(figure_difference[1,2], colourbarthing) 
-	save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure_difference)
-	=#
 end
 
 function draw_path(points)
 	Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
 end
+
 
 function do_more_io_stuff(adf, mdf)
 	rot_o_alt_ave_file = open("ensemble_rot_o_alt.txt", "w")
@@ -387,4 +362,34 @@ function average_across_thing(agent_vals_lines, dimension_to_average_across, var
 	return d_ave
 end
 
+function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+         ##Draw the figure of the agents with their actual DODs
+        for id in 1:nagents(model)
+                colours[id] = actual_areas[id]/(pi*rho^2)
+        end
+        figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
+        #=for i in 1:nagents(model)
+                text!(new_pos[i], text = "$i", align = (:center, :top))
+        end=#
+        Colorbar(figure_actual[1,2], colourbarthing)
+        save("./Simulation_Images_Actual_Areas/shannon_flock_n_=_$(model.n).png", figure_actual)
+
+end
+
+function draw_delta_DOD(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+        ##Draw the figure of the agents with their change in DOD
+        for id in 1:nagents(model)
+                #print("Current A is $(model[id].A), previous areas was $(previous_areas[id])\n")
+                colours[id] = (abs(model[id].A - model.target_area)-abs(previous_areas[id]-model.target_area))/(2*delta_max)
+        end
+        figure_difference, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (-0.1, 0.1)) #Note that I have no idea what the colorbarthing is for
+        #=for i in 1:nagents(model)
+                text!(new_pos[i], text = "$i", align = (:center, :top))
+        end=#
+        #Makie.scatter!([Tuple(point) for point in path_points], marker = :circle, color = :black, markersize = 20)
+        #draw_path(path_points)
+        Colorbar(figure_difference[1,2], colourbarthing)
+        save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure_difference)
+
+end
 

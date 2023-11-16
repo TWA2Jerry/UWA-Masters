@@ -178,10 +178,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                #turn::Int32 = rand([1])
-		#min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
-		ids = find_nearest_agents(agent, model)
-		min_direction = model[ids[1]].vel
+                turn::Int32 = rand([1, -1])
+		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
 	agent.nospots = num_positions_better
@@ -252,6 +250,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	best_pos::Tuple{Float64, Float64} = agent.pos
 	sampled_positions::Vector{Tuple{Float64, Float64}} = []
 	colours = []	
+	best_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = []	
 
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
@@ -355,6 +354,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")
 				end=#
 				best_pos = new_agent_pos
+				best_voronoi_cell = agent_voronoi_cell
                 	end
 			
 			colour = :black
@@ -429,7 +429,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	#print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
 	
-	return best_pos, min_area, sampled_positions, colours, move_made
+	return best_pos, min_area, sampled_positions, colours, move_made, best_voronoi_cell
 end
 
 

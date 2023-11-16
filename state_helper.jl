@@ -58,7 +58,7 @@ function display_model_cell(model)
 	display(figure)
 end
 
-function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
 	##Scatter the agent positions
 	b_positions::Vector{Tuple{Float64, Float64}} = []
 	colours::Vector{Float64} = []
@@ -79,8 +79,8 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 		
 	
 	#figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
-	
+	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;  title = "Model state at step $(model.n)", limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+	#figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
 	##Draw the cells	
 	##For each agent, generate the cells and plot using the normal half plane bounded thingo. 
 	for i::Int32 in 1:nagents(model)
@@ -106,7 +106,7 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
         	        push!(points, cell[j][1])
 	        end
         	push!(points, cell[1][1])
-		Makie.lines!(points, color = :black)
+		#Makie.lines!(points, color = :black)
 	end 
 	#Colorbar(figure[1,2], colourbarthing)
 	#save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
@@ -153,7 +153,7 @@ function draw_tesselation(positions, model)
 
 end
 
-function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int32)
+function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64)
 	##First, show the position that the agent with id of id will go to 
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
@@ -163,6 +163,7 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	sampled_positions = move_tuple[3]
 	sampled_colours = move_tuple[4]	
 	best_area = move_tuple[2]
+	best_voronoi_cell = move_tuple[6]
 	##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent	
 	positions::Vector{Tuple{Float64, Float64}} = []
 	for i in 1:nagents(model)
@@ -173,11 +174,13 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		push!(positions, model[i].pos)
 	end
 
-	figure = draw_model_cell(model)
+	figure = draw_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-	Makie.scatter!(model[id].pos, color = :yellow)
-        Makie.scatter!(sampled_positions, color = sampled_colours)
+        Makie.scatter!(sampled_positions, color = sampled_colours, markersize = 4)
 	Makie.scatter!(pot_pos, color = :cyan)
+	Makie.scatter!(model[id].pos, color = :yellow)
+	bounded_cell = give_cell_bounded(best_voronoi_cell, pot_pos)
+	#draw_agent_cell_bounded!(bounded_cell)
 	display(figure)
 end
 
@@ -219,6 +222,37 @@ end
 
 function plot_cave_ins(agent_ids)
 	Plots.plot([t for t in 1:length(areas[1])], areas, label = transpose(agents_to_track))
+end
+
+
+function give_cell_bounded(cell, pos)
+	cell_including_circle = []
+        new_cell_i = cell        
+	for point in new_cell_i
+		print("$point\n")
+	end
+	print("Starting\n")
+                for i in 1:length(new_cell_i)
+                        point = new_cell_i[i]
+                        point_pp = new_cell_i[(i)%length(new_cell_i)+1]
+                        push!(cell_including_circle, point)
+                        #print("$(point[3]) $(point_pp[2])\n")
+                        if(point[3] == 0 && point_pp[2] == 0)
+                                print("State helper.jl here. Circle confirmed\n")
+                                vec_to_point = point[1] .- pos
+                                vec_to_pointpp = point_pp[1] .- pos
+                                theta_1 = atan(vec_to_point[2], vec_to_point[1])
+                                theta_2 = atan(vec_to_pointpp[2], vec_to_pointpp[1])
+                                if(theta_2 < theta_1)
+                                        theta_2 += 2*pi
+                                end
+                                circle_points = circle_seg(pos, rho, theta_1, theta_2)
+                                for j in 1:length(circle_points[1])
+                                        push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
+                                end
+                        end
+                end
+                return cell_including_circle
 end
 
 function give_agent_cell_bounded(agent_i, model)
@@ -270,6 +304,17 @@ function give_agent_cell_bounded(agent_i, model)
 			end
 		end        
 		return cell_including_circle
+end
+
+function draw_agent_cell_bounded!(bounded_cell)
+	cell = bounded_cell
+	points::Vector{Tuple{Float64, Float64}} = []
+                for i in 1:length(cell)
+                        push!(points, cell[i][1])
+                end
+        push!(points, cell[1][1])
+	Makie.lines!(points, color = :black)
+	return 
 end
 
 function draw_agent_cell_bounded(id, model)

@@ -24,6 +24,10 @@ print("All homemade files included\n")
 print("Hello\n")
 include("global_vars.jl")
 
+tracked_agent::Int64 = rand(1:no_birds)
+tracked_path::Vector{Tuple{Float64, Float64}} = []
+rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
+
 ###Function that takes a vector and calculates the mean of the elements in the vector
 function mean(v)
 	total = 0.0
