@@ -1,6 +1,6 @@
 ##Define the no_simulations and steps
-const no_steps = 5000
-const no_simulations = 50
+const no_steps = 50
+const no_simulations = 10
 
 ##Include the IO files for the previous order parameters that we wanted. 
 compac_frac_file = open("compaction_frac.txt", "w")
@@ -25,6 +25,11 @@ function rot_o_alt(model)
 	return rot_ord_alt(agents_iterable)	
 end
 
+function rot_o(model)
+        agents_iterable = allagents(model)
+        return rot_ord(agents_iterable)
+end
+
 adata = [happiness, :tdodr, :nospots]
 #adata = [(happiness, Statistics.mean)]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o]
@@ -33,10 +38,12 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 #Define the parameters we want to scan over
 target_dods = [0.0, 1*sqrt(12),2*sqrt(12), 5*sqrt(12), 10*sqrt(12), 20*sqrt(12), 1000*sqrt(12)]
+left_biases::Vector{Float64} = LinRange(0.5, 1.0, 11)
 
 parameters = Dict(
 	:seed => [i for i in 1:no_simulations],
-	:target_area_arg => target_dods
+	:target_area_arg => 1800.0,
+	:left_bias_arg => left_biases
 )
 
 ##Run the ABM using paramscan, and with changing the seed

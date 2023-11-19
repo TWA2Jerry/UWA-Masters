@@ -2,10 +2,14 @@ Hello future me, or probably presently-confused me.
 
 This document is just to outline what files are needed to run the project. To sum up, our project is to simulate a group of agents flocking together. 
 
-The main program is in program.jl. This file loads all the necessary files for running the simulations. It also defines the files for input and output.
 
 The file "main.jl" contains all the main functions for the model and agents. 
 The file "main.jl" includes the "global_vars.jl" file which contains a lot of variables we use such as rho, etc.
+
+Now there's two ways of using the model in main.jl. The first is to simply run a single model simulation, which can be done by typing
+	"julia program.jl"
+
+
 Alternatively, if you want to sweep over certain parameters such as target dod and the like, use
 
 "julia ensemble_run.jl"

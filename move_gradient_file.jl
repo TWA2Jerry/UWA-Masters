@@ -1,6 +1,7 @@
 ###Function that determines the gradient of movement
 include("record_peripheral_agents.jl")
 include("nearest_agents.jl")
+using StatsBase
 using VoronoiCells
 function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	dt::Float64 = model.dt
@@ -173,12 +174,13 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	epsilon_prime::Vector{Float64} = randn(model.rng, Float64, 2)
 	dW::Vector{Float64} = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
-		
+	turns = [1, -1]
+	weights = [model.left_bias, 1.0-model.left_bias]		
 	if(move_made==1)
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn::Int32 = rand([1, -1])
+                turn::Int32 = sample(turns, Weights(weights))
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end

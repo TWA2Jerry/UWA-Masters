@@ -228,9 +228,10 @@ function do_more_io_stuff(adf, mdf)
                 write(polarisation_file, "$(i-1) $(mdf[i,6])\n")
         end
 
+	###If I recall correctly, this is basically to write the entire mdf data struct onto the mdf_file. The starting from 2 in j is to account for the fact that the first column is just a column counter which we don't want
 	mdf_file = open("mdf_file.txt", "w")
 	for i in 1:size(mdf, 1)
-		for j in 2:size(mdf, 2)
+		for j in 1:size(mdf, 2)
 			if(j < size(mdf,2)) 
 				write(mdf_file, "$(mdf[i, j]) ")
 			else 
@@ -321,6 +322,17 @@ function write_pos_vel(positions, velocities, pos_vels_file, n)
 	end
 end
 
+function parse_model_vals(read_lines)
+	parsed_lines = []
+	for line in read_lines
+		split_line = split(line, " ")
+		parsed_line = parse.(Float64, split_line)
+		parsed_line[1] = Int64(trunc(parsed_line[1]))
+		push!(parsed_lines, parsed_line)
+	end
+	return parsed_lines
+end
+
 function calc_mean_std(values)
 	n::Int32 = length(values)
 	mean::Float64 = 0.0
@@ -329,8 +341,8 @@ function calc_mean_std(values)
 		mean += values[i]/n
         	mean_squared += values[i]^2/n
 	end
-	std_dev::Float64 = sqrt(mean^2 - mean_squared)
-	return new_mean, std_dev
+	std_dev::Float64 = sqrt(mean_squared - mean^2)
+	return mean, std_dev
 end
 
 function average_across_thing(agent_vals_lines, dimension_to_average_across, var_of_interest)
