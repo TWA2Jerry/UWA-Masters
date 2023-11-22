@@ -404,4 +404,4 @@ function draw_delta_DOD(model::UnremovableABM{ContinuousSpace{2, true, Float64, 
         save("./Simulation_Images_Difference_Areas/shannon_flock_n_=_$(model.n).png", figure_difference)
 
 end
-
+ 

@@ -1,6 +1,6 @@
 ##Define the no_simulations and steps
-const no_steps = 50
-const no_simulations = 10
+const no_steps = 2500
+const no_simulations = 20
 
 ##Include the IO files for the previous order parameters that we wanted. 
 compac_frac_file = open("compaction_frac.txt", "w")
