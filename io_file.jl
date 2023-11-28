@@ -149,8 +149,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #print("About to do the figure\n")
         
 	
-	#figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = :circle,  rotations = rotations, color = :black)
+	#figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :black)
 
 
 	#=
@@ -160,9 +160,9 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	=#	
 
         #print("The number of points in path points is $(length(path_points))\n")
-	draw_path(path_points)
-	title!("Model state at step $(model.n)")
-	text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
+	#draw_path(path_points)
+	#title!("Model state at step $(model.n)")
+	#text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
 	###tracking the radial distance of each agent from group center
         radial_distances::Vector{Float64}  = []
         #=for i in 1:nagents(model)

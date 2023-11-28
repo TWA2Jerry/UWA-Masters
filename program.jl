@@ -1,5 +1,5 @@
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 5000
+const no_steps::Int64 = 1000
 
 ###Define IO. files
 compac_frac_file = open("compaction_frac.txt", "w")
@@ -16,7 +16,7 @@ include("main.jl")
 
 ###Run ABM
 for i in 1:no_simulations
-	run_ABM(i, 1000.0*sqrt(12))
+	run_ABM(i, 1000*sqrt(12))
 end
 
 do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
