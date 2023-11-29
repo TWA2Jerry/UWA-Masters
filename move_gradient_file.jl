@@ -114,18 +114,6 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			=#
 
 			#print("Potential new area of $new_area\n")
-			#=
-			#print("The vertices of this convex hull point are\n")
-			if(convex_hull_point[agent.id] == 1)
-				for i in 1:length(agent_voronoi_cell)
-				 vector_to_vertex = agent_voronoi_cell[i][1] .- new_agent_pos
-                                 angle_to_vertex = atan(vector_to_vertex[2], vector_to_vertex[1])
-                                 print("$angle_to_vertex ")
-                                 #print("$(atan(cell[i][1][2], cell[i][1][1])) ")
-				end
-			end
-			print("\n")
-			=#
 
 			if (abs(new_area-target_area) < min_diff)
                         	min_diff = abs(new_area-target_area)
@@ -174,13 +162,11 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	epsilon_prime::Vector{Float64} = randn(model.rng, Float64, 2)
 	dW::Vector{Float64} = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
-	turns = [1, -1]
-	weights = [model.left_bias, 1.0-model.left_bias]		
 	if(move_made==1)
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn::Int32 = sample(turns, Weights(weights))
+                turn::Int32 = rand([1, -1])
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
