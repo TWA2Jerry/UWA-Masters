@@ -14,7 +14,7 @@ using ColorSchemes
 import ColorSchemes.balance
 print("Packages loaded\n")
 include("half_plane_fast.jl")
-include("half_plane_bounded_need_to_delete.jl")
+include("half_plane_bounded.jl")
 include("convex_hull.jl")
 include("rot_ord.jl")
 include("rot_ord_check.jl")
