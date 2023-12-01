@@ -6,7 +6,7 @@ include("load_initialise.jl")
 include("global_vars.jl")
 include("give_agent_cell.jl")
 
-
+###Calculates and draws bounded but not circle bounded agent cell. Args: An agent you want to calculate the cell of, model. 
 function draw_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
 	all_agents_iterable =  allagents(model)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
@@ -40,7 +40,7 @@ function draw_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2,
 		return new_cell_i 
 end
 
-
+###Takes in any cell, of the type returned by voronoi_cell from half_plane bounded (which includes vertex info), and draw lines between vertices of the cell. 
 function draw_cell(cell)
 	print("Draw cell called\n")	
 	points::Vector{Tuple{Float64, Float64}} = []
@@ -53,11 +53,13 @@ function draw_cell(cell)
 	return figure
 end
 
+
 function display_model_cell(model)
 	figure = draw_model_cell(model)
 	display(figure)
 end
 
+###Function that returns a figure of the cells for the entire model. 
 function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
 	##Scatter the agent positions
 	b_positions::Vector{Tuple{Float64, Float64}} = []
@@ -106,7 +108,7 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
         	        push!(points, cell[j][1])
 	        end
         	push!(points, cell[1][1])
-		#Makie.lines!(points, color = :black)
+		Makie.lines!(points, color = :black)
 	end 
 	#Colorbar(figure[1,2], colourbarthing)
 	#save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
