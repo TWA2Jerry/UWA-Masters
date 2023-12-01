@@ -6,40 +6,6 @@ include("load_initialise.jl")
 include("global_vars.jl")
 include("give_agent_cell.jl")
 
-###Calculates and draws bounded but not circle bounded agent cell. Args: An agent you want to calculate the cell of, model. 
-function draw_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
-	all_agents_iterable =  allagents(model)
-	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
-        previous_areas::Vector{Float64} = zeros(nagents(model))
-        actual_areas::Vector{Float64} = zeros(nagents(model))
-
-                neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
-                for agent_j in all_agents_iterable
-                        if(agent_i.id == agent_j.id)
-                                continue
-                        end
-                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
-                end
-                ri::Tuple{Float64, Float64} = agent_i.pos
-                vix::Float64 = agent_i.vel[1]
-                viy::Float64 = agent_i.vel[2]
-                relic_x::Float64 = -1.0*(-viy)
-                relic_y::Float64 = -vix
-                relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-                relic_angle::Float64 = atan(relic_y, relic_x)
-                relic_is_box::Int64 = 2
-                relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-
-                #new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(agent_i, model)
-		figure = draw_cell(new_cell_i)
-		Plots.scatter!(agent_i.pos)
-		display(figure)
-                new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
-		 print("Now calculating the voronoi area for agent $(agent_i.id), which was $new_area\n")	
-		return new_cell_i 
-end
-
 ###Takes in any cell, of the type returned by voronoi_cell from half_plane bounded (which includes vertex info), and draw lines between vertices of the cell. 
 function draw_cell(cell)
 	print("Draw cell called\n")	
@@ -48,19 +14,50 @@ function draw_cell(cell)
 		push!(points, cell[i][1])
 	end		
 	push!(points, cell[1][1])
-	figure = Plots.plot(points)
+	figure = Makie.lines(points)
 	#display(Plots.plot(points))
 	return figure
 end
 
 
 function display_model_cell(model)
-	figure = draw_model_cell(model)
+	figure = give_model_cell(model)
 	display(figure)
 end
 
+function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+        ##Scatter the agent positions
+        b_positions::Vector{Tuple{Float64, Float64}} = []
+        colours::Vector{Float64} = []
+        rotations::Vector{Float64} = []
+        minx = model[1].pos[1]
+        maxx = model[1].pos[1]
+        miny = model[1].pos[2]
+        maxy = model[2].pos[2]
+        for i in 1:nagents(model)
+                push!(colours, model[i].nospots)
+                push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
+                push!(b_positions, model[i].pos)
+                minx = min(minx, model[i].pos[1])
+                maxx = max(maxx, model[i].pos[1])
+                miny = min(miny, model[i].pos[2])
+                maxy = max(maxy, model[i].pos[2])
+        end
+
+
+        #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;  title = "Model state at step $(model.n)", limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+        #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+        
+	#Colorbar(figure[1,2], colourbarthing)
+        #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
+        #display(figure)
+        return figure
+end
+
+
 ###Function that returns a figure of the cells for the entire model. 
-function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
 	##Scatter the agent positions
 	b_positions::Vector{Tuple{Float64, Float64}} = []
 	colours::Vector{Float64} = []
@@ -99,11 +96,6 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 		#cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp) 
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		points::Vector{Tuple{Float64, Float64}} = []
-		if(length(cell) == 0)
-			print("Agent $i was detected to have an unbounded cell\n")
-			draw_circle_seg(b_positions[i], rho, 0.0, 2*pi)
-			continue
-		end		
 		for j in 1:length(cell)
         	        push!(points, cell[j][1])
 	        end
@@ -115,6 +107,50 @@ function draw_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 	#display(figure)
 	return figure		
 end
+
+function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+        ##Scatter the agent positions
+        b_positions::Vector{Tuple{Float64, Float64}} = []
+        colours::Vector{Float64} = []
+        rotations::Vector{Float64} = []
+        for i in 1:nagents(model)
+                push!(colours, model[i].nospots)
+                push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
+                push!(b_positions, model[i].pos)
+        end
+
+
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+
+
+        ##Draw the cells
+        ##For each agent, generate the cells and plot using the normal half plane bounded thingo.
+        for i in 1:nagents(model)
+                ##Just some colour stuff for the plot
+                text!(model[i].pos, text = "$i", align = (:center, :top))
+                temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+                positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
+                for j in 1:nagents(model)
+                        if(j == i) continue
+                        end
+                        push!(positions, (model[j].pos, model[j].id))
+                end
+
+                #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp)
+                cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_circled(model[i], model)
+                points::Vector{Tuple{Float64, Float64}} = []
+                for i in 1:length(cell)
+                        push!(points, cell[i][1])
+                end
+                push!(points, cell[1][1])
+                Makie.lines!(points, color = :black)
+        end
+        Colorbar(figure[1,2], colourbarthing)
+        #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
+        #display(figure)
+        return figure
+end
+
 
 function draw_tesselation(positions, model)
 	##Scatter the agent positions
@@ -176,13 +212,13 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		push!(positions, model[i].pos)
 	end
 
-	figure = draw_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
+	figure = give_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
         Makie.scatter!(sampled_positions, color = sampled_colours, markersize = 4)
 	Makie.scatter!(pot_pos, color = :cyan)
 	Makie.scatter!(model[id].pos, color = :yellow)
-	bounded_cell = give_cell_bounded(best_voronoi_cell, pot_pos)
-	#draw_agent_cell_bounded!(bounded_cell)
+	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
+	#draw_agent_cell_bounded!(circled_cell)
 	display(figure)
 end
 
@@ -227,87 +263,6 @@ function plot_cave_ins(agent_ids)
 end
 
 
-function give_cell_bounded(cell, pos)
-	cell_including_circle = []
-        new_cell_i = cell        
-	for point in new_cell_i
-		print("$point\n")
-	end
-	print("Starting\n")
-                for i in 1:length(new_cell_i)
-                        point = new_cell_i[i]
-                        point_pp = new_cell_i[(i)%length(new_cell_i)+1]
-                        push!(cell_including_circle, point)
-                        #print("$(point[3]) $(point_pp[2])\n")
-                        if(point[3] == 0 && point_pp[2] == 0)
-                                print("State helper.jl here. Circle confirmed\n")
-                                vec_to_point = point[1] .- pos
-                                vec_to_pointpp = point_pp[1] .- pos
-                                theta_1 = atan(vec_to_point[2], vec_to_point[1])
-                                theta_2 = atan(vec_to_pointpp[2], vec_to_pointpp[1])
-                                if(theta_2 < theta_1)
-                                        theta_2 += 2*pi
-                                end
-                                circle_points = circle_seg(pos, rho, theta_1, theta_2)
-                                for j in 1:length(circle_points[1])
-                                        push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
-                                end
-                        end
-                end
-                return cell_including_circle
-end
-
-function give_agent_cell_bounded(agent_i, model)
-        all_agents_iterable =  allagents(model)
-        temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
-        previous_areas::Vector{Float64} = zeros(nagents(model))
-        actual_areas::Vector{Float64} = zeros(nagents(model))
-
-                neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
-                for agent_j in all_agents_iterable
-                        if(agent_i.id == agent_j.id)
-                                continue
-                        end
-                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
-                end
-                ri::Tuple{Float64, Float64} = agent_i.pos
-                vix::Float64 = agent_i.vel[1]
-                viy::Float64 = agent_i.vel[2]
-                relic_x::Float64 = -1.0*(-viy)
-                relic_y::Float64 = -vix
-                relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-                relic_angle::Float64 = atan(relic_y, relic_x)
-                relic_is_box::Int64 = 2
-                relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, relic_half_plane)
-        	
-		##Procedure for adding the 
-		cell_including_circle = []
-		print("Starting\n")
-		for i in 1:length(new_cell_i)
-			point = new_cell_i[i]
-			point_pp = new_cell_i[(i)%length(new_cell_i)+1]
-			push!(cell_including_circle, point)
-			print("$(point[3]) $(point_pp[2])\n")
-			if(point[3] == 0 && point_pp[2] == 0)
-				print("State helper.jl here. Circle confirmed\n")
-				vec_to_point = point[1] .- agent_i.pos
-				vec_to_pointpp = point_pp[1] .- agent_i.pos
-				theta_1 = atan(vec_to_point[2], vec_to_point[1])
-				theta_2 = atan(vec_to_pointpp[2], vec_to_pointpp[1])
-				if(theta_2 < theta_1)
-					theta_2 += 2*pi
-				end
-				circle_points = circle_seg(agent_i.pos, rho, theta_1, theta_2)
-				for j in 1:length(circle_points[1])
-					push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
-				end
-			end
-		end        
-		return cell_including_circle
-end
-
 function draw_agent_cell_bounded!(bounded_cell)
 	cell = bounded_cell
 	points::Vector{Tuple{Float64, Float64}} = []
@@ -319,9 +274,10 @@ function draw_agent_cell_bounded!(bounded_cell)
 	return 
 end
 
+
 function draw_agent_cell_bounded(id, model)
 	agent_i = model[id]
-	cell = give_agent_cell_bounded(model[id], model)
+	cell = give_agent_cell_circled(model[id], model)
 	 points::Vector{Tuple{Float64, Float64}} = []
                 for i in 1:length(cell)
                         push!(points, cell[i][1])
@@ -332,52 +288,7 @@ function draw_agent_cell_bounded(id, model)
 	display(figure)
 end
 
-function draw_model_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
-	##Scatter the agent positions
-	b_positions::Vector{Tuple{Float64, Float64}} = []
-	colours::Vector{Float64} = []
-        rotations::Vector{Float64} = []
-	for i in 1:nagents(model)
-		push!(colours, model[i].nospots)
-                push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
-		push!(b_positions, model[i].pos)
-	end
-		
 	
-	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-	
-	
-	##Draw the cells	
-	##For each agent, generate the cells and plot using the normal half plane bounded thingo. 
-	for i in 1:nagents(model)
-		##Just some colour stuff for the plot
-		text!(model[i].pos, text = "$i", align = (:center, :top))
-		temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
-		positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
-		for j in 1:nagents(model)
-			if(j == i) continue
-			end
-			push!(positions, (model[j].pos, model[j].id))	
-		end		
-
-		#cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp) 
-		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_bounded(model[i], model)
-		points::Vector{Tuple{Float64, Float64}} = []
-		if(length(cell) == 0)
-			draw_circle_seg(b_positions[i], rho, 0.0, 2*pi)
-			continue
-		end		
-		for i in 1:length(cell)
-        	        push!(points, cell[i][1])
-	        end
-        	push!(points, cell[1][1])
-		Makie.lines!(points, color = :black)
-	end 
-	Colorbar(figure[1,2], colourbarthing)
-	#save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
-	#display(figure)
-	return figure		
-end
 
 function record_dod_distributions(pos_vels_file, start, agent_ids, no_steps)
 	for i in 0:no_steps
@@ -385,6 +296,8 @@ function record_dod_distributions(pos_vels_file, start, agent_ids, no_steps)
 		plot_dod_hist(model)		
 	end
 end
+
+
 
 function give_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int32)
         ##First, show the position that the agent with id of id will go to

@@ -75,6 +75,7 @@ function initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simula
 
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, no_birds) 
+	print("The length of initial positions is $(length(initial_positions))\n")
 	for i in 1:no_bird
 
 		pack_positions[i] = initial_positions[i]

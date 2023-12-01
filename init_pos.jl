@@ -61,6 +61,7 @@ function assign_pos_vels(pos_vels_file, initial_positions, initial_vels, step, n
 		else 
 			print("Line thingo incremented\n")
 			line_counter += 1
+			print("Line counter is $line_counter\n")
 			continue
 		end
 	end
