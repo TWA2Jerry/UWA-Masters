@@ -6,3 +6,4 @@ Cell_Images/*
 Simulation_Images/*
 *.txt
 !/pos_vels.txt
+Dod/*

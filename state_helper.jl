@@ -46,7 +46,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
 
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;  title = "Model state at step $(model.n)", limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
         
 	#Colorbar(figure[1,2], colourbarthing)
@@ -108,7 +108,7 @@ function give_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 	return figure		
 end
 
-function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
         colours::Vector{Float64} = []
@@ -120,14 +120,14 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
         end
 
 
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = :blue)
 
 
         ##Draw the cells
         ##For each agent, generate the cells and plot using the normal half plane bounded thingo.
         for i in 1:nagents(model)
                 ##Just some colour stuff for the plot
-                text!(model[i].pos, text = "$i", align = (:center, :top))
+                #text!(model[i].pos, text = "$i", align = (:center, :top))
                 temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
                 positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
                 for j in 1:nagents(model)
@@ -145,7 +145,7 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
                 push!(points, cell[1][1])
                 Makie.lines!(points, color = :black)
         end
-        Colorbar(figure[1,2], colourbarthing)
+        #Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
         #display(figure)
         return figure
@@ -191,7 +191,7 @@ function draw_tesselation(positions, model)
 
 end
 
-function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64)
+function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)))
 	##First, show the position that the agent with id of id will go to 
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
@@ -212,9 +212,10 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		push!(positions, model[i].pos)
 	end
 
-	figure = give_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
+	figure = give_model_cell_circled(model, fig_box = view_box)
+	#figure = give_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        Makie.scatter!(sampled_positions, color = sampled_colours, markersize = 4)
+        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
 	Makie.scatter!(pot_pos, color = :cyan)
 	Makie.scatter!(model[id].pos, color = :yellow)
 	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
@@ -320,4 +321,18 @@ function give_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
         end
 	return move_tuple
 end
- 
+
+function find_model_limits(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+	minx = model[1].pos[1]
+        maxx = model[1].pos[1]
+        miny = model[1].pos[2]
+        maxy = model[1].pos[2]
+        for i in 1:nagents(model)
+                minx = min(minx, model[i].pos[1])
+                maxx = max(maxx, model[i].pos[1])
+                miny = min(miny, model[i].pos[2])
+                maxy = max(maxy, model[i].pos[2])
+        end
+	
+	return (minx, miny), (maxx, maxy)
+end 

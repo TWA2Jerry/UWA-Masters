@@ -38,12 +38,13 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 #Define the parameters we want to scan over
 target_dods = [0.0, 1*sqrt(12),2*sqrt(12), 5*sqrt(12), 10*sqrt(12), 20*sqrt(12), 1000*sqrt(12)]
-left_biases::Vector{Float64} = LinRange(0.5, 1.0, 11)
+target_dods = LinRange(0.0, pi*rho^2, 2)
+#left_biases::Vector{Float64} = LinRange(0.5, 1.0, 11)
 
 parameters = Dict(
 	:seed => [i for i in 1:no_simulations],
 	:target_area_arg => 1800.0,
-	:left_bias_arg => left_biases
+	#:left_bias_arg => left_biases
 )
 
 ##Run the ABM using paramscan, and with changing the seed
