@@ -50,7 +50,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg)
 	
 	#Create the rng
-	rng = Random.MersenneTwister(seed)
+	rng = Random.MersenneTwister(Int64(seed))
 	
 	print("Before model\n")
 

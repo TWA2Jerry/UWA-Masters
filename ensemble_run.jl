@@ -1,6 +1,6 @@
 ##Define the no_simulations and steps
-const no_steps = 2500
-const no_simulations = 20
+const no_steps = 5000
+const no_simulations::Int64 = 20
 
 ##Include the IO files for the previous order parameters that we wanted. 
 compac_frac_file = open("compaction_frac.txt", "w")
@@ -38,14 +38,18 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 
 #Define the parameters we want to scan over
 target_dods = [0.0, 1*sqrt(12),2*sqrt(12), 5*sqrt(12), 10*sqrt(12), 20*sqrt(12), 1000*sqrt(12)]
-target_dods = LinRange(0.0, pi*rho^2, 2)
+target_dods = LinRange{Float64}(0.0, pi*rho^2, 500)
+target_dods = [element for element in target_dods]
 #left_biases::Vector{Float64} = LinRange(0.5, 1.0, 11)
 
 parameters = Dict(
-	:seed => [i for i in 1:no_simulations],
-	:target_area_arg => 1800.0,
+	:seed => [i for i::Int64 in 1:no_simulations],
+	:target_area_arg => target_dods,
 	#:left_bias_arg => left_biases
 )
+
+a = [i for i::Int64 in 1:no_simulations]
+print(typeof(a))
 
 ##Run the ABM using paramscan, and with changing the seed
 adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
