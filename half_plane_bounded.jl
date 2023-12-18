@@ -1,7 +1,7 @@
 include("half_plane_fast.jl")
 include("intersect_check.jl")
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (atan(0.0), (0.0, 0.0), (0.0,0.0), 0))
+function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(atan(0.0), (0.0, 0.0), (0.0,0.0), 0)])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -52,8 +52,9 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 	#For the relic version of stemler vision, we also need to retain the relic half plane as a bounding half plane for all sampled positions
 	#print("About to push the relic, which is $relic\n")
-	push!(dq, relic)
-
+	for relic_half_plane in relic
+		push!(dq, relic_half_plane)
+	end
 
 
 ###

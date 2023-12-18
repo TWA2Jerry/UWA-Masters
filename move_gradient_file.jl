@@ -1,6 +1,7 @@
 ###Function that determines the gradient of movement
 include("record_peripheral_agents.jl")
 include("nearest_agents.jl")
+include("generate_relic.jl")
 using StatsBase
 using VoronoiCells
 function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
@@ -8,6 +9,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
 	theta_0::Float64 = atan(unit_v[2], unit_v[1])
 	agent_speed::Float64 = 1.0
+	v::Tuple{Float64,Float64} = agent.vel
 	vix::Float64 = unit_v[1]
 	viy::Float64 = unit_v[2]
 	positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
@@ -36,6 +38,17 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
         relic_angle::Float64 = atan(relic_y, relic_x)
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
+	
+
+	velocity_half_plane = generate_relic_alt(agent.pos, unit_v)
+	angle_of_vision = 3/4*pi
+	rotate_angle = pi-angle_of_vision
+	left_hemi_half_plane_pq = (cos(rotate_angle)*v[1] - sin(rotate_angle)*v[2], sin(rotate_angle)*v[1] + cos(rotate_angle)*v[2])
+	right_hemi_half_plane_pq = (cos(-rotate_angle)*v[1] - sin(-rotate_angle)*v[2], sin(-rotate_angle)*v[1] + cos(-rotate_angle)*v[2])
+	left_hemi_half_plane = (atan(left_hemi_half_plane_pq[2], left_hemi_half_plane_pq[1]), left_hemi_half_plane_pq, agent.pos, -3)
+	right_hemi_half_plane = (atan(right_hemi_half_plane_pq[2], right_hemi_half_plane_pq[1]), right_hemi_half_plane_pq, agent.pos, -4)
+	
+
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
 		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
@@ -75,9 +88,12 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-                	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
-			
+			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+                	bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane, left_hemi_half_plane])
+			left_hemi_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
+			bounded_cell_2 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane, right_hemi_half_plane])
+			right_hemi_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_2, rho)
+			new_area::Float64 = left_hemi_area + right_hemi_area
 
 			##Some error detection stuff
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
@@ -90,17 +106,17 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 				exit()
 			end
 
-			if(rot_ord_check(new_agent_pos, agent_voronoi_cell) != 1)
+			if(rot_ord_check(new_agent_pos, bounded_cell_2) != 1)
 				print("Rotational order violated for a potential position of $new_agent_pos\n")
 				print("\n\n\nThe dq for this position was \n")
                         	for i in 1:length(temp_hp)
                                 	print("$(temp_hp[i])\n")
                         	end
 				print("The points and angles were\n")
-				for i in 1:length(agent_voronoi_cell)
-			                vec_to_point = [agent_voronoi_cell[i][1][1] - new_agent_pos[1], agent_voronoi_cell[i][1][2] - new_agent_pos[2]]
+				for i in 1:length(bounded_cell_2)
+			                vec_to_point = [bounded_cell_2[i][1][1] - new_agent_pos[1], bounded_cell_2[i][1][2] - new_agent_pos[2]]
                 			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
-                        		print("$(agent_voronoi_cell[i]), $(angle_of_vec)")
+                        		print("$(bounded_cell_2[i]), $(angle_of_vec)")
 				end
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
 				#exit()
