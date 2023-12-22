@@ -6,8 +6,10 @@ import ColorSchemes.balance
 #using Agents
 using Random
 
+
 include("agent_definition.jl")
 include("order_parameters.jl")
+include("plot_histograms.jl")
 #=
 ###Animate
 model = initialise(1000.0*sqrt(12), 1);

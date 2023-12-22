@@ -11,13 +11,22 @@ rot_alt_target_ave_file = open("rot_order_alt_tave.txt", "w")
 pos_vels_file = open("pos_vels.txt", "w")
 
 ###Load the functions
+include("order_parameters.jl")
 include("io_file.jl")
 include("main.jl")
 
 ###Run ABM
+#=
 for i in 1:no_simulations
 	run_ABM(i, 0.0)
 end
+=#
+
+adata = [happiness, :nospots, :no_neighbours]
+mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours]
+
+model = initialise(target_area_arg = 0.5, simulation_number_arg = 1, no_bird = no_birds)
+adf, mdf = run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
-#do_more_io_stuff(adf, mdf)
+do_more_io_stuff(adf, mdf)

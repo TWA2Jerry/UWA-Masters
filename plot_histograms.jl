@@ -2,6 +2,15 @@ include("record_peripheral_agents.jl")
 include("give_agent_cell.jl")
 include("voronoi_area_file.jl")
 
+function plot_data_hist(data_lines, dimension_to_plot)
+	hist_values = []
+	for i in 1:length(data_lines)
+		push!(hist_values, data_lines[i][dimension_to_plot])
+	end
+	figure = histogram(hist_values)
+	return figure
+end
+
 function plot_dod_hist(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
 	areas_on_periphery = []
 	areas_on_interior = []	

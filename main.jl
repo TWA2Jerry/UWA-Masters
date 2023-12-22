@@ -65,6 +65,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	initial_positions::Vector{Tuple{Float64, Float64}} = []
 	initial_vels::Vector{Tuple{Float64, Float64}} = []
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
+	num_neighbours = zeros(Int32, 100)	
+	regularities = zeros(Float64, 100)
+
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
@@ -118,7 +121,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
-		
+		num_neighbours[i] = no_neighbours(true_initial_cell)		
+		regularities[i] = regularity_metric(true_initial_cell, true_initial_A)		
+	
 		#=print("The half planes that generated the cell for agent $i were \n")
                         for i in 1:length(temp_hp)
                                 print("$(temp_hp[i])\n")
@@ -161,7 +166,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, initial_dods[i]/target_area_arg, 0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], regularities[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -304,7 +309,7 @@ function model_step!(model)
                 new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
-		agent_i.tdodr = agent_i.A/agent_i.tdod
+		#agent_i.tdodr = agent_i.A/agent_i.tdod
 		if(agent_i.A > pi*rho^2)
 			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
                         exit()
@@ -314,6 +319,8 @@ function model_step!(model)
 		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
+		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
+		agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
 	
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
@@ -407,6 +414,7 @@ function run_ABM(i, target_area) #Note that we're asking to input no simulations
 	#write(rot_o_file, "\n")
 	#write(rot_o_alt_file, "\n")
 	#write(mean_speed_file, "\n")
+	
 end #This should be the end of the function or running the ABM
 
 ###This line simulates the model

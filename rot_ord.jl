@@ -1,4 +1,16 @@
 ###Function takes in the agent objects. It calculates the center of the group (average of all agent positions). It then calculates the cross product of r_ig and v_i, the relative position of the agent to the group center and its velocity. 
+
+function rot_o_alt(model)
+        agents_iterable = allagents(model)
+        return rot_ord_alt(agents_iterable)
+end
+
+function rot_o(model)
+        agents_iterable = allagents(model)
+        return rot_ord(agents_iterable)
+end
+
+
 function rot_ord(agents)
 	num_agents = length(agents)
 

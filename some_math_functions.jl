@@ -94,3 +94,6 @@ function center_of_pos(positions)
         return com
 end
 
+function distance(point1::Tuple{Float64, Float64}, point2::Tuple{Float64, Float64})
+	return norm(point1 .- point2)
+end

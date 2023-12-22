@@ -30,7 +30,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	#Iterate through all the possible places the agent can move, keeping track of which one minimises area assuming static neighbour positions, though we make sure that if none of the moves optimises the current area, don't move at all
 	#print("For agent $(agent.id), its min area is $min_area \n")
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
-
+	
 	#For the relic idea, we have a bounding half plane based on the agent's current position and velocity
         relic_x::Float64 = -1.0*(-viy)
         relic_y::Float64 = -vix
@@ -39,7 +39,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 	
-
+	
 	velocity_half_plane = generate_relic_alt(agent.pos, unit_v)
 	angle_of_vision = 3/4*pi
 	rotate_angle = pi-angle_of_vision
@@ -94,6 +94,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			bounded_cell_2 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane, right_hemi_half_plane])
 			right_hemi_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_2, rho)
 			new_area::Float64 = left_hemi_area + right_hemi_area
+
+			bounded_cell_3 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move)
 
 			##Some error detection stuff
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
