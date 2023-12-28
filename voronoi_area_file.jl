@@ -257,3 +257,22 @@ function voronoi_area_alt(ri, cell, rho)
 end
 
 
+
+
+
+function polygon_area(vertices::Vector{Tuple{Float64, Float64}})
+	Area::Float64 = 0.0
+	num_points::Int32 = length(vertices)
+	for i in 1:length(vertices)
+                #Use the shoestring formula to calcualte the area
+                j = (i)%num_points+1
+                #print("i and j are $i $j\n")
+                xi = cell[i][1][1]
+                yi = cell[i][1][2]
+                xj = cell[j][1][1]
+                yj = cell[j][1][2]
+                Area += 0.5 * (yi + yj)* (xi - xj)
+	end
+
+	return Area
+end

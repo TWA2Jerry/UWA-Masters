@@ -10,7 +10,6 @@ mutable struct bird <: AbstractAgent
         true_A::Float64 #The true area of the agent's DOD
 	tdod::Float64
 	nospots::Int32
-	no_neighbours::Int32
-	regularity::Float64
+	true_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}}
 end
 

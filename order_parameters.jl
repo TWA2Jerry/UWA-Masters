@@ -1,7 +1,7 @@
 include("agent_definition.jl")
 include("rot_ord.jl")
 include("some_math_functions.jl")
-include("voronoi_area_file.jl")
+include("polygon_area_file.jl")
 #Define the data we want
 
 function happiness(agent::bird)
@@ -117,6 +117,22 @@ function mean_no_neighbours(model)
 	return ave_no_neighbours
 end
 
+function sides_squared(vertices::Vector{Tuple{Float64, Float64}})
+	perimeter_squared::Float64 = 0.0
+	v::Int32 = length(vertices)
+        for i in 1:v
+                perimeter_squared += distance(vertices[i], vertices[i%v+1])
+        end
+	
+	return perimeter_squared
+end
+
+function regularity_metric(vertices::Vector{Tuple{Float64, Float64}})
+	A::Float64 = polygon_area(vertices)
+	perimeter_squared::Float64 = sides_squared(vertices)
+	return A/perimeter_squared
+end
+
 function regularity_metric(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}}, area::Float64)
 	perimeter_squared::Float64 = 0.0
 	v::Int32 = length(cell)
@@ -125,3 +141,23 @@ function regularity_metric(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, In
 	end
 	return area/perimeter_squared
 end
+
+function return_regularities()
+        regularities = Dict{Int32, Float64}([])
+	r::Float64 = 1.0
+        for n in 3:20
+                vertexes::Vector{Tuple{Float64, Float64}} = Array{Tuple{Float64, Float64}}(undef, 0)
+                for i in 0:n
+                        coord::Tuple{Float64, Float64} = (r*cos(2*pi*i/n), r*sin(2*pi*i/n))
+                        push!(vertexes, coord)
+                end
+
+        	regularities[n] = regularity_metric(vertexes)
+	end
+        return regularities
+end
+
+
+
+regularities::Dict{Int32, Float64} = return_regularities()
+print("Regularities calculated\n")

@@ -325,21 +325,24 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 	#Final check before we send vq off for processing: rotational order check
 	if(rot_ord_check(ri, vq) != 1)
-                                print("Rotational order violated for a potential position of $ri\n")
+                                #=
+				print("Half plane bounded here. Rotational order violated for a potential position of $ri\n")
                                 print("\n\n\nThe dq for this position was \n")
                                 for i in 1:length(dq)
                                         print("$(dq[i])\n")
                                 end
-				print("The actual relevant half planes were\n")
+				print("Half plane bounded here. The actual relevant half planes were\n")
 				for i in 1:length(newdq)
 					print("$(newdq[i])\n")		
 				end
-                                print("The points and angles were\n")
+                                #print("The points and angles were\n")
                                 for i in 1:length(vq)
                                         vec_to_point = [vq[i][1][1] - ri[1], vq[i][1][2] - ri[2]]
                                         angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
                                         print("$(vq[i]), $(angle_of_vec)\n")
                                 end
+				=#		
+	
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
                                 #exit()
         end

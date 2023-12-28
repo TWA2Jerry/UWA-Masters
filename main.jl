@@ -67,6 +67,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
 	num_neighbours = zeros(Int32, 100)	
 	regularities = zeros(Float64, 100)
+	init_true_cells = Array{Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}}}(undef, 100)
 
 	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	empty!(tracked_path)
@@ -121,9 +122,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
-		num_neighbours[i] = no_neighbours(true_initial_cell)		
-		regularities[i] = regularity_metric(true_initial_cell, true_initial_A)		
-	
+		#num_neighbours[i] = no_neighbours(true_initial_cell)		
+		#regularities[i] = regularity_metric(true_initial_cell, true_initial_A)	
+		init_true_cells[i] = true_initial_cell	
+			
+
 		#=print("The half planes that generated the cell for agent $i were \n")
                         for i in 1:length(temp_hp)
                                 print("$(temp_hp[i])\n")
@@ -166,7 +169,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], regularities[i])
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, init_true_cells[i])
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -319,9 +322,10 @@ function model_step!(model)
 		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
-		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
-		agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
-	
+		#agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
+		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
+		agent_i.true_cell = true_new_cell_i	
+
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
 		agent_i.true_A = true_new_area

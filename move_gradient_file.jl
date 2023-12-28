@@ -60,7 +60,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		end
 		
 		no_angles_considered += 1
-		for j::Int64 in 1:1 #For every position up to m
+		for j::Int64 in 1:m #For every position up to m
 			if(angular_conflict == 1) 
 				break
 			end
@@ -109,6 +109,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			end
 
 			if(rot_ord_check(new_agent_pos, bounded_cell_2) != 1)
+				#=
 				print("Rotational order violated for a potential position of $new_agent_pos\n")
 				print("\n\n\nThe dq for this position was \n")
                         	for i in 1:length(temp_hp)
@@ -120,6 +121,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
                         		print("$(bounded_cell_2[i]), $(angle_of_vec)")
 				end
+				=#
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
 				#exit()
 			end
