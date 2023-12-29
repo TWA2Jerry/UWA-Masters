@@ -41,12 +41,6 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	
 	
 	velocity_half_plane = generate_relic_alt(agent.pos, unit_v)
-	angle_of_vision = 3/4*pi
-	rotate_angle = pi-angle_of_vision
-	left_hemi_half_plane_pq = (cos(rotate_angle)*v[1] - sin(rotate_angle)*v[2], sin(rotate_angle)*v[1] + cos(rotate_angle)*v[2])
-	right_hemi_half_plane_pq = (cos(-rotate_angle)*v[1] - sin(-rotate_angle)*v[2], sin(-rotate_angle)*v[1] + cos(-rotate_angle)*v[2])
-	left_hemi_half_plane = (atan(left_hemi_half_plane_pq[2], left_hemi_half_plane_pq[1]), left_hemi_half_plane_pq, agent.pos, -3)
-	right_hemi_half_plane = (atan(right_hemi_half_plane_pq[2], right_hemi_half_plane_pq[1]), right_hemi_half_plane_pq, agent.pos, -4)
 	
 
 	for i::Int64 in 0:(q-1) #For every direction
@@ -89,13 +83,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-                	bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane, left_hemi_half_plane])
-			left_hemi_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
-			bounded_cell_2 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane, right_hemi_half_plane])
-			right_hemi_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_2, rho)
-			new_area::Float64 = left_hemi_area + right_hemi_area
+                	bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane])
+			bounded_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
+			new_area::Float64 = bounded_area 
 
-			bounded_cell_3 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move)
 
 			##Some error detection stuff
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
@@ -108,7 +99,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 				exit()
 			end
 
-			if(rot_ord_check(new_agent_pos, bounded_cell_2) != 1)
+			if(rot_ord_check(new_agent_pos, bounded_cell_1) != 1)
 				#=
 				print("Rotational order violated for a potential position of $new_agent_pos\n")
 				print("\n\n\nThe dq for this position was \n")
@@ -116,10 +107,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                                 	print("$(temp_hp[i])\n")
                         	end
 				print("The points and angles were\n")
-				for i in 1:length(bounded_cell_2)
-			                vec_to_point = [bounded_cell_2[i][1][1] - new_agent_pos[1], bounded_cell_2[i][1][2] - new_agent_pos[2]]
+				for i in 1:length(bounded_cell_1)
+			                vec_to_point = [bounded_cell_1[i][1][1] - new_agent_pos[1], bounded_cell_1[i][1][2] - new_agent_pos[2]]
                 			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
-                        		print("$(bounded_cell_2[i]), $(angle_of_vec)")
+                        		print("$(bounded_cell_1[i]), $(angle_of_vec)")
 				end
 				=#
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
