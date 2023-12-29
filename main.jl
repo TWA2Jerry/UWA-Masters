@@ -290,7 +290,8 @@ function model_step!(model)
 	model.no_moves = 0
 	for agent_i in all_agents_iterable
 		previous_areas[agent_i.id] = agent_i.A #Just stores the area for the agent in the previous step for plotting
-                
+               
+		ri::Tuple{Float64, Float64} = agent_i.pos 
 		neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
                 for agent_j in all_agents_iterable
                         if(agent_i.id == agent_j.id)
@@ -298,19 +299,19 @@ function model_step!(model)
                         end
                         push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
-                ri::Tuple{Float64, Float64} = agent_i.pos
-		vix::Float64 = agent_i.vel[1]
-		viy::Float64 = agent_i.vel[2]
-		relic_x::Float64 = -1.0*(-viy)
-        	relic_y::Float64 = -vix
-        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-        	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = 2
-        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-		
+	
+		velocity_half_plane = generate_relic_alt(agent_i.pos, agent_i.vel)
+        	angle_of_vision = 3/4*pi
+        	rotate_angle = pi-angle_of_vision
+		left_hemi_half_plane = generate_artificial_hp_vision(agent_i.pos, agent_i.vel, -rotate_angle)
+		right_hemi_half_plane = generate_artificial_hp_vision(agent_i.pos, agent_i.vel, rotate_angle)
+		left_bounded_cell = voronoi_cell_bounded(model, agent_i.pos, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [velocity_half_plane, left_hemi_half_plane])
+		right_bounded_cell =  bounded_cell_2 = voronoi_cell_bounded(model, agent_i.pos, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [velocity_half_plane, right_hemi_half_plane])
+		left_hemi_area::Float64 = voronoi_area(model, agent_i.pos, left_bounded_cell, rho)
+		right_hemi_area::Float64 = voronoi_area(model, agent_i.pos, right_bounded_cell, rho)	
+
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
-                new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
+                new_area::Float64 = left_hemi_area + right_hemi_area
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
 		if(agent_i.A > pi*rho^2)
