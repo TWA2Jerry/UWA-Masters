@@ -117,13 +117,23 @@ function mean_no_neighbours(model)
 	return ave_no_neighbours
 end
 
+
 function sides_squared(vertices::Vector{Tuple{Float64, Float64}})
+         perimeter_squared::Float64 = 0.0
+         v::Int32 = length(vertices)
+         for i in 1:v
+                 perimeter_squared += distance(vertices[i], vertices[i%v+1])^2
+         end
+        return perimeter_squared
+end
+
+
+function cell_sides_squared(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
 	perimeter_squared::Float64 = 0.0
-	v::Int32 = length(vertices)
+        v::Int32 = length(cell)
         for i in 1:v
-                perimeter_squared += distance(vertices[i], vertices[i%v+1])
+                perimeter_squared += distance(cell[i][1], cell[i%v+1][1])
         end
-	
 	return perimeter_squared
 end
 
@@ -137,9 +147,13 @@ function regularity_metric(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, In
 	perimeter_squared::Float64 = 0.0
 	v::Int32 = length(cell)
 	for i in 1:v
-		perimeter_squared += distance(cell[i][1], cell[i%v+1][1])
+		perimeter_squared += distance(cell[i][1], cell[i%v+1][1])^2
 	end
 	return area/perimeter_squared
+end
+
+function agent_regularity(agent::bird)
+	return agent.true_A/agent.sides_squared
 end
 
 function return_regularities()
@@ -161,3 +175,8 @@ end
 
 regularities::Dict{Int32, Float64} = return_regularities()
 print("Regularities calculated\n")
+
+function regularity_dev(agent::bird)
+	no_sides::Int32 = agent.no_neighbours
+	return (agent_regularity(agent)-regularities[no_sides])/(regularities[no_sides])
+end
