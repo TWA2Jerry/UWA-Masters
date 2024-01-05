@@ -22,7 +22,7 @@ for i in 1:no_simulations
 end
 =#
 
-adata = [happiness, :nospots]
+adata = [happiness, :nospots, :true_A, :perimeter_squared]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours]
 
 model = initialise(target_area_arg = 0.5, simulation_number_arg = 1, no_bird = no_birds)
