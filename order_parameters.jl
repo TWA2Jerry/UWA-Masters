@@ -132,7 +132,7 @@ function cell_sides_squared(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, I
 	perimeter_squared::Float64 = 0.0
         v::Int32 = length(cell)
         for i in 1:v
-                perimeter_squared += distance(cell[i][1], cell[i%v+1][1])
+                perimeter_squared += distance(cell[i][1], cell[i%v+1][1])^2
         end
 	return perimeter_squared
 end
