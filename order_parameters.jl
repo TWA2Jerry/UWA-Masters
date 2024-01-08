@@ -133,7 +133,11 @@ function cell_sides_squared(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, I
         v::Int32 = length(cell)
         for i in 1:v
                 perimeter_squared += distance(cell[i][1], cell[i%v+1][1])^2
-        end
+        	if(cell[i][2] == 0 || cell[i%v+1][2] == 0)
+			perimeter_squared = 0.0 #This is used because I don't think it makes sense to calculate regularities for cells with circles
+			break
+		end
+	end
 	return perimeter_squared
 end
 
