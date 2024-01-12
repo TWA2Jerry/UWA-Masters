@@ -43,11 +43,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :num_birds => no_bird)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -169,13 +169,20 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], init_sides_squared[i])
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], init_sides_squared[i], 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += true_initial_dods[i]/(pi*rho^2)
 		total_speed += agent.speed
+	end	
+
+	##Add the predator to the model
+	for i in 1:no_preds
+		rand_position::Tuple{Float64, Float64} = rect_bound .* Tuple(rand(Float64, 2)) 
+		agent = bird(no_birds+i, rand_position, 2 .* Tuple(randn(2)) .- (1.0, 1.0), 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], init_sides_squared[i], 1)
+		add_agent!(agent, rand_position, model)
 	end	
 
 	#Calculate the actual area of the convex hull of the group of birds
@@ -249,7 +256,7 @@ function agent_step!(agent, model)
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+        new_agent_vel::Tuple{Float64, Float64} = Tuple(agent.vel .+ dt .* k1[3:4]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
 		agent.vel = new_agent_vel

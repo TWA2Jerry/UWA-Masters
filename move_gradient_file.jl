@@ -83,7 +83,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-                	bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [velocity_half_plane])
+                	bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane])
 			bounded_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
 			new_area::Float64 = bounded_area 
 
@@ -167,6 +167,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	else 
 		no_move[agent.id] = 1
 	end
+
+		
 	
 	#Create the noise addition
 	epsilon::Vector{Float64} = randn(model.rng, Float64, 2)
@@ -181,6 +183,12 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
+
+	###Mixed force
+        accelerationdod::Tuple{Float64, Float64} = ((min_direction .- agent.vel))./model.dt	
+	kn[3] = accelerationdod[1]
+	kn[4] = accelerationdod[2]
+
 	agent.nospots = num_positions_better
 
 	#Store the new position for updating in model step
@@ -287,11 +295,15 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			=#
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	
-			###
+
+
+			###Actually calculating the DOD
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			
+
+
 
 			##Some error detection stuff
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
@@ -389,7 +401,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	else 
 		no_move[agent.id] = 1
 	end
-	
+
 	#Create the noise addition
 	epsilon::Vector{Float64} = randn(model.rng, Float64, 2)
 	epsilon_prime::Vector{Float64} = randn(model.rng, Float64, 2)
@@ -434,4 +446,18 @@ end
 
 
 
+function pred_move_gradient(kn::Vector{Float64}, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+	
+	##For now, let's suppose that the predator moves in the direction of com of the agents
+	
+	accelerating_direction::Tuple{Float64, Float64} = (agent.pos .- center_of_mass(model))
+	accelerating_direction = accelerating_direction/norm(accelerating_direction)  
+	accelerating_change::Tuple{Float64, Float64} = accelerating_direction .- agent.vel
 
+	kn[1] = agent.vel[1]
+	kn[2] = agent.vel[2]
+	kn[3] = accelerating_change[1]
+	kn[4] = accelerating_change[2]
+	
+	return
+end

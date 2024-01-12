@@ -10,7 +10,7 @@ end
 
 function center_of_mass(model)
         com::Tuple{Float64, Float64} = (0.0, 0.0)
-        n::Int64 = nagents(model)
+        n::Int64 = model.num_birds
         for i in 1:n
                 com =  (com .+ 1/n .* (model[i].pos))
         end

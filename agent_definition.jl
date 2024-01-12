@@ -12,5 +12,6 @@ mutable struct bird <: AbstractAgent
 	nospots::Int32
 	no_neighbours::Int32
 	perimeter_squared::Float64
+	predator::Int32 
 end
 
