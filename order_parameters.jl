@@ -8,6 +8,15 @@ function happiness(agent::bird)
         return abs((agent.A - agent.tdod)/max(pi/2*rho^2-agent.tdod, abs(0.0-agent.tdod)))
 end
 
+function model_mean_speed(model)
+	mean_speed::Float64 = 0.0
+	no_birds::Int32 = model.num_birds
+	for i in 1:no_birds
+		mean_speed += model[i].speed/no_birds
+	end
+	return mean_speed
+end
+
 function center_of_mass(model)
         com::Tuple{Float64, Float64} = (0.0, 0.0)
         n::Int64 = model.num_birds

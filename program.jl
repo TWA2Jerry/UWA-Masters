@@ -32,7 +32,7 @@ parameters = Dict(
 )
 
 adata = [happiness, :nospots, :true_A, :perimeter_squared, :no_neighbours]
-mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours]
+mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours, model_mean_speed]
 
 #model = initialise(target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = no_birds)
 #adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
