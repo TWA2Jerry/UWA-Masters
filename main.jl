@@ -301,7 +301,7 @@ function model_step!(model)
                 end
 	
 		velocity_half_plane = generate_relic_alt(agent_i.pos, agent_i.vel)
-        	angle_of_vision = 3/4*pi
+        	angle_of_vision = 3/4*pi #I believe this describes how much of one side the agent can see
         	rotate_angle = pi-angle_of_vision
 		left_hemi_half_plane = generate_artificial_hp_vision(agent_i.pos, agent_i.vel, -rotate_angle)
 		right_hemi_half_plane = generate_artificial_hp_vision(agent_i.pos, agent_i.vel, rotate_angle)
