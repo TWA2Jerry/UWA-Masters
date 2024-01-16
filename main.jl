@@ -234,6 +234,10 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
+
+	global pos_vels_file
+	close(pos_vels_file)
+	global pos_vels_file = open("pos_vels.txt", "w")
 	write_pos_vel(positions, velocities, pos_vels_file, 0)
 	#write_agent_vals(model)	
 

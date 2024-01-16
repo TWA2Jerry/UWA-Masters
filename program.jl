@@ -1,5 +1,5 @@
 const no_simulations::Int64 = 20
-const no_steps::Int64 = 2500
+const no_steps::Int64 = 3500
 
 ###Define IO. files
 compac_frac_file = open("compaction_frac.txt", "w")
@@ -22,8 +22,12 @@ for i in 1:no_simulations
 end
 =#
 
-target_dods = LinRange{Float64}(0.0, pi*rho^2, 500)
-target_dods = [element for element in target_dods]
+target_dodsrange = LinRange{Float64}(0.0, 3*1000*sqrt(12), 100)
+target_dods = [element for element in target_dodsrange]
+target_dodsrange = LinRange{Float64}(4*1000*sqrt(12), pi*rho^2, 50)
+for tdod in target_dodsrange
+	push!(target_dods, tdod)
+end
 
 parameters = Dict(
         :seed => [i for i::Int64 in 1:no_simulations],
