@@ -8,6 +8,15 @@ function happiness(agent::bird)
         return abs((agent.A - agent.tdod)/max(pi/2*rho^2-agent.tdod, abs(0.0-agent.tdod)))
 end
 
+function center_of_mass(positions::Vector{Tuple{Float64, Float64}})
+	com::Tuple{Float64, Float64} = (0.0, 0.0)
+        n::Int64 = length(positions)
+        for i in 1:n
+                com =  (com .+ 1/n .* (positions[i]))
+        end
+        return com
+end
+
 function center_of_mass(model)
         com::Tuple{Float64, Float64} = (0.0, 0.0)
         n::Int64 = nagents(model)
@@ -78,13 +87,21 @@ function thingo(model)
                 distance_to_next_pos::Float64 = norm(next_pos .- model[i].pos)
 end
 
-function no_neighbours(cell)
+function no_neighbours(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
 	neighbour_count::Int32 = 0
 	for i in 1:length(cell)
 		if(cell[i][3] != 0) neighbour_count += 1 end
 	end
 	return neighbour_count
 end
+
+function neighbours(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
+	neighbour_set::Vector{Int64} = Vector{Int32}(undef, 0) #We could make this a set, but the vec should work since every vertex can be associated with one unique neighbour
+	for i in 1:length(cell)
+                if(cell[i][3] != 0) push!(neighbour_set, cell[i][3]) end
+        end
+	return neighbour_set
+end       
 
 function mean_no_neighbours(model)
 	n::Int32 = nagents(model)
@@ -157,7 +174,7 @@ function regularity_metric(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, In
 end
 
 function agent_regularity(agent::bird)
-	return agent.true_A/agent.sides_squared
+	return abs(agent.true_A/agent.sides_squared - regularities[agent.no_neighbours])/(regularities[agent.no_neighbours])
 end
 
 function return_regularities()
@@ -183,4 +200,22 @@ print("Regularities calculated\n")
 function regularity_dev(agent::bird)
 	no_sides::Int32 = agent.no_neighbours
 	return (agent_regularity(agent)-regularities[no_sides])/(regularities[no_sides])
+end
+
+function agent_neighbour_correlation(agent::bird, neighbours::Vector{Int32}, model)
+	neighbour_rot_o_alts::Vector{Float64} = Vector{Float64}(undef, 0)
+	for nid in neighbours
+		push!(neighbour_rot_o_alts, model[nid].rot_o_alt)
+	end
+	d = abs(agent.rot_o_alt - mean(neighbour_rot_o_alts))
+	correlation::Float64 = 1-d
+	return correlation
+end
+
+function model_correlation(model)
+	
+	#Go through all agents
+		#Calculate their voronoi cell and therefore who their neighbours are
+
+		#Calculate how similar their rot_o_alt parameter is to that of their neighbours
 end

@@ -143,7 +143,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	for id in 1:nagents(model)
                 #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
-		push!(colours, model[id].nospots)
+		push!(colours, 0)
 		push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
         end
         #figure, _ = abmplot(model)
@@ -375,6 +375,37 @@ function average_across_thing(agent_vals_lines, dimension_to_average_across, var
 	
 	return d_ave
 end
+
+
+function average_across_thing_data_frame(data_frame, dimension_to_average_across, var_of_interest)
+        #Create a set that will hold the
+        s = Set([])
+
+        #Iterate through all sample instances
+        for i in 1:size(data_frame, 1)
+                push!(s, data_frame[i, dimension_to_average_across])
+        end
+
+        #Create a map such that associated with each key, the values that the variable along which we average can take, is an array that holds all the values of the variable of interest for that value
+        d = Dict([])
+        for element in s
+                d[element] = []
+        end
+
+        #Now go through the lines again and add every lines value
+        for i in 1:size(data_frame, 1)
+		xvar = data_frame[i, dimension_to_average_across]
+		push!(d[xvar], data_frame[i, var_of_interest])
+        end
+
+        d_ave = Dict([])
+        for (key, value) in d
+                d_ave[key] = calc_mean_std(value)
+        end
+
+        return d_ave
+end
+
 
 function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
          ##Draw the figure of the agents with their actual DODs

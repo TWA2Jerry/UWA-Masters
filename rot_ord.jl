@@ -1,5 +1,11 @@
 ###Function takes in the agent objects. It calculates the center of the group (average of all agent positions). It then calculates the cross product of r_ig and v_i, the relative position of the agent to the group center and its velocity. 
 
+function rot_o_alt_generic(r_com::Tuple{Float64, Float64}, velocity::Tuple{Float64, Float64})
+	#rcom is the agent position relative to com, velocity is the velocity of the agent (direction they face, not including speed)
+	rot_o_raw::Float64 = norm(r_com) > eps ? cross((r_com) ./ norm(r_com), velocity) : 0.0
+	return abs(rot_o_raw)
+end 
+
 function rot_o_alt(model)
         agents_iterable = allagents(model)
         return rot_ord_alt(agents_iterable)
@@ -57,4 +63,5 @@ function rot_ord_alt(agents)
 
         return rot_order
 end
+
 

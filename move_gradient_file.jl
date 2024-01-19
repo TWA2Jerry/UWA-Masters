@@ -80,7 +80,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	
-			###
+			### Agent cell calculation
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
                 	bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane])
@@ -181,7 +181,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
-	agent.nospots = num_positions_better
+	#agent.nospots = num_positions_better
 
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)

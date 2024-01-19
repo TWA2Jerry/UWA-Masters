@@ -29,7 +29,7 @@ tracked_path::Vector{Tuple{Float64, Float64}} = []
 rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
 
 include("some_math_functions.jl")
-
+include("give_agent_cell.jl")
 
 include("voronoi_area_file.jl")
 include("move_gradient_file.jl")
@@ -169,7 +169,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], init_sides_squared[i])
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -262,7 +262,10 @@ function agent_step!(agent, model)
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
 	#print(new_agent_pos, new_agent_vel, "\n")
-	#move_agent!(agent, new_agent_pos, model)	
+	#move_agent!(agent, new_agent_pos, model)
+	com::Tuple{Float64, Float64} = center_of_mass(model)
+	r_com::Tuple{Float64, Float64} = agent.pos .- com
+	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
 end
 	
 
@@ -275,6 +278,16 @@ function model_step!(model)
 	rot_order::Float64 = rot_ord(allagents(model))
         rot_order_alt::Float64 = rot_ord_alt(allagents(model))
 	print("Alternate rotational order returned as $rot_order_alt\n")	
+
+
+	#Calculate the correlation of the moves between agents just before they move
+	for i in 1:no_birds
+		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
+		agent_neighbour_set::Vector{Int64} = neighbours(cell)
+        	agent_i.rot_o_alt_corr = agent_neighbour_correlation(agent_i, agent_neighbour_set, model)
+	end
+
+
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
@@ -325,6 +338,7 @@ function model_step!(model)
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
 		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
 		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
+		
 
 		actual_areas[agent_i.id] = true_new_area
 		#print("The bounded DOD was calculated as $new_area, while the unbounded was calculated as $true_new_area\n")
