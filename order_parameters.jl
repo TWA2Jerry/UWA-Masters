@@ -202,7 +202,7 @@ function regularity_dev(agent::bird)
 	return (agent_regularity(agent)-regularities[no_sides])/(regularities[no_sides])
 end
 
-function agent_neighbour_correlation(agent::bird, neighbours::Vector{Int32}, model)
+function agent_neighbour_correlation(agent::bird, neighbours::Vector{Int64}, model)
 	neighbour_rot_o_alts::Vector{Float64} = Vector{Float64}(undef, 0)
 	for nid in neighbours
 		push!(neighbour_rot_o_alts, model[nid].rot_o_alt)

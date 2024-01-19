@@ -284,7 +284,7 @@ function model_step!(model)
 	for i in 1:no_birds
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		agent_neighbour_set::Vector{Int64} = neighbours(cell)
-        	agent_i.rot_o_alt_corr = agent_neighbour_correlation(agent_i, agent_neighbour_set, model)
+        	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
 
