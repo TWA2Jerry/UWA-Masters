@@ -174,7 +174,7 @@ function regularity_metric(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, In
 end
 
 function agent_regularity(agent::bird)
-	return abs(agent.true_A/agent.sides_squared - regularities[agent.no_neighbours])/(regularities[agent.no_neighbours])
+	return agent.no_neighbours >= 3 ? abs(agent.true_A/agent.perimeter_squared - regularities[agent.no_neighbours])/(regularities[agent.no_neighbours]) : 0.0
 end
 
 function return_regularities()
