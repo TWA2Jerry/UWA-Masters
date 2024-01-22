@@ -219,3 +219,58 @@ function model_correlation(model)
 
 		#Calculate how similar their rot_o_alt parameter is to that of their neighbours
 end
+
+function rlm(theta_l, theta_m)
+	rlm::Float64 = 0.0
+	x_com_rhs::Float64 = (cos(theta_l) + cos(theta_m))/2
+	x_com_lhs::Float64 = cos((theta_l+theta_m)/2)
+	rlm = x_com_rhs/x_com_lhs
+	return rlm
+end
+
+function rl(rlm_vec::Vector{Float64})
+	return mean(rlm_vec)
+end	
+
+function neighbours_l_r(l_pos::Tuple{Float64, Float64}, r::Float64, neighbour_pos::Vector{Tuple{Float64, Float64}})
+	no_neighbours::Int64 = 0
+	neighbours_vec::Vector{Int64} = [] #I know this is bad practice in C since allocated memory is popped, but eh
+	for i in 1:length(neighbour_pos)	
+		if(distance(l_pos, pos) < r)
+			push!(neighbours_vec, i)
+			no_neighbours +=1 		
+		end
+	end
+	return neighbours_vec
+end
+
+function rlm_generator(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Float64}}, vel_vec::Vector{Tuple{Float64, Float64}})
+	neighbour_pos::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:length(positions)
+		if(i != l)
+			push!(neighbour_pos, positions[i])
+		end
+	end
+	neighbours::Vector{Int64} = neighbours_l_r(l_pos, r, neighbour_pos)
+	
+
+	theta_l::Float64 = atan(vel_vec[l][2], vel_vec[l][1])
+	rlm_vec::Vector{Float64} = Vector{Float64}(undef, 0)
+	for neighbour_id in neighbours
+		theta_m::Float64 = atan(vel_vec[neighbour_id][2], vel_vec[neighbour_id][1])
+		push!(rlm_vec, rlm(theta_l, theta_m))
+	end
+	return rlm_vec
+end
+
+function rlm_quick(l::Int64, r::Float64, model)
+	positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	vel_vecs::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:no_birds
+		push!(positions_vec, model[i].pos)
+		push!(vel_vecs, model[i].vel)
+	end
+	
+	rlm_vec::Vector{Float64} = rlm_generator(l, r, positions_vec, vel_vecs)
+	return rl(rlm_vec)
+end

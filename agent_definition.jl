@@ -13,5 +13,6 @@ mutable struct bird <: AbstractAgent
 	perimeter_squared::Float64
 	rot_o_alt::Float64
 	rot_o_alt_corr::Float64
+	collaborator::Int32
 end
 
