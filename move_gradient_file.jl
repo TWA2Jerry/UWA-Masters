@@ -432,6 +432,6 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 end
 
 
-
-
-
+function move_gradient_collab(kn)
+	
+end

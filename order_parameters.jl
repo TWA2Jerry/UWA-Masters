@@ -236,7 +236,7 @@ function neighbours_l_r(l_pos::Tuple{Float64, Float64}, r::Float64, neighbour_po
 	no_neighbours::Int64 = 0
 	neighbours_vec::Vector{Int64} = [] #I know this is bad practice in C since allocated memory is popped, but eh
 	for i in 1:length(neighbour_pos)	
-		if(distance(l_pos, pos) < r)
+		if(distance(l_pos, neighbour_pos[i]) < r)
 			push!(neighbours_vec, i)
 			no_neighbours +=1 		
 		end
@@ -251,6 +251,7 @@ function rlm_generator(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Fl
 			push!(neighbour_pos, positions[i])
 		end
 	end
+	l_pos::Tuple{Float64, Float64} = positions[l]
 	neighbours::Vector{Int64} = neighbours_l_r(l_pos, r, neighbour_pos)
 	
 
@@ -263,7 +264,7 @@ function rlm_generator(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Fl
 	return rlm_vec
 end
 
-function rlm_quick(l::Int64, r::Float64, model)
+function rl_quick(l::Int64, r::Float64, model)
 	positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	vel_vecs::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:no_birds

@@ -22,6 +22,7 @@ include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
 
+
 include("global_vars.jl")
 print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
@@ -36,6 +37,7 @@ include("move_gradient_file.jl")
 include("state_helper.jl")
 include("record_peripheral_agents.jl")
 include("write_agent_file.jl")
+include("game_theory_functions.jl")
 
 print("Agent template created\n")
 
@@ -169,7 +171,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, 1)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, 1, 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -346,6 +348,13 @@ function model_step!(model)
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
 		model.no_moves += no_move[agent_i.id]
+
+		##Update agent correlation
+		agent_i.rl = rl_quick(agent_i.id, rho, model)
+		change::Int64 = change_strat(agent_i, model)
+		if(change[1] == 1)
+			agent_i.collaborator = change[2]
+		end	
         end
         
 	#Now update the model's convex hull
