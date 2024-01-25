@@ -2,6 +2,8 @@
 include("record_peripheral_agents.jl")
 include("nearest_agents.jl")
 include("generate_relic.jl")
+include("global_vars.jl")
+
 using StatsBase
 using VoronoiCells
 function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
@@ -431,7 +433,29 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	return best_pos, min_area, sampled_positions, colours, move_made, best_voronoi_cell
 end
 
+function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float64 = rho)
+	##Create vector of neighbour positions
+	neighbour_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:no_birds
+		push!(neighbour_positions, model[i].pos) 
+	end
 
-function move_gradient_collab(kn)
-	
+	##Find neighbours
+	neighbour_set::Vector{Int64} = neighbours_l_r(agent.id, r, neighbour_positions)
+
+	##Align velocity with neighbour velocities
+	theta_vec::Vector{Float64} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for nid in neighbour_set
+		push!(theta_vec, atan(model[nid].vel[2], model[nid].vel[1]))
+	end
+
+	theta_tpp::Float64 = mean(theta_vec)
+
+	##Set kn[1,4]
+	kn[1] = agent.vel[1]
+	kn[2] = agent.vel[2]
+	kn[3] = (cos(theta_tpp) .- agent.vel[1])
+	kn[4] = (sin(theta_tpp) .- agent.vel[2])
+		
+	return 1
 end

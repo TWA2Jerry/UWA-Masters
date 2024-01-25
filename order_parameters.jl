@@ -180,7 +180,7 @@ end
 function return_regularities()
         regularities = Dict{Int32, Float64}([])
 	r::Float64 = 1.0
-        for n in 3:20
+        for n in 3:99
                 vertexes::Vector{Tuple{Float64, Float64}} = Array{Tuple{Float64, Float64}}(undef, 0)
                 for i in 0:n
                         coord::Tuple{Float64, Float64} = (r*cos(2*pi*i/n), r*sin(2*pi*i/n))
@@ -232,11 +232,12 @@ function rl(rlm_vec::Vector{Float64})
 	return mean(rlm_vec)
 end	
 
-function neighbours_l_r(l_pos::Tuple{Float64, Float64}, r::Float64, neighbour_pos::Vector{Tuple{Float64, Float64}})
+function neighbours_l_r(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Float64}})
+	l_pos::Tuple{Float64, Float64} = positions[l]
 	no_neighbours::Int64 = 0
 	neighbours_vec::Vector{Int64} = [] #I know this is bad practice in C since allocated memory is popped, but eh
-	for i in 1:length(neighbour_pos)	
-		if(distance(l_pos, neighbour_pos[i]) < r)
+	for i in 1:length(positions)	
+		if(i != l && distance(l_pos, positions[i]) < r)
 			push!(neighbours_vec, i)
 			no_neighbours +=1 		
 		end
@@ -247,12 +248,10 @@ end
 function rlm_generator(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Float64}}, vel_vec::Vector{Tuple{Float64, Float64}})
 	neighbour_pos::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:length(positions)
-		if(i != l)
 			push!(neighbour_pos, positions[i])
-		end
 	end
 	l_pos::Tuple{Float64, Float64} = positions[l]
-	neighbours::Vector{Int64} = neighbours_l_r(l_pos, r, neighbour_pos)
+	neighbours::Vector{Int64} = neighbours_l_r(l, r, neighbour_pos)
 	
 
 	theta_l::Float64 = atan(vel_vec[l][2], vel_vec[l][1])

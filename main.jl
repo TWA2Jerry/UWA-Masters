@@ -125,6 +125,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
 		num_neighbours[i] = no_neighbours(true_initial_cell)		
+		
+		if(num_neighbours[i] > 20)
+			print("$(true_initial_cell)\n")
+		end
+		
 		init_sides_squared[i] = cell_sides_squared(true_initial_cell)	
 		#regularities[i] = regularity_metric(true_initial_cell, true_initial_A)	
 			
@@ -171,7 +176,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, 1, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0,1]), 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -246,7 +251,12 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made_main::Int32 =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
+        move_made_main::Int32 = 0
+	if(agent.collaborator == 1)
+		move_made_main = move_gradient_collab(agent, model, k1, rho)
+	else
+		move_made_main =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
+	end
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
@@ -254,12 +264,14 @@ function agent_step!(agent, model)
         new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
-		agent.vel = new_agent_vel
+		#agent.vel = new_agent_vel
 		#agent.speed = 1.0
+		new_vel[agent.id] = new_agent_vel
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
-		agent.vel = new_agent_vel
+		#agent.vel = new_agent_vel
 		#agent.speed = 0.0
+		new_vel[agent.id] = new_agent_vel
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -293,6 +305,7 @@ function model_step!(model)
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
                 move_agent!(agent, Tuple(new_pos[agent.id]), model)
+		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
 	
@@ -351,7 +364,7 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
-		change::Int64 = change_strat(agent_i, model)
+		change::Tuple{Int64, Int32} = change_strat(agent_i, model)
 		if(change[1] == 1)
 			agent_i.collaborator = change[2]
 		end	
