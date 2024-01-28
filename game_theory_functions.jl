@@ -1,4 +1,5 @@
 include("order_parameters.jl")
+include("global_vars.jl")
 function cl(sl::Int32, r::Float64, L::Float64)
 	return sl*r/L
 end
@@ -35,3 +36,31 @@ function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2    
 	
 	return prob < wl ? (1, model[m].collaborator) : (0, 1)
 end
+
+function translate_positions(positions::Vector{Tuple{Float64, Float64}}, xoffset::Float64 = 0.0, yoffset::Float64 = 0.0) 
+	translated_positions::Vector{Tuple{Float64, Float64}} = [positions[i] .+ (xoffset, yoffset) for i in 1:length(positions)]
+	return translated_positions
+end
+
+function add_translated_positions(positions::Vector{Tuple{Float64, Float64}}, xoffset::Float64 = 0.0, yoffset::Float64 = 0.0)
+	temp_positions::Vector{Tuple{Float64, Float64}} = translate(positions, xoffset, yoffset)
+	for trans_position in temp_positions
+		push!(positions, trans_position)
+	end
+
+	return
+end
+
+#Function that takes in a vector of neighbour positions and adds to that vec their translations for periodic boundaries 
+function translate_periodic_quick(positions::Vector{Tuple{Float64, Float64}}, period::Float64 = rect_bound)
+	add_translated_positions(positions, period, 0.0)
+	add_translated_positions(positions, period, period)
+	add_translated_positions(positions, 0.0, period)
+	add_translated_positions(positions, -period, period)
+	add_translated_positions(positions, -period, 0.0)
+	add_translated_positions(positions, -period, -period)
+	add_translated_positions(positions, 0.0, -period)
+	add_translated_positions(positions, period, -period)
+	
+	return
+end	

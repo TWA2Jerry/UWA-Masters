@@ -406,6 +406,16 @@ function average_across_thing_data_frame(data_frame, dimension_to_average_across
         return d_ave
 end
 
+function df_for_plotting(df)
+	rot_o_plot_data = average_across_thing_data_frame(df, 1, 7)
+	step_val_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for (key, value) in rot_o_plot_data
+		 push!(step_val_vec, (Float64(key), value[1]))
+	end
+	sort!(step_val_vec)
+	return 	step_val_vec
+end
+
 
 function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
          ##Draw the figure of the agents with their actual DODs
