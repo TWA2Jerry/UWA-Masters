@@ -180,7 +180,7 @@ end
 function return_regularities()
         regularities = Dict{Int32, Float64}([])
 	r::Float64 = 1.0
-        for n in 3:99
+        for n in 3:20
                 vertexes::Vector{Tuple{Float64, Float64}} = Array{Tuple{Float64, Float64}}(undef, 0)
                 for i in 0:n
                         coord::Tuple{Float64, Float64} = (r*cos(2*pi*i/n), r*sin(2*pi*i/n))

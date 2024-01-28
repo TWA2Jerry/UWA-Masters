@@ -261,7 +261,7 @@ function agent_step!(agent, model)
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+	new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
 		#agent.vel = new_agent_vel
@@ -351,6 +351,10 @@ function model_step!(model)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
+		if(agent_i.no_neighbours > 20) 
+			print("$true_new_cell_i\n") 
+			exit() 
+		end
 		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
 		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
 		
