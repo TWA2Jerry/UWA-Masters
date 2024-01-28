@@ -274,3 +274,11 @@ function rl_quick(l::Int64, r::Float64, model)
 	rlm_vec::Vector{Float64} = rlm_generator(l, r, positions_vec, vel_vecs)
 	return rl(rlm_vec)
 end
+
+function no_collabs(model)
+	no_collabs::Int32 = 0
+	for i in 1:nagents(model)
+		if (model[i].collaborator == 1) no_collabs += 1 end
+	end
+	return no_collabs
+end

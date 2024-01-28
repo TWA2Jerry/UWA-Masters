@@ -456,7 +456,9 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	kn[2] = agent.vel[2]
 	kn[3] = (cos(theta_tpp) .- agent.vel[1])
 	kn[4] = (sin(theta_tpp) .- agent.vel[2])
-	
-	new_pos[agent.id] = agent.pos .+ agent.vel		
+
+	agent.speed = 1.0
+		
+	new_pos[agent.id] = agent.pos .+ (agent.vel .+ (kn[3], kn[4])) .* agent.speed		
 	return 1
 end

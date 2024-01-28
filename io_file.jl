@@ -155,11 +155,9 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :black)
 
 
-	#=
 	for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end
-	=#	
 
         #print("The number of points in path points is $(length(path_points))\n")
 	#draw_path(path_points)
