@@ -8,10 +8,10 @@ function pl(rl, cl, alpha)
 	return rl-alpha*cl
 end
 
-function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0)
+function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0, r::Float64 = rho)
 	l::Int64 = agent_l.id
-	rl::Float64 = rl_quick(l, rho, model)
-	return rl - alpha*cl(agent_l.collaborator, rho, rect_bound)
+	rl::Float64 = rl_quick(l, r, model)
+	return rl - alpha*cl(agent_l.collaborator, r, rect_bound)
 end
 
 function wlm(pl::Float64, pm::Float64, beta::Float64 = 1.0)
@@ -19,7 +19,7 @@ function wlm(pl::Float64, pm::Float64, beta::Float64 = 1.0)
 end
 
 function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0, beta::Float64 = 1.0)
-	pl::Float64 = pl_quick(agent_l, model; alpha)
+	pl::Float64 = pl_quick(agent_l, model, alpha=alpha, r= 0.5*rho)
 	neighbour_pos_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:no_birds
 		push!(neighbour_pos_vec, model[i].pos) 
@@ -29,7 +29,7 @@ function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, tr
 	wl::Float64 = 0.0
 	if(length(neighbour_vec) > 0) 
 		m::Int64 = rand(neighbour_vec) 	
-		pm::Float64 = pl_quick(model[m], model; alpha)
+		pm::Float64 = pl_quick(model[m], model, alpha= alpha, r = 0.5*rho)
 		wl = wlm(pl, pm, 1.0)
 	end
 	prob::Float64 = rand(Float64)
