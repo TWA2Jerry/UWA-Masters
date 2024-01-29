@@ -371,7 +371,7 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
-		change::Tuple{Int64, Int32} = change_strat(agent_i, model)
+		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
 		if(change[1] == 1)
 			agent_i.collaborator = change[2]
 		end	
