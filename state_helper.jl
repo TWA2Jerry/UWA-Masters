@@ -336,3 +336,5 @@ function find_model_limits(model::UnremovableABM{ContinuousSpace{2, true, Float6
 	
 	return (minx, miny), (maxx, maxy)
 end 
+
+better_positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)

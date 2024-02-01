@@ -176,7 +176,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0,1]), 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -252,11 +252,13 @@ function agent_step!(agent, model)
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
         move_made_main::Int32 = 0
+	move_made_main_tuple = (0.0)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho)
 	else
-		move_made_main =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
+		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
 	end
+	move_made_main = move_made_main_tuple[5]
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
@@ -280,6 +282,8 @@ function agent_step!(agent, model)
 	com::Tuple{Float64, Float64} = center_of_mass(model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
 	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
+	
+	best_pos[agent.id] = move_made_main_tuple[1]
 end
 	
 
@@ -301,6 +305,9 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
+	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	#draw_better_positions(model, better_positions_vec)
+	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
@@ -371,10 +378,10 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
-		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
+		#=change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
 		if(change[1] == 1)
 			agent_i.collaborator = change[2]
-		end	
+		end =#	
         end
         
 	#Now update the model's convex hull

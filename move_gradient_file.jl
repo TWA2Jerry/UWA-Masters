@@ -291,7 +291,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane]) #Generates the set of vertices which define the voronoi cell
                 	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			
 
@@ -362,6 +362,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			if(abs(new_area-target_area) < abs(agent.A - target_area)) 
 				num_positions_better += 1
 				colour = (conflict == 1) ? :orange : :green
+				push!(better_positions_vec, new_agent_pos)
 			else
 				colour = :red
 			end
@@ -406,9 +407,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
-	agent.nospots = num_positions_better
+	#agent.nospots = num_positions_better
 		
-	#=
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
@@ -416,7 +416,6 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		AgentsIO.save_checkpoint("simulation_save.jld2", model)	
 		exit()
 	end
-	=#	
 
 	#This warning might not be as important due to the fact that we may set min_area = inf, and then skip all other possible positions for sampling
 	#=if(min_area > pi*rho^2)

@@ -13,3 +13,4 @@ convex_hull_point = zeros(Int32, 100)
 last_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0) for i in 1:no_birds]
 const sigma = 0.0
 const R::Float64 = 80.0
+best_pos::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, no_birds)
