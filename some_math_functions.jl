@@ -59,7 +59,7 @@ function inter(h1::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float6
                 m2 = h2[2][2]/h2[2][1]
         end
         if(abs(m1 - m2) < abs(eps))
-                print("Parallel planes yo\n")
+                print("This is some_math_functions file. Parallel planes yo\n")
                 #exit()
                 return ((-1.0, -1.0), -1)
         end

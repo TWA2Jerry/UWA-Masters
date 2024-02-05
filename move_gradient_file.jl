@@ -22,6 +22,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		end
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
+	
+	translate_periodic_quick(positions)	
+	print("Move grad file here. length of positions is $(length(positions))\n")	
+
 	#min_area = inf  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
@@ -230,6 +234,10 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		end
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
+
+	translate_periodic_quick(positions)
+        #print("Move grad file here. length of positions is $(length(positions))\n")
+
 	min_area = agent.A  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
@@ -432,7 +440,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	return best_pos, min_area, sampled_positions, colours, move_made, best_voronoi_cell
 end
 
-function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float64 = rho)
+function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float64 = rho, eta::Float64 = 1.0)
 	##Create vector of neighbour positions
 	neighbour_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:no_birds
@@ -448,7 +456,7 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 		push!(theta_vec, atan(model[nid].vel[2], model[nid].vel[1]))
 	end
 
-	theta_tpp::Float64 = mean(theta_vec)
+	theta_tpp::Float64 = mean(theta_vec) + 2* eta .* rand(Float64) .- (eta)
 
 	##Set kn[1,4]
 	kn[1] = agent.vel[1]

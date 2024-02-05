@@ -109,6 +109,13 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			end
 			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
+
+		translate_periodic_quick(neighbouring_positions)	
+		#=print("Main here. Giving out the initial translated positions now\n")
+		for i in 1:length(neighbouring_positions)
+			print("$(neighbouring_positions[i])\n")
+		end =#		
+	
 		vix::Float64 = initial_vels[i][1]
 		viy::Float64 = initial_vels[i][2]
 		relic_x::Float64 = -1.0*(-viy)
@@ -254,7 +261,7 @@ function agent_step!(agent, model)
         move_made_main::Int32 = 0
 	move_made_main_tuple = (0.0)
 	if(agent.collaborator == 1)
-		move_made_main = move_gradient_collab(agent, model, k1, rho)
+		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
 		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
 	end
@@ -336,6 +343,9 @@ function model_step!(model)
                         end
                         push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
+
+		translate_periodic_quick(neighbour_positions) #Introduce period boundary conditions for Vicsek
+
                 ri::Tuple{Float64, Float64} = agent_i.pos
 		vix::Float64 = agent_i.vel[1]
 		viy::Float64 = agent_i.vel[2]
@@ -343,7 +353,7 @@ function model_step!(model)
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = 2
+        	relic_is_box::Int64 = -2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		
 		#print("The time for calculating a cell was\n")
