@@ -27,7 +27,7 @@ include("global_vars.jl")
 print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
+rect = Rectangle(Point2(0,0), Point2(Int64(trunc(rect_bound)), Int64(trunc(rect_bound))))
 
 include("some_math_functions.jl")
 include("give_agent_cell.jl")
@@ -75,8 +75,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -183,7 +183,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0, 1]), 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -264,8 +264,8 @@ function agent_step!(agent, model)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
 		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
+		move_made_main = move_made_main_tuple[5]
 	end
-	move_made_main = move_made_main_tuple[5]
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
@@ -290,7 +290,9 @@ function agent_step!(agent, model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
 	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
 	
-	best_pos[agent.id] = move_made_main_tuple[1]
+	if(agent.collaborator == 0)
+		best_pos[agent.id] = move_made_main_tuple[1]
+	end
 end
 	
 

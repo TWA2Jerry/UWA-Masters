@@ -282,3 +282,16 @@ function no_collabs(model)
 	end
 	return no_collabs
 end
+
+function va(model)
+	N::Int64 = nagents(model)
+	avexcomponent::Float64 = 0.0
+	ave_direction::Float64 = 0.0
+	
+	for i in 1:nagents(model)
+		avexcomponent += 1/N * model[i].pos[1]
+		ave_direction += 1/N *atan(model[i].pos[2], model[i].pos[1])	
+	end
+
+	return avexcomponent/(cos(ave_direction))
+end

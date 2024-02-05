@@ -419,11 +419,14 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
+	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
+        correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
+        new_pos[agent.id] = (correct_x, correct_y)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		AgentsIO.save_checkpoint("simulation_save.jld2", model)	
 		exit()
-	end
+	end 
 
 	#This warning might not be as important due to the fact that we may set min_area = inf, and then skip all other possible positions for sampling
 	#=if(min_area > pi*rho^2)
@@ -467,5 +470,14 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	agent.speed = 1.0
 		
 	new_pos[agent.id] = agent.pos .+ (agent.vel .+ (kn[3], kn[4])) .* agent.speed		
+	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
+        correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
+	new_pos[agent.id]  = (correct_x, correct_y)	
+	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
+                print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+                AgentsIO.save_checkpoint("simulation_save.jld2", model)
+                exit()
+        end
+
 	return 1
 end
