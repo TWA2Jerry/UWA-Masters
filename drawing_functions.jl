@@ -15,16 +15,18 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         for id in 1:nagents(model)
                 #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
-                push!(colours, agent_regularity(model[id]))
+                #push!(colours, agent_regularity(model[id]))
                 push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
-        end
+        	push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
+	end
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :black)
+        #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :black)
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
 
 	#=
         for i in 1:nagents(model)
@@ -33,7 +35,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	=#
 
         #print("The number of points in path points is $(length(path_points))\n")
-        draw_path(path_points)
+        #draw_path(path_points)
         #title!("Model state at step $(model.n)")
         #text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
         ###tracking the radial distance of each agent from group center
@@ -44,7 +46,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         for i in 1:nagents(model)
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
-        #Colorbar(figure[1,2], colourbarthing)
+        Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 end
 
@@ -127,7 +129,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
         Colorbar(figure[1,2], colourbarthing)
-        save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+        save("./Better_Positions/shannon_flock_n_=_$(model.n).png", figure)
 end
 
 function draw_better_positions(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, better_positions::Vector{Tuple{Float64, Float64}})
