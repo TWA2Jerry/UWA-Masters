@@ -1,8 +1,8 @@
 const no_birds::Int32 = 100
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 31.6
-const rho::Float64 = 2*rect_bound
+const rect_bound::Float64 = 1000.0
+const rho::Float64 = 100.0
 const spawn_dim_x::Float64 = 31.6 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 31.6 #This gives the y dimension size of the initial spawning area for the agents
 moves_areas::Vector{Tuple{Int64, Float64, Float64}} = [] #This is an array which will allow us to record all the areas and directions considered for each step, for each agent

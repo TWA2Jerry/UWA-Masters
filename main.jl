@@ -75,8 +75,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -110,7 +110,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
 
-		translate_periodic_quick(neighbouring_positions)	
+		#translate_periodic_quick(neighbouring_positions)	
 		#=print("Main here. Giving out the initial translated positions now\n")
 		for i in 1:length(neighbouring_positions)
 			print("$(neighbouring_positions[i])\n")
@@ -183,7 +183,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0, 1]), 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -314,7 +314,7 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
-	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
 	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
@@ -346,7 +346,7 @@ function model_step!(model)
                         push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
 
-		translate_periodic_quick(neighbour_positions) #Introduce period boundary conditions for Vicsek
+		#translate_periodic_quick(neighbour_positions) #Introduce period boundary conditions for Vicsek
 
                 ri::Tuple{Float64, Float64} = agent_i.pos
 		vix::Float64 = agent_i.vel[1]

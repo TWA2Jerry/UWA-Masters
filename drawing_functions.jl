@@ -93,7 +93,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
         for id in 1:nagents(model)
                 #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
-                push!(colours, agent_regularity(model[id]))
+                push!(colours, distance(model[id].pos, best_pos[id]))
                 push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
         end
         #figure, _ = abmplot(model)
@@ -102,8 +102,12 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in best_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
-	Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker = :circle,  rotations = rotations, color = :black)
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0))
+	Makie.scatter!([Tuple(point) for point in best_pos], marker = :circle,  rotations = rotations, color = :blue)
+	
+	for i in 1:length(new_pos)
+		Makie.lines!([new_pos[i], best_pos[i]], color= :black)
+	end
 
 	#=
         for i in 1:nagents(model)
@@ -122,7 +126,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
         for i in 1:nagents(model)
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
-        #Colorbar(figure[1,2], colourbarthing)
+        Colorbar(figure[1,2], colourbarthing)
         save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 end
 

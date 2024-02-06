@@ -23,8 +23,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
 	
-	translate_periodic_quick(positions)	
-	print("Move grad file here. length of positions is $(length(positions))\n")	
+	#translate_periodic_quick(positions)	
+	#print("Move grad file here. length of positions is $(length(positions))\n")	
 
 	#min_area = inf  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
@@ -235,7 +235,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
 
-	translate_periodic_quick(positions)
+	#translate_periodic_quick(positions)
         #print("Move grad file here. length of positions is $(length(positions))\n")
 
 	min_area = agent.A  #The agent's current DOD area
