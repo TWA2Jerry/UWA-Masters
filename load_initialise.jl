@@ -68,7 +68,7 @@ function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), s
         	relic_is_box::Int64 = -1
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
 
-		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], relic_half_plane)
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 	
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
@@ -116,7 +116,7 @@ function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), s
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, initial_dods[i]/target_area_arg, 0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, 0.0, 0.0, 0.0, 1, 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)

@@ -8,13 +8,11 @@ function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	segment_detected = 0
 	balloon_detected = 0
 	num_points = length(cell)
-	#=
 	if(num_points == 0)
-		print("Number of points is 0\n")
+		#print("Number of points is 0\n")
 		Area = pi*rho^2
 		return Area
 	end
-	=#
 
 	#=	
 	print("Top of voronoi_area_file here. The vertices for the cell are ")
