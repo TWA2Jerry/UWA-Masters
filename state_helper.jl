@@ -46,12 +46,14 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
 
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
-       
+
+	#=       
 	for i in 1:nagents(model)
                 text!(model[i].pos, text = "$i", align = (:center, :top))
  	end
+	=#
 
 	#Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
@@ -221,7 +223,7 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	figure = give_model(model, fig_box = view_box)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
         #Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
-	Makie.scatter!(model[id].pos, color = :yellow)
+	Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
 	Makie.scatter!(pot_pos, color = :cyan)
 	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
 	draw_agent_cell_bounded!(circled_cell)
@@ -289,7 +291,7 @@ function draw_agent_cell_bounded(id, model)
                         push!(points, cell[i][1])
                 end
         push!(points, cell[1][1])
-	figure = Makie.scatter(agent_i.pos, marker = '→',markersize = 20, rotations = atan(agent_i.vel[2], agent_i.vel[1]))
+	figure = Makie.scatter(agent_i.pos, marker = '→', markersize = 20, rotations = atan(agent_i.vel[2], agent_i.vel[1]))
 	Makie.lines!(points, color = :black)
 	display(figure)
 end
