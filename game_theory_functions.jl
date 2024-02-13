@@ -11,7 +11,7 @@ end
 function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0, r::Float64 = rho)
 	l::Int64 = agent_l.id
 	rl::Float64 = rl_quick(l, r, model)
-	return rl - alpha*cl(agent_l.collaborator, r, rect_bound)
+	return rl - alpha*cl(agent_l.collaborator, r, rect_bound) - betaprime*agent_l.A
 end
 
 function wlm(pl::Float64, pm::Float64, beta::Float64 = 1.0)
