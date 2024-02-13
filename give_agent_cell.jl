@@ -25,7 +25,7 @@ function give_cell_circled(cell, pos)
         end
         print("Starting\n")
                 if(length(cell) <=  1)
-			circle_points = circle_seg(pos, rho, 0, 2*pi)
+			circle_points = circle_seg(pos, rho, 0.0, 2*pi)
                         for j in 1:length(circle_points[1])
                                  push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
                         end
