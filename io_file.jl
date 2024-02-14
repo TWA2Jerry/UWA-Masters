@@ -126,58 +126,6 @@ end
 	print("Finished statistics IO\n")
 end
 
-
-
-###Function for drawing the plots for model step
-function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
-	##Draw the standard figure of the agents with their DODs after the step
-	colours::Vector{Float64} = []
-        rotations::Vector{Float64} = []
-        allagents_iterable = allagents(model)
-	target_area::Float64 = model.target_area
-	com::Tuple{Float64, Float64} = center_of_mass(model)
-	for id in 1:nagents(model)
-                #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
-                #push!(colours, radial_distance(model[id], com)/200.0)
-		push!(colours, agent_regularity(model[id]))
-		push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
-        end
-        #figure, _ = abmplot(model)
-        print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
-        #print("About to do the figure\n")
-        
-	
-	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 0.75))
-	#figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = :black)
-
-
-	#=
-	for i in 1:nagents(model)
-                text!(new_pos[i], text = "$i", align = (:center, :top))
-        end
-	=#	
-
-        #print("The number of points in path points is $(length(path_points))\n")
-	#draw_path(path_points)
-	#title!("Model state at step $(model.n)")
-	#text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
-	###tracking the radial distance of each agent from group center
-        radial_distances::Vector{Float64}  = []
-        #=for i in 1:nagents(model)
-                push!(radial_distances, radial_distance(model[i], com))
-        end
-	for i in 1:nagents(model)
-                text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
-        end=#
-	Colorbar(figure[1,2], colourbarthing)
-        save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
-end
-
-function draw_path(points)
-	Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
-end
-
-
 function do_more_io_stuff(adf, mdf)
 	rot_o_alt_ave_file = open("ensemble_rot_o_alt.txt", "w")
 	for i in 1:no_steps+1

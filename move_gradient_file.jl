@@ -241,6 +241,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	min_area = agent.A  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
+	min_distance::Float64 = inf
 	move_made::Int64 = 0
 	pos_area_array::Vector{Tuple{Tuple{Float64,Float64}, Float64}}  = []
 	no_angles_considered::Int64 = 0
@@ -351,13 +352,20 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			print("\n")
 			=#
 
-			if (abs(new_area-target_area) < min_diff && conflict != 1)
+			#if (abs(new_area-target_area) < min_diff && conflict != 1)
+			if((new_area > lower_area && new_area < upper_area && j < min_distance) || (move_made == 0 && abs(new_area-target_area) < min_diff && conflict != 1))
 				min_diff = abs(new_area-target_area)
 				min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
 				min_direction = direction_of_move
-                        	move_made = 1
+                        	#min_distance = j
+				
+				if((new_area > lower_area && new_area < upper_area && j < min_distance))
+					min_distance = j
+				end
+				
+				move_made = 1
 				#=replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
 				if(convex_hull_point[agent.id] == 1)
 					#print("Min area was lowered for agent $(agent.id), in a potential position of $(new_agent_pos),  here is the temp_hp\n")

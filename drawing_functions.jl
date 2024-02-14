@@ -20,7 +20,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         	push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
 	end
         #figure, _ = abmplot(model)
-        print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+        print("\n\n\ndraw_figures here. The number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
 
 
@@ -52,7 +52,8 @@ end
 
 
 function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
-         ##Draw the figure of the agents with their actual DODs
+        print("draw actual called\n") 
+	##Draw the figure of the agents with their actual DODs
         for id in 1:nagents(model)
                 colours[id] = actual_areas[id]/(pi*rho^2)
         end
@@ -137,3 +138,8 @@ function draw_better_positions(model::UnremovableABM{ContinuousSpace{2, true, Fl
 	Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker = :circle,  color = :black)
 	save("./Better_Positions/shannon_flock_n_=_$(model.n).png", figure)
 end
+
+function draw_path(points)
+        Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
+end
+
