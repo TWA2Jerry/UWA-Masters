@@ -15,5 +15,5 @@ const sigma = 0.0
 const R::Float64 = 80.0
 best_pos::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, no_birds)
 eta::Float64 = 1.0
-const lower_area::Float64 = 1000*sqrt(12)-100.0
-const upper_area::Float64 = 1000*sqrt(12)+100.0
+const lower_area::Float64 = 0.0
+const upper_area::Float64 = 500.0
