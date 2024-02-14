@@ -22,11 +22,12 @@ include("init_pos.jl")
 print("All homemade files included\n")
 print("Hello\n")
 
+
 include("global_vars.jl")
 print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
-rect = Rectangle(Point2(0,0), Point2(Int64(rect_bound), Int64(rect_bound)))
+rect = Rectangle(Point2(0,0), Point2(Int64(trunc(rect_bound)), Int64(trunc(rect_bound))))
 
 include("some_math_functions.jl")
 include("give_agent_cell.jl")
@@ -36,6 +37,7 @@ include("move_gradient_file.jl")
 include("state_helper.jl")
 include("record_peripheral_agents.jl")
 include("write_agent_file.jl")
+include("game_theory_functions.jl")
 
 print("Agent template created\n")
 
@@ -74,7 +76,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
 	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -107,6 +109,13 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			end
 			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
+
+		#translate_periodic_quick(neighbouring_positions)	
+		#=print("Main here. Giving out the initial translated positions now\n")
+		for i in 1:length(neighbouring_positions)
+			print("$(neighbouring_positions[i])\n")
+		end =#		
+	
 		vix::Float64 = initial_vels[i][1]
 		viy::Float64 = initial_vels[i][2]
 		relic_x::Float64 = -1.0*(-viy)
@@ -123,6 +132,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
 		num_neighbours[i] = no_neighbours(true_initial_cell)		
+		
+		if(num_neighbours[i] > 20)
+			print("$(true_initial_cell)\n")
+		end
+		
 		init_sides_squared[i] = cell_sides_squared(true_initial_cell)	
 		#regularities[i] = regularity_metric(true_initial_cell, true_initial_A)	
 			
@@ -169,7 +183,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -244,20 +258,29 @@ function agent_step!(agent, model)
 	target_area::Float64 = model.target_area	
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
-        move_made_main::Int32 =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
+        move_made_main::Int32 = 0
+	move_made_main_tuple = (0.0)
+	if(agent.collaborator == 1)
+		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
+	else
+		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
+		move_made_main = move_made_main_tuple[5]
+	end
 	no_move[Int64(agent.id)] = move_made_main
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
-        new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+	new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
-		agent.vel = new_agent_vel
+		#agent.vel = new_agent_vel
 		#agent.speed = 1.0
+		new_vel[agent.id] = new_agent_vel
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
-		agent.vel = new_agent_vel
+		#agent.vel = new_agent_vel
 		#agent.speed = 0.0
+		new_vel[agent.id] = new_agent_vel
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -266,6 +289,10 @@ function agent_step!(agent, model)
 	com::Tuple{Float64, Float64} = center_of_mass(model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
 	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
+	
+	if(agent.collaborator == 0)
+		best_pos[agent.id] = move_made_main_tuple[1]
+	end
 end
 	
 
@@ -287,10 +314,17 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
+	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	#draw_better_positions(model, better_positions_vec)
+	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
-                move_agent!(agent, Tuple(new_pos[agent.id]), model)
+                if(distance(new_pos[agent.id], agent.pos) < eps)
+			print("I have not moved, I am agent $(agent.id). My collab status is $(agent.collaborator)\n")
+		end
+		move_agent!(agent, Tuple(new_pos[agent.id]), model)
+		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
 	
@@ -311,6 +345,9 @@ function model_step!(model)
                         end
                         push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
+
+		#translate_periodic_quick(neighbour_positions) #Introduce period boundary conditions for Vicsek
+
                 ri::Tuple{Float64, Float64} = agent_i.pos
 		vix::Float64 = agent_i.vel[1]
 		viy::Float64 = agent_i.vel[2]
@@ -318,7 +355,7 @@ function model_step!(model)
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = 2
+        	relic_is_box::Int64 = -2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		
 		#print("The time for calculating a cell was\n")
@@ -336,6 +373,10 @@ function model_step!(model)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
+		if(agent_i.no_neighbours > 20) 
+			print("$true_new_cell_i\n") 
+			exit() 
+		end
 		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
 		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
 		
@@ -346,6 +387,13 @@ function model_step!(model)
 		total_area += true_new_area/(pi*rho^2)
 		total_speed += agent_i.speed
 		model.no_moves += no_move[agent_i.id]
+
+		##Update agent correlation
+		agent_i.rl = rl_quick(agent_i.id, rho, model)
+		#=change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
+		if(change[1] == 1)
+			agent_i.collaborator = change[2]
+		end =#	
         end
         
 	#Now update the model's convex hull

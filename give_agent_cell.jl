@@ -24,7 +24,14 @@ function give_cell_circled(cell, pos)
                 print("$point\n")
         end
         print("Starting\n")
-                for i in 1:length(new_cell_i)
+                if(length(cell) <=  1)
+			circle_points = circle_seg(pos, rho, 0.0, 2*pi)
+                        for j in 1:length(circle_points[1])
+                                 push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
+                        end
+
+		end
+		for i in 1:length(new_cell_i)
                         point = new_cell_i[i]
                         point_pp = new_cell_i[(i)%length(new_cell_i)+1]
                         push!(cell_including_circle, point)

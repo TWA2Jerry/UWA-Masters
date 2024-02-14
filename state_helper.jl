@@ -35,7 +35,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         miny = model[1].pos[2]
         maxy = model[2].pos[2]
         for i in 1:nagents(model)
-                push!(colours, model[i].nospots)
+                #push!(colours, model[i].nospots)
                 push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
                 push!(b_positions, model[i].pos)
                 minx = min(minx, model[i].pos[1])
@@ -46,9 +46,13 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
 
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
-        
+
+	for i in 1:nagents(model)
+                text!(model[i].pos, text = "$i", align = (:center, :top))
+ 	end
+
 	#Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
         #display(figure)
@@ -114,7 +118,7 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
         colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
         for i in 1:nagents(model)
-                push!(colours, model[i].nospots)
+                #push!(colours, model[i].nospots)
                 push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
                 push!(b_positions, model[i].pos)
         end
@@ -212,14 +216,15 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		push!(positions, model[i].pos)
 	end
 
-	figure = give_model_cell_circled(model, fig_box = view_box)
-	#figure = give_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
+	#figure = give_model_cell_circled(model, fig_box = view_box)
+	#figure = give_model_cell(model, fig_box = view_box)
+	figure = give_model(model, fig_box = view_box)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
+        #Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
+	Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
 	Makie.scatter!(pot_pos, color = :cyan)
-	Makie.scatter!(model[id].pos, color = :yellow)
 	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-	#draw_agent_cell_bounded!(circled_cell)
+	draw_agent_cell_bounded!(circled_cell)
 	display(figure)
 end
 
@@ -284,7 +289,7 @@ function draw_agent_cell_bounded(id, model)
                         push!(points, cell[i][1])
                 end
         push!(points, cell[1][1])
-	figure = Makie.scatter(agent_i.pos, marker = '→',markersize = 20, rotations = atan(agent_i.vel[2], agent_i.vel[1]))
+	figure = Makie.scatter(agent_i.pos, marker = '→', markersize = 20, rotations = atan(agent_i.vel[2], agent_i.vel[1]))
 	Makie.lines!(points, color = :black)
 	display(figure)
 end
@@ -336,3 +341,5 @@ function find_model_limits(model::UnremovableABM{ContinuousSpace{2, true, Float6
 	
 	return (minx, miny), (maxx, maxy)
 end 
+
+better_positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)

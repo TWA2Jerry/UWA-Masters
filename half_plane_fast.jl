@@ -1,25 +1,6 @@
 include("intersect_check.jl")
 include("some_math_functions.jl")
 
-function dot(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
-	if(length(v1) != length(v2))
-	   print("Bruh these vectors ain't got the same length no?\n")
-	   return -1
-	end
-
-	sum = 0.0
-	for i in 1:length(v1)
-		sum += v1[i]*v2[i]
-	end
-	return sum
-end
-
-###Function for calculating the magnitude of the cross product between two vectors v1 and v2
-function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
-	return v1[1] * v2[2] - v1[2]*v2[1]
-end
-
-
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 
@@ -91,13 +72,13 @@ function voronoi_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 		i += 1
 	end
 	
-	#=		
+	#=	
 	print("We have now removed all bounding box and redundant half-planes; for the agent position of $ri, the remaining half planes are (given by their vectors) \n")
 	for half_plane in dq
 		print("The half plane is $half_plane\n")
 	end
-	=#	
-
+	=#
+	
 	sort!(dq)
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")

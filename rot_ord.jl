@@ -55,7 +55,10 @@ function rot_ord_alt(agents)
         for agent in agents
 		rot_order += abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
         	int_rot = abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
-		#print("Cross product calculated to be $int_rot\n")
+		int_rad = dot((agent.pos .- r_g) ./ norm(agent.pos .- r_g),agent.vel .* agent.speed) 
+		if(agent.id == 1)
+			print("Cross product calculated to be $int_rot, while the radial component was $int_rad. Total was $(int_rot^2 + int_rad^2)\n")
+		end
 	end
 
         rot_order = rot_order/num_agents

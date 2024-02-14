@@ -59,7 +59,7 @@ function inter(h1::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float6
                 m2 = h2[2][2]/h2[2][1]
         end
         if(abs(m1 - m2) < abs(eps))
-                print("Parallel planes yo\n")
+                print("This is some_math_functions file. Parallel planes yo\n")
                 #exit()
                 return ((-1.0, -1.0), -1)
         end
@@ -96,4 +96,22 @@ end
 
 function distance(point1::Tuple{Float64, Float64}, point2::Tuple{Float64, Float64})
 	return norm(point1 .- point2)
+end
+
+function dot(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
+        if(length(v1) != length(v2))
+           print("Bruh these vectors ain't got the same length no?\n")
+           return -1
+        end
+
+        sum = 0.0
+        for i in 1:length(v1)
+                sum += v1[i]*v2[i]
+        end
+        return sum
+end
+
+###Function for calculating the magnitude of the cross product between two vectors v1 and v2
+function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
+        return v1[1] * v2[2] - v1[2]*v2[1]
 end

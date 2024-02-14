@@ -2,6 +2,8 @@
 include("record_peripheral_agents.jl")
 include("nearest_agents.jl")
 include("generate_relic.jl")
+include("global_vars.jl")
+
 using StatsBase
 using VoronoiCells
 function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
@@ -20,6 +22,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		end
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
+	
+	#translate_periodic_quick(positions)	
+	#print("Move grad file here. length of positions is $(length(positions))\n")	
+
 	#min_area = inf  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
@@ -228,6 +234,10 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		end
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
+
+	#translate_periodic_quick(positions)
+        #print("Move grad file here. length of positions is $(length(positions))\n")
+
 	min_area = agent.A  #The agent's current DOD area
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
@@ -289,8 +299,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-                	new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane]) #Generates the set of vertices which define the voronoi cell
+			new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			
 
 			##Some error detection stuff
@@ -360,6 +370,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			if(abs(new_area-target_area) < abs(agent.A - target_area)) 
 				num_positions_better += 1
 				colour = (conflict == 1) ? :orange : :green
+				push!(better_positions_vec, new_agent_pos)
 			else
 				colour = :red
 			end
@@ -400,21 +411,22 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn = rand([1])
+                turn = rand([1, -1])
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
-	agent.nospots = num_positions_better
+	#agent.nospots = num_positions_better
 		
-	#=
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
+	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
+        correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
+        new_pos[agent.id] = (correct_x, correct_y)
 	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
 		print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		AgentsIO.save_checkpoint("simulation_save.jld2", model)	
 		exit()
-	end
-	=#	
+	end 
 
 	#This warning might not be as important due to the fact that we may set min_area = inf, and then skip all other possible positions for sampling
 	#=if(min_area > pi*rho^2)
@@ -434,4 +446,41 @@ end
 
 
 
+function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float64 = rho, eta::Float64 = 1.0)
+	##Create vector of neighbour positions
+	neighbour_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:no_birds
+		push!(neighbour_positions, model[i].pos) 
+	end
 
+	##Find neighbours
+	neighbour_set::Vector{Int64} = neighbours_l_r(agent.id, r, neighbour_positions)
+
+	##Align velocity with neighbour velocities
+	theta_vec::Vector{Float64} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for nid in neighbour_set
+		push!(theta_vec, atan(model[nid].vel[2], model[nid].vel[1]))
+	end
+
+	theta_tpp::Float64 = mean(theta_vec) + 2* eta .* rand(Float64) .- (eta)
+
+	##Set kn[1,4]
+	kn[1] = agent.vel[1]
+	kn[2] = agent.vel[2]
+	kn[3] = (cos(theta_tpp) .- agent.vel[1])
+	kn[4] = (sin(theta_tpp) .- agent.vel[2])
+
+	agent.speed = 1.0
+		
+	new_pos[agent.id] = agent.pos .+ (agent.vel .+ (kn[3], kn[4])) .* agent.speed		
+	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
+        correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
+	new_pos[agent.id]  = (correct_x, correct_y)	
+	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
+                print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+                AgentsIO.save_checkpoint("simulation_save.jld2", model)
+                exit()
+        end
+
+	return 1
+end
