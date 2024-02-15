@@ -320,9 +320,9 @@ function model_step!(model)
 
 	#Move the agents to their predetermined places 
 	for agent in all_agents_iterable
-                if(distance(new_pos[agent.id], agent.pos) < eps)
+                #=if(distance(new_pos[agent.id], agent.pos) < eps)
 			print("I have not moved, I am agent $(agent.id). My collab status is $(agent.collaborator)\n")
-		end
+		end =#
 		move_agent!(agent, Tuple(new_pos[agent.id]), model)
 		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
