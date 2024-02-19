@@ -17,6 +17,15 @@ function model_mean_speed(model)
 	return mean_speed
 end
 
+function center_of_mass(positions::Vector{Tuple{Float64, Float64}})
+	com::Tuple{Float64, Float64} = (0.0, 0.0)
+        n::Int64 = length(positions)
+        for i in 1:n
+                com =  (com .+ 1/n .* (positions[i]))
+        end
+        return com
+end
+
 function center_of_mass(model)
         com::Tuple{Float64, Float64} = (0.0, 0.0)
         n::Int64 = model.num_birds
@@ -87,13 +96,21 @@ function thingo(model)
                 distance_to_next_pos::Float64 = norm(next_pos .- model[i].pos)
 end
 
-function no_neighbours(cell)
+function no_neighbours(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
 	neighbour_count::Int32 = 0
 	for i in 1:length(cell)
 		if(cell[i][3] != 0) neighbour_count += 1 end
 	end
 	return neighbour_count
 end
+
+function neighbours(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
+	neighbour_set::Vector{Int64} = Vector{Int32}(undef, 0) #We could make this a set, but the vec should work since every vertex can be associated with one unique neighbour
+	for i in 1:length(cell)
+                if(cell[i][3] != 0) push!(neighbour_set, cell[i][3]) end
+        end
+	return neighbour_set
+end       
 
 function mean_no_neighbours(model)
 	n::Int32 = nagents(model)
@@ -166,7 +183,7 @@ function regularity_metric(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, In
 end
 
 function agent_regularity(agent::bird)
-	return agent.true_A/agent.sides_squared
+	return agent.no_neighbours >= 3 ? abs(agent.true_A/agent.perimeter_squared - regularities[agent.no_neighbours])/(regularities[agent.no_neighbours]) : 0.0
 end
 
 function return_regularities()
@@ -192,4 +209,98 @@ print("Regularities calculated\n")
 function regularity_dev(agent::bird)
 	no_sides::Int32 = agent.no_neighbours
 	return (agent_regularity(agent)-regularities[no_sides])/(regularities[no_sides])
+end
+
+function agent_neighbour_correlation(agent::bird, neighbours::Vector{Int64}, model)
+	neighbour_rot_o_alts::Vector{Float64} = Vector{Float64}(undef, 0)
+	for nid in neighbours
+		push!(neighbour_rot_o_alts, model[nid].rot_o_alt)
+	end
+	d = abs(agent.rot_o_alt - mean(neighbour_rot_o_alts))
+	correlation::Float64 = 1-d
+	return correlation
+end
+
+function model_correlation(model)
+	
+	#Go through all agents
+		#Calculate their voronoi cell and therefore who their neighbours are
+
+		#Calculate how similar their rot_o_alt parameter is to that of their neighbours
+end
+
+function rlm(theta_l, theta_m)
+	rlm::Float64 = 0.0
+	x_com_rhs::Float64 = (cos(theta_l) + cos(theta_m))/2
+	x_com_lhs::Float64 = cos((theta_l+theta_m)/2)
+	rlm = x_com_rhs/x_com_lhs
+	return rlm
+end
+
+function rl(rlm_vec::Vector{Float64})
+	return mean(rlm_vec)
+end	
+
+function neighbours_l_r(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Float64}})
+	l_pos::Tuple{Float64, Float64} = positions[l]
+	no_neighbours::Int64 = 0
+	neighbours_vec::Vector{Int64} = [] #I know this is bad practice in C since allocated memory is popped, but eh
+	for i in 1:length(positions)	
+		if(i != l && distance(l_pos, positions[i]) < r)
+			push!(neighbours_vec, i)
+			no_neighbours +=1 		
+		end
+	end
+	return neighbours_vec
+end
+
+function rlm_generator(l::Int64, r::Float64, positions::Vector{Tuple{Float64, Float64}}, vel_vec::Vector{Tuple{Float64, Float64}})
+	neighbour_pos::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:length(positions)
+			push!(neighbour_pos, positions[i])
+	end
+	l_pos::Tuple{Float64, Float64} = positions[l]
+	neighbours::Vector{Int64} = neighbours_l_r(l, r, neighbour_pos)
+	
+
+	theta_l::Float64 = atan(vel_vec[l][2], vel_vec[l][1])
+	rlm_vec::Vector{Float64} = Vector{Float64}(undef, 0)
+	for neighbour_id in neighbours
+		theta_m::Float64 = atan(vel_vec[neighbour_id][2], vel_vec[neighbour_id][1])
+		push!(rlm_vec, rlm(theta_l, theta_m))
+	end
+	return rlm_vec
+end
+
+function rl_quick(l::Int64, r::Float64, model)
+	positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	vel_vecs::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:no_birds
+		push!(positions_vec, model[i].pos)
+		push!(vel_vecs, model[i].vel)
+	end
+	
+	rlm_vec::Vector{Float64} = rlm_generator(l, r, positions_vec, vel_vecs)
+	return rl(rlm_vec)
+end
+
+function no_collabs(model)
+	no_collabs::Int32 = 0
+	for i in 1:nagents(model)
+		if (model[i].collaborator == 1) no_collabs += 1 end
+	end
+	return no_collabs
+end
+
+function va(model)
+	N::Int64 = nagents(model)
+	avexcomponent::Float64 = 0.0
+	ave_direction::Float64 = 0.0
+	
+	for i in 1:nagents(model)
+		avexcomponent += 1/N * model[i].pos[1]
+		ave_direction += 1/N *atan(model[i].pos[2], model[i].pos[1])	
+	end
+
+	return avexcomponent/(cos(ave_direction))
 end

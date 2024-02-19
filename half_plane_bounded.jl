@@ -54,8 +54,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	#print("About to push the relic, which is $relic\n")
 	for relic_half_plane in relic
 		push!(dq, relic_half_plane)
-	end
-
+	end 
 
 ###
 ###This is the section where we account for the circle of vision

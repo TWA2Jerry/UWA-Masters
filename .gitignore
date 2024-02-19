@@ -7,3 +7,4 @@ Simulation_Images/*
 *.txt
 !/pos_vels.txt
 Dod/*
+Better_Positions/*

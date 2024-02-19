@@ -12,7 +12,7 @@ pos_vels_file = open("pos_vels.txt", "r")
 
 ###Load the functions
 include("io_file.jl")
-include("load_main.jl")
+include("load_main2.jl")
 
 ###Run ABM. Though in this case, I think you should just do it in interactive.
 #=for i in 1:no_simulations

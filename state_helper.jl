@@ -19,6 +19,28 @@ function draw_cell(cell)
 	return figure
 end
 
+###Same as above, but just draws it on the figure that already exists
+function draw_cell!(cell)
+        print("state_helper here. Draw cell! called\n")
+        points::Vector{Tuple{Float64, Float64}} = []
+        for i in 1:length(cell)
+                push!(points, cell[i][1])
+        end
+        push!(points, cell[1][1])
+	Makie.lines!(points)
+	return
+end
+
+function draw_cell_filled!(cell)
+	print("state_helper here. Draw cell! called\n")
+        points::Vector{Tuple{Float64, Float64}} = []
+        for i in 1:length(cell)
+                push!(points, cell[i][1])
+        end
+        Makie.poly!(points)
+        return
+
+end
 
 function display_model_cell(model)
 	figure = give_model_cell(model)
@@ -35,7 +57,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         miny = model[1].pos[2]
         maxy = model[2].pos[2]
         for i in 1:nagents(model)
-                push!(colours, model[i].nospots)
+                #push!(colours, model[i].nospots)
                 push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
                 push!(b_positions, model[i].pos)
                 minx = min(minx, model[i].pos[1])
@@ -46,9 +68,13 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
 
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
-        
+
+	for i in 1:nagents(model)
+                text!(model[i].pos, text = "$i", align = (:center, :top))
+ 	end
+
 	#Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
         #display(figure)
@@ -114,7 +140,7 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
         colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
         for i in 1:nagents(model)
-                push!(colours, model[i].nospots)
+                #push!(colours, model[i].nospots)
                 push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
                 push!(b_positions, model[i].pos)
         end
@@ -167,7 +193,7 @@ function draw_tesselation(positions, model)
         ##For each agent, generate the cells and plot using the normal half plane bounded thingo.
         for i in 1:length(positions)
                 ##Just some colour stuff for the plot
-                text!(positions[i], text = "$i", align = (:center, :top))
+                text!(positions[i] .+ (5.0, 5.0), text = "$i", align = (:center, :top))
                 temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
                 c_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
                 for j in 1:length(positions)
@@ -212,14 +238,15 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		push!(positions, model[i].pos)
 	end
 
-	figure = give_model_cell_circled(model, fig_box = view_box)
-	#figure = give_model_cell(model, fig_box = (model[id].pos .- (20, 20), model[id].pos .+ (20, 20)))
+	#figure = give_model_cell_circled(model, fig_box = view_box)
+	#figure = give_model_cell(model, fig_box = view_box)
+	figure = give_model(model, fig_box = view_box)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
+        #Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
+	Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
 	Makie.scatter!(pot_pos, color = :cyan)
-	Makie.scatter!(model[id].pos, color = :yellow)
 	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-	#draw_agent_cell_bounded!(circled_cell)
+	draw_agent_cell_bounded!(circled_cell)
 	display(figure)
 end
 
@@ -284,7 +311,7 @@ function draw_agent_cell_bounded(id, model)
                         push!(points, cell[i][1])
                 end
         push!(points, cell[1][1])
-	figure = Makie.scatter(agent_i.pos, marker = '→',markersize = 20, rotations = atan(agent_i.vel[2], agent_i.vel[1]))
+	figure = Makie.scatter(agent_i.pos, marker = '→', markersize = 20, rotations = atan(agent_i.vel[2], agent_i.vel[1]))
 	Makie.lines!(points, color = :black)
 	display(figure)
 end
@@ -336,3 +363,47 @@ function find_model_limits(model::UnremovableABM{ContinuousSpace{2, true, Float6
 	
 	return (minx, miny), (maxx, maxy)
 end 
+
+better_positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+
+function draw_cell_context(cell, positions::Vector{Tuple{Float64, Float64}}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), filled= 0)
+	figure, ax, colourbarthing = Makie.scatter(positions, axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 10, color = :black)
+	for i in 1:length(positions)
+		text!(positions[i], text = "$i", align = (:center, :top))
+	end
+	
+	if(filled == 0)
+		draw_cell!(cell)
+	else
+		draw_cell_filled!(cell)
+	end
+	return figure, ax
+end
+
+function draw_cell_context_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), circled = 0, rhop = rho, filled = 0)
+	ri::Tuple{Float64, Float64} = model[id].pos
+	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:nagents(model)
+		push!(positions, model[i].pos)
+	end
+
+	cell_id = give_agent_cell(model[id], model; rhop = rhop)
+	if(circled == 1)
+		cell_id = give_cell_circled(cell_id, ri; rhop= rhop)
+	end
+	return draw_cell_context(cell_id, positions; fig_box = fig_box, filled = filled)
+end
+
+function draw_cell_forward_context_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), circled = 0, rhop = rho, filled = 0)
+        ri::Tuple{Float64, Float64} = model[id].pos
+        positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+        for i in 1:nagents(model)
+                push!(positions, model[i].pos)
+        end
+        cell_id = give_cell_forward_quick(id, model; rhop = rhop)
+	if(circled == 1)
+		cell_id = give_cell_circled(cell_id, ri; rhop= rhop)
+	end
+        return draw_cell_context(cell_id, positions; fig_box = fig_box, filled= filled)
+end
+
