@@ -143,3 +143,48 @@ function draw_path(points)
         Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
 end
 
+function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+	ri::Tuple{Float64, Float64} = positions[id]
+	half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}(undef, 0)
+	n::Int64 = Int64(length(positions))
+	 r_ji::Tuple{Float64, Float64} = (0.0, 0.0)
+        half_plane_point::Tuple{Float64, Float64} = (0.0, 0.0)
+        v_jix::Float64 = 0.0
+        v_jiy::Float64 = 0.0
+        pq::Tuple{Float64, Float64} = (0.0, 0.0)
+        is_box::Int64 = -100000
+
+	for j in 1:n	
+		if(j == id) continue end
+		r_ji = positions[j] .- ri
+		half_plane_point = 0.5 .* r_ji .+ ri
+		v_jix = -1.0 * (0.5 * r_ji[2])
+                v_jiy = 0.5 * r_ji[1] #Hopefully you can see that this is literally just v = [-sin(\theta), \cos(\theta)]
+		pq = (v_jix, v_jiy)
+		angle = atan(v_jiy, v_jix)
+		is_box = j
+		half_plane = (angle, pq, half_plane_point, is_box)
+		push!(half_planes, half_plane) 
+	end
+
+	figure, ax, colourbarthing = Makie.scatter(positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, ), marker = :circle,  markersize = 10, color = :black)
+	for i in 1:n
+		text!(positions[i], text = "$i", align= (:center, :top))
+	end
+	hidedecorations!(ax)
+	for half_plane in half_planes
+		rj::Tuple{Float64, Float64} = half_plane[3]
+		pqj::Tuple{Float64, Float64} = half_plane[2]
+		Makie.arrows!([rj[1], rj[1]], [rj[2], rj[2]], [-pqj[1], pqj[1]], [-pqj[2], pqj[2]], color = :red)
+	end
+
+	return figure	
+end
+
+function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	for i in 1:nagents(model)
+		push!(positions, model[i].pos)
+	end
+	return draw_half_planes(id, positions; fig_box)
+end
