@@ -10,6 +10,7 @@ mutable struct bird <: AbstractAgent
         true_A::Float64 #The true area of the agent's DOD
 	tdod::Float64
 	predator::Int32 
-	
+	collaborator::Int32	
+	rot_o_alt::Float64
 end
 

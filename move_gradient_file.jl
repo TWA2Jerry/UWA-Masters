@@ -238,7 +238,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	all_agents_iterable = allagents(model)
 	vel_angle::Float64 = atan(viy, vix) #This is for rotating vectors so we know which neighbours are out of view
 	for neighbour in all_agents_iterable
-		if(neighbour.id == agent.id)
+		if(neighbour.id == agent.id || neighbour.predator == 1)
 			continue
 		end
 
@@ -468,12 +468,12 @@ end
 
 
 
-function pred_move_gradient(kn::Vector{Float64}, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function pred_move_gradient(agent::bird, kn::Vector{Float64}, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
 	
 	##For now, let's suppose that the predator moves in the direction of com of the agents
 	
-	accelerating_direction::Tuple{Float64, Float64} = (agent.pos .- center_of_mass(model))
-	accelerating_direction = accelerating_direction/norm(accelerating_direction)  
+	accelerating_direction::Tuple{Float64, Float64} = (center_of_mass(model) .- agent.pos)
+	accelerating_direction = accelerating_direction ./ norm(accelerating_direction)  
 	accelerating_change::Tuple{Float64, Float64} = accelerating_direction .- agent.vel
 
 	kn[1] = agent.vel[1]
@@ -483,6 +483,11 @@ function pred_move_gradient(kn::Vector{Float64}, model::UnremovableABM{Continuou
 	
 	return
 end
+
+
+
+
+
 
 function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float64 = rho, eta::Float64 = 1.0)
 	##Create vector of neighbour positions

@@ -26,7 +26,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours)
 
 	#=
         for i in 1:nagents(model)
@@ -94,6 +94,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
         target_area::Float64 = model.target_area
         com::Tuple{Float64, Float64} = center_of_mass(model)
         for id in 1:nagents(model)
+		if(model[id].predator == 1) continue end
                 #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
                 push!(colours, distance(model[id].pos, best_pos[id]))
@@ -105,10 +106,11 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0))
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:no_birds], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0))
 	Makie.scatter!([Tuple(point) for point in best_pos], marker = :circle,  rotations = rotations, color = :blue)
 	
 	for i in 1:length(new_pos)
+		if(model[i].predator == 1) continue end
 		Makie.lines!([new_pos[i], best_pos[i]], color= :black)
 	end
 

@@ -49,7 +49,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => seed, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :num_birds => no_bird)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :num_birds => no_bird)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -184,7 +184,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, 0, 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -196,7 +196,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	##Add the predator to the model
 	for i in 1:no_preds
 		rand_position::Tuple{Float64, Float64} = rect_bound .* Tuple(rand(Float64, 2)) 
-		agent = bird(no_birds+i, rand_position, 2 .* Tuple(randn(2)) .- (1.0, 1.0), 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 1)
+		agent = bird(no_birds+i, rand_position, 2 .* Tuple(randn(2)) .- (1.0, 1.0), 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 1, 0, 0.0)
 		add_agent!(agent, rand_position, model)
 	end	
 
@@ -274,25 +274,33 @@ function agent_step!(agent, model)
 	move_made_main_tuple = (0.0)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
+	elseif(agent.predator == 1)
+		move_made_main = 1	
+		pred_move_gradient(agent, k1, model)
 	else
 		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
 		move_made_main = move_made_main_tuple[5]
 	end
-	no_move[Int64(agent.id)] = move_made_main
 	
+	if(agent.predator == 0) 
+		no_move[Int64(agent.id)] = move_made_main
+	end	
+
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
         new_agent_vel::Tuple{Float64, Float64} = Tuple(agent.vel .+ dt .* k1[3:4]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
+	new_pos[agent.id] = new_agent_pos
+	if(agent.predator == 1) agent.vel = new_agent_vel end
 	if(move_made_main==1)
 		#agent.vel = new_agent_vel
 		#agent.speed = 1.0
-		new_vel[agent.id] = new_agent_vel
+		if(agent.predator == 0) new_vel[agent.id] = new_agent_vel end
 	else 
 		#print("No movement made, agent area was $(agent.A)\n")
 		#agent.vel = new_agent_vel
 		#agent.speed = 0.0
-		new_vel[agent.id] = new_agent_vel
+		if(agent.predator == 0) new_vel[agent.id] = new_agent_vel end
 	end
 	#print("New agent pos of $new_agent_pos representing change of $change_in_position\n")
 	#print(k1, "\n")
@@ -302,7 +310,7 @@ function agent_step!(agent, model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
 	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
 	
-	if(agent.collaborator == 0)
+	if(agent.collaborator == 0 && agent.predator == 0)
 		best_pos[agent.id] = move_made_main_tuple[1]
 	end
 end
@@ -336,6 +344,7 @@ function model_step!(model)
 			print("I have not moved, I am agent $(agent.id). My collab status is $(agent.collaborator)\n")
 		end =#
 		move_agent!(agent, Tuple(new_pos[agent.id]), model)
+		if(agent.predator == 1) continue end
 		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
@@ -384,12 +393,14 @@ function model_step!(model)
 		true_new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, ri, neighbour_positions, rho,eps, inf, temp_hp, agent_i.vel)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
-		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
+		
+		#= agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
 		if(agent_i.no_neighbours > 20) 
 			print("$true_new_cell_i\n") 
 			exit() 
-		end
-		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
+		end =#
+		
+		#agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
 		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
 		
 
@@ -401,7 +412,7 @@ function model_step!(model)
 		model.no_moves += no_move[agent_i.id]
 
 		##Update agent correlation
-		agent_i.rl = rl_quick(agent_i.id, rho, model)
+		#agent_i.rl = rl_quick(agent_i.id, rho, model)
 		#=change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
 		if(change[1] == 1)
 			agent_i.collaborator = change[2]
@@ -419,6 +430,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
+		print("drawing figures\n")
 		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
