@@ -242,9 +242,9 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			continue
 		end
 
-		rij::Tuple{Float64, Float64} = neighbour.pos .- agent.pos
-		rij_angle::Float64 = atan(rij[2], rij[1])
-		if(abs(rij_angle - vel_angle) > pi/2) continue end
+		#rij::Tuple{Float64, Float64} = neighbour.pos .- agent.pos
+		#rij_angle::Float64 = atan(rij[2], rij[1])
+		#if(abs(rij_angle - vel_angle) > pi/2) continue end
 		 
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
@@ -373,7 +373,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			if (abs(new_area-target_area) < min_diff && conflict != 1)
 				min_diff = abs(new_area-target_area)
 				min_area = new_area
-				#print("New min area of $min_area, direction of $direction_of_move\n")
+				#print("New min area of $min_area, direction of $direction_of_move against target area of $target_area\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
 				min_direction = direction_of_move
                         	min_distance = j
@@ -459,6 +459,9 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         #It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
         kn[1] = (min_direction .* agent_speed)[1]
         kn[2] = (min_direction .* agent_speed)[2]
+	accelerationdod::Tuple{Float64, Float64} = ((min_direction .- agent.vel))./model.dt
+        kn[3] = accelerationdod[1]
+        kn[4] = accelerationdod[2]
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	#print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
 	

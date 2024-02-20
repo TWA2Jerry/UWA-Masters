@@ -32,7 +32,7 @@ end
 adata = [happiness, :true_A]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o]
 
-target_dods = [1000.0*sqrt(12)]
+target_dods = [1000*sqrt(12)]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
@@ -42,7 +42,7 @@ parameters = Dict(
 
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
-adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps, parallel = true)
+adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
 
 #do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 #do_more_io_stuff(adf, mdf)

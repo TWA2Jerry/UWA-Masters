@@ -279,6 +279,7 @@ function agent_step!(agent, model)
 		pred_move_gradient(agent, k1, model)
 	else
 		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
+		#print("Agent step here, the min_area was $(move_made_main_tuple[2])\n")
 		move_made_main = move_made_main_tuple[5]
 	end
 	
@@ -291,7 +292,7 @@ function agent_step!(agent, model)
         new_agent_vel::Tuple{Float64, Float64} = Tuple(agent.vel .+ dt .* k1[3:4]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	new_pos[agent.id] = new_agent_pos
-	if(agent.predator == 1) agent.vel = new_agent_vel end
+	agent.vel = new_agent_vel 
 	if(move_made_main==1)
 		#agent.vel = new_agent_vel
 		#agent.speed = 1.0

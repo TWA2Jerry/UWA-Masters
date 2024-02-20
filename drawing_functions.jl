@@ -20,7 +20,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         	push!(colours, model[id].predator == 0 ? :blue : :red) #This is for highlighting differences between predators and whatnot 
 	end
         #figure, _ = abmplot(model)
-        print("\n\n\ndraw_figures here. The number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+        #print("\n\n\ndraw_figures here. The number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
         #print("About to do the figure\n")
 
 
