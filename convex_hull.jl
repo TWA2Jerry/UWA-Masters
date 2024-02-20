@@ -10,11 +10,13 @@ function update_convex_hull(model)
 	points = []
 	all_agents_iterable = allagents(model)
 	for agent in all_agents_iterable
+		if(agent.predator == 1) continue end
 		push!(points, [agent.pos[1], agent.pos[2], agent.id])
 		#print("The point added was $([agent.pos[1], agent.pos[2], Int64(agent.id)]), the agent id is $(agent.id)\n")
 	end
 	
 	for i in 1:nagents(model)
+		if(model[i].predator == 1) continue end
 		convex_hull_point[i] = 0
 	end
 

@@ -7,7 +7,7 @@ import ColorSchemes.balance
 ###Function for drawing the plots for model step
 function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the standard figure of the agents with their DODs after the step
-        colours::Vector{Float64} = []
+        colours = []
         rotations::Vector{Float64} = []
         allagents_iterable = allagents(model)
         target_area::Float64 = model.target_area
@@ -17,7 +17,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
                 #push!(colours, radial_distance(model[id], com)/200.0)
                 #push!(colours, agent_regularity(model[id]))
                 push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
-        	push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
+        	push!(colours, model[id].predator == 0 ? :blue : :red) #This is for highlighting differences between predators and whatnot 
 	end
         #figure, _ = abmplot(model)
         print("\n\n\ndraw_figures here. The number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
@@ -25,8 +25,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
-	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
+        #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
 
 	#=
         for i in 1:nagents(model)

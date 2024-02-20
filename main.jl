@@ -75,9 +75,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
 	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
-	init_thesis(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
+	#init_thesis(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -184,11 +184,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-<<<<<<< HEAD
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], init_sides_squared[i], 0)
-=======
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
->>>>>>> main
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -200,7 +196,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	##Add the predator to the model
 	for i in 1:no_preds
 		rand_position::Tuple{Float64, Float64} = rect_bound .* Tuple(rand(Float64, 2)) 
-		agent = bird(no_birds+i, rand_position, 2 .* Tuple(randn(2)) .- (1.0, 1.0), 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, num_neighbours[i], init_sides_squared[i], 1)
+		agent = bird(no_birds+i, rand_position, 2 .* Tuple(randn(2)) .- (1.0, 1.0), 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 1)
 		add_agent!(agent, rand_position, model)
 	end	
 
@@ -286,11 +282,7 @@ function agent_step!(agent, model)
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
-<<<<<<< HEAD
         new_agent_vel::Tuple{Float64, Float64} = Tuple(agent.vel .+ dt .* k1[3:4]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
-=======
-	new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
->>>>>>> main
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
 		#agent.vel = new_agent_vel
@@ -328,11 +320,11 @@ function model_step!(model)
 
 
 	#Calculate the correlation of the moves between agents just before they move
-	for i in 1:no_birds
+	#=for i in 1:no_birds
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		agent_neighbour_set::Vector{Int64} = neighbours(cell)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
-	end
+	end =#
 
 	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
