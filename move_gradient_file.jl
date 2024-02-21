@@ -429,6 +429,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	dW::Vector{Float64} = sqrt(model.dt) .* (epsilon .- epsilon_prime)
 
 		
+	#= Original non-predators move made scheme (with turning)
 	if(move_made==1)
                 agent.speed = 1.0
         else 
@@ -438,6 +439,25 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		agent.speed = 0.0
         end
 	#agent.nospots = num_positions_better
+	=# 
+		
+
+	anti_pred_direction::Tuple{Float64, Float64} = (0.0, 0.0)
+        for i in 1:no_preds
+                anti_pred_direction = anti_pred_direction .+ 1/no_preds .* (agent.pos .- model[no_birds+i].pos)
+        end
+
+	anti_pred_direction = norm(anti_pred_direction) < eps ? 0.0 : anti_pred_direction ./ norm(anti_pred_direction)
+	if(agent.id == 1) print("Anti pred direction is $anti_pred_direction\n") end	
+
+        min_direction = min_direction .+ 0.01 .* anti_pred_direction
+	if(norm(min_direction) < eps) 
+		turn = rand([1, -1])
+                min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
+                agent.speed = 0.0
+	else
+		min_direction = min_direction ./ norm(min_direction)
+	end
 		
 	#Store the new position for updating in model step
 	new_pos[agent.id] = Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
@@ -457,7 +477,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 
 	 #print("The number of angles considered was $no_angles_considered\n")
         #It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
-        kn[1] = (min_direction .* agent_speed)[1]
+
+	kn[1] = (min_direction .* agent_speed)[1]
         kn[2] = (min_direction .* agent_speed)[2]
 	accelerationdod::Tuple{Float64, Float64} = ((min_direction .- agent.vel))./model.dt
         kn[3] = accelerationdod[1]
