@@ -444,13 +444,13 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 
 	anti_pred_direction::Tuple{Float64, Float64} = (0.0, 0.0)
         for i in 1:no_preds
-                anti_pred_direction = anti_pred_direction .+ 1/no_preds .* (agent.pos .- model[no_birds+i].pos)
+                anti_pred_direction = distance(model[no_birds+i].pos, agent.pos) > 100.0 ? (0.0, 0.0) : anti_pred_direction .+ 1/no_preds .* (agent.pos .- model[no_birds+i].pos)
         end
 
-	anti_pred_direction = norm(anti_pred_direction) < eps ? 0.0 : anti_pred_direction ./ norm(anti_pred_direction)
+	anti_pred_direction = norm(anti_pred_direction) < eps ? (0.0, 0.0) : anti_pred_direction ./ norm(anti_pred_direction)
 	if(agent.id == 1) print("Anti pred direction is $anti_pred_direction\n") end	
 
-        min_direction = min_direction .+ 0.01 .* anti_pred_direction
+        min_direction = min_direction .+ anti_pred_direction
 	if(norm(min_direction) < eps) 
 		turn = rand([1, -1])
                 min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
