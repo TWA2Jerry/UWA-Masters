@@ -295,3 +295,13 @@ function va(model)
 
 	return avexcomponent/(cos(ave_direction))
 end
+
+function num_in_bin(model)
+	num_times::Int64 = 0
+	for i in 1:no_birds
+		if(happiness(model[i]) > bin_range[1] && happiness(model[i]) < bin_range[2])
+			num_times += 1
+		end
+	end
+	return num_times
+end
