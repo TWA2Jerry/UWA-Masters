@@ -146,7 +146,7 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
         end
 
 
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = :blue)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = :blue)
 
 
         ##Draw the cells
@@ -163,8 +163,10 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
                 end
 
                 #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp)
-                cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_circled(model[i], model)
-                points::Vector{Tuple{Float64, Float64}} = []
+                #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_circled(model[i], model)
+                cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_cell_forward_quick(i, model)
+		cell = give_cell_circled(cell, model[i].pos)
+		points::Vector{Tuple{Float64, Float64}} = []
                 for i in 1:length(cell)
                         push!(points, cell[i][1])
                 end
