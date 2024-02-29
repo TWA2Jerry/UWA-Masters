@@ -375,7 +375,7 @@ function model_step!(model)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
 		if(agent_i.no_neighbours > 20) 
-			print("$true_new_cell_i\n") 
+			print("Main here. $true_new_cell_i\n") 
 			exit() 
 		end
 		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)

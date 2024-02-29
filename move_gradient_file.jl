@@ -233,11 +233,13 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		if(neighbour.id == agent.id)
 			continue
 		end
-
+		
+		#=
 		rij::Tuple{Float64, Float64} = neighbour.pos .- agent.pos
 		rij_angle::Float64 = atan(rij[2], rij[1])
 		if(abs(rij_angle - vel_angle) > pi/2) continue end
-		 
+		=#
+		
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
 
@@ -358,14 +360,17 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			print("\n")
 			=#
 
-			if (abs(new_area-target_area) < min_diff && conflict != 1)
+			#if (abs(new_area-target_area) < min_diff && conflict != 1)
+			if((new_area > lower_area && new_area < upper_area && j < min_distance) || (move_made == 0 && abs(new_area-target_area) < min_diff && conflict != 1))	
 				min_diff = abs(new_area-target_area)
 				min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
 				min_direction = direction_of_move
-                        	min_distance = j
-				
+			
+				if((new_area > lower_area && new_area < upper_area && j < min_distance))
+                                        min_distance = j
+                                end	
 				
 				move_made = 1
 				#=replace_vector(last_half_planes[Int64(agent.id)], [agent_voronoi_cell, temp_hp, new_agent_pos])
