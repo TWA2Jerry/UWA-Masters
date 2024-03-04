@@ -409,3 +409,30 @@ function draw_cell_forward_context_quick(id::Int64, model::UnremovableABM{Contin
         return draw_cell_context(cell_id, positions; fig_box = fig_box, filled= filled)
 end
 
+function give_model_moves(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+        positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, nagents(model))
+        colours::Vector{Float64} = Vector{Float64}(undef, nagents(model))
+        best_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, nagents(model))           
+        rotations::Vector{Float64} = Vector{Float64}(undef, nagents(model))
+
+        for i in 1:nagents(model)
+                k1::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
+                move_made_main_tuple =  move_gradient_alt(model[i], model, k1, 8, 100, rho, model.target_area)
+                best_pos = move_made_main_tuple[1]
+                positions[i] = model[i].pos
+                best_positions[i] = best_pos
+                colours[i] = distance(model[i].pos, best_pos)
+                rotations[i] = atan(model[i].vel[2], model[i].vel[1])
+        end
+
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0))
+        Makie.scatter!([point for point in best_positions], marker = :circle,  rotations = rotations, color = :blue)
+
+        for i in 1:length(new_pos)
+                Makie.lines!([model[i].pos, best_positions[i]], color= :black)
+        end
+
+        Colorbar(figure[1,2], colourbarthing)
+        return figure, ax
+end
+
