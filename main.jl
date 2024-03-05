@@ -374,10 +374,13 @@ function model_step!(model)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
-		if(agent_i.no_neighbours > 20) 
+		
+		if(agent_i.no_neighbours > 30) 
 			print("Main here. $true_new_cell_i\n") 
 			exit() 
 		end
+		
+
 		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
 		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
 		
