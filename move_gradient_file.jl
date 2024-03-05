@@ -358,7 +358,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			print("\n")
 			=#
 
-			if (abs(new_area-target_area) < min_diff && conflict != 1)
+			#if (abs(new_area-target_area) < min_diff && conflict != 1)
+			if (abs(new_area-target_area) < min_diff)
 				min_diff = abs(new_area-target_area)
 				min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
