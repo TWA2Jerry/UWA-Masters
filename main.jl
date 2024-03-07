@@ -360,7 +360,7 @@ function model_step!(model)
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
