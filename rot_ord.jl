@@ -43,7 +43,7 @@ function rot_ord(agents)
 		
 	rot_order = abs(rot_order)/length(agents)
 
-	print("The number of negative was $num_neg, the number of pos was $num_pos\n")
+	#print("The number of negative was $num_neg, the number of pos was $num_pos\n")
 	return rot_order
 end
 
@@ -65,7 +65,7 @@ function rot_ord_alt(agents)
         	int_rot = abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
 		int_rad = dot((agent.pos .- r_g) ./ norm(agent.pos .- r_g),agent.vel .* agent.speed) 
 		if(agent.id == 1)
-			print("Cross product calculated to be $int_rot, while the radial component was $int_rad. Total was $(int_rot^2 + int_rad^2)\n")
+			#print("Cross product calculated to be $int_rot, while the radial component was $int_rad. Total was $(int_rot^2 + int_rad^2)\n")
 		end
 	end
 

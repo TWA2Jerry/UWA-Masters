@@ -166,6 +166,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			
 			area_zero[i] = 1
 		end
+	
 		if(abs(initial_A-init_tess_areas[i]) > eps)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
 		end
@@ -232,7 +233,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -305,7 +306,7 @@ function model_step!(model)
         all_agents_iterable = allagents(model)
 	rot_order::Float64 = rot_ord(allagents(model))
         rot_order_alt::Float64 = rot_ord_alt(allagents(model))
-	print("Alternate rotational order returned as $rot_order_alt\n")	
+	#print("Alternate rotational order returned as $rot_order_alt\n")	
 
 
 	#Calculate the correlation of the moves between agents just before they move
@@ -315,7 +316,7 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
-	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
 	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
@@ -360,7 +361,7 @@ function model_step!(model)
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
@@ -411,7 +412,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		#draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
