@@ -25,7 +25,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  markersize = 20, rotations = rotations, color = :black)
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  markersize = 10, rotations = rotations, color = :black)
 	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
 
 	#=
@@ -35,7 +35,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	=#
 
         #print("The number of points in path points is $(length(path_points))\n")
-        draw_path(path_points)
+        #draw_path(path_points)
         title!("Model state at step $(model.n)")
         #text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
         ###tracking the radial distance of each agent from group center
@@ -142,6 +142,14 @@ end
 
 function draw_path(points)
         Makie.scatter!([Tuple(point) for point in points], marker = :circle, color = :black, markersize = 5)
+end
+
+function draw_half_planes_generic!(half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}})
+	for half_plane in half_planes
+                rj::Tuple{Float64, Float64} = half_plane[3]
+                pqj::Tuple{Float64, Float64} = half_plane[2]
+                Makie.arrows!([rj[1]-pqj[1]], [rj[2]-pqj[2]], [pqj[1]], [pqj[2]], color = :red)
+        end
 end
 
 function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
