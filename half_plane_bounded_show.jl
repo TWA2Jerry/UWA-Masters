@@ -1,8 +1,26 @@
 include("half_plane_fast.jl")
 include("intersect_check.jl")
 
-function show_cell_calculation(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
-
+function show_cell_calculation(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+	neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
+	
+	for i in 1:nagents(model)
+		if(i == id)
+                	continue
+                end
+                push!(neighbouring_points, (Tuple(model[i].pos), i))
+	end
+	
+	vix::Float64 = model[id].vel[1]
+        viy::Float64 = model[id].vel[2]
+        relic_x::Float64 = -1.0*(-viy)
+        relic_y::Float64 = -vix
+        relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+        relic_angle::Float64 = atan(relic_y, relic_x)
+        relic_is_box::Int64 = -1
+        relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, model[id].pos, relic_is_box)
+	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}= []
+	voronoi_cell_bounded_show(model, model[id].pos, neighbouring_points, rho, eps, inf, temp_hp, model[id].vel, [relic_half_plane])
 end 
 
 ###Function for generating the set of vertices defining the voronoi cell
@@ -85,7 +103,7 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 	###Drawing stuff. Draw the initial setup: Agents and their positions, and the half planes for an agent
 	fig, ax = give_model(model)
 	draw_half_planes_generic!(dq)
-	savefig("./cell_illustration_0.pdf")
+	save("./Cell_alg/cell_illustration_0.pdf")
 	
 
 
@@ -162,7 +180,7 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 		draw_half_planes_generic!(newdq)
 		draw_half_planes_generic!([dq[i]])
 		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown)
-		savefig("./cell_illustration_$i.png", fig)
+		save("./Cell_alg/cell_illustration_$i.png", fig)
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
 			if(vq[vlen][3] != 0)
@@ -264,7 +282,16 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 		#print("Half plane $i added. The dequeues vq and dq are now \n")
 		#print("$vq\n")
 		#print("$newdq\n")
-        end
+        	
+		########################
+                fig, ax = give_model(model)
+                draw_half_planes_generic!(newdq)
+                draw_half_planes_generic!([dq[i]])
+                print("The number of points in vq is $(length(vq))\n")
+                Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :brown)
+                save("./Cell_alg/cell_illustration_$(i)_post.png", fig)
+
+	end
 	#print("$t\n")
 	
 
@@ -333,13 +360,6 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
                                 push!(vq, (intersect_last, newdq[len][4], newdq[1][4]))
                                 vlen += 1
                         end
-
-########################
-		fig, ax = give_model(model)
-                draw_half_planes_generic!(newdq)
-                draw_half_planes_generic!([dq[i]])
-                Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown)
-                savefig("./cell_illustration_$i_post.png", fig)
 
 		
 	end
