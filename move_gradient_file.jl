@@ -233,11 +233,13 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		if(neighbour.id == agent.id)
 			continue
 		end
-
+		
+		#=
 		rij::Tuple{Float64, Float64} = neighbour.pos .- agent.pos
 		rij_angle::Float64 = atan(rij[2], rij[1])
 		if(abs(rij_angle - vel_angle) > pi/2) continue end
-		 
+		=#	
+	 
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
 
