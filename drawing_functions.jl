@@ -148,7 +148,7 @@ function draw_half_planes_generic!(half_planes::Vector{Tuple{Float64, Tuple{Floa
 	for half_plane in half_planes
                 rj::Tuple{Float64, Float64} = half_plane[3]
                 pqj::Tuple{Float64, Float64} = half_plane[2]
-                Makie.arrows!([rj[1]-pqj[1]], [rj[2]-pqj[2]], [pqj[1]], [pqj[2]], color = :red)
+                Makie.arrows!([rj[1]-pqj[1]], [rj[2]-pqj[2]], [2*pqj[1]], [2*pqj[2]], color = :red)
         end
 end
 

@@ -1,5 +1,10 @@
 include("half_plane_fast.jl")
 include("intersect_check.jl")
+
+function show_cell_calculation(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+
+end 
+
 ###Function for generating the set of vertices defining the voronoi cell
 function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0)])
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
@@ -75,6 +80,15 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
         for half_plane in dq
                 print("The half plane is $half_plane\n")
         end=# 
+
+
+	###Drawing stuff. Draw the initial setup: Agents and their positions, and the half planes for an agent
+	fig, ax = give_model(model)
+	draw_half_planes_generic!(dq)
+	savefig("./cell_illustration_0.pdf")
+	
+
+
 	
 	#print("In the voronoi function, a was modified to a value of $a\n")
 	#Now, go through and start calculating the intersects between the non-redundant lines, but if there is no valid intersect, then use the circle
@@ -141,6 +155,14 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
                 f_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) >=  0.0 ? (x1, y1) : (x2, y2) #This is to see we of the intersects is right, by testing if the first needs us to move "backwards" from the last vertex 
 		#print("f_circle was selected to be $f_circle_intersect_i because a1_a2 was $a1_a2, the dequeue vector was $(dq[i][2]) resulting in a dot product of $(dot(a1_a2, dq[i][2]))\n")
 		b_circle_intersect_i::Tuple{Float64, Float64} = dot(a1_a2, dq[i][2]) <=  0.0 ? (x1, y1) : (x2, y2)
+
+
+###################Plot the current state of cell
+		fig, ax = give_model(model)
+		draw_half_planes_generic!(newdq)
+		draw_half_planes_generic!([dq[i]])
+		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown)
+		savefig("./cell_illustration_$i.png", fig)
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
 			if(vq[vlen][3] != 0)
@@ -311,6 +333,15 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
                                 push!(vq, (intersect_last, newdq[len][4], newdq[1][4]))
                                 vlen += 1
                         end
+
+########################
+		fig, ax = give_model(model)
+                draw_half_planes_generic!(newdq)
+                draw_half_planes_generic!([dq[i]])
+                Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown)
+                savefig("./cell_illustration_$i_post.png", fig)
+
+		
 	end
 
 	if(length(vq) == 2 && norm(vq[1][1] .- vq[2][1]) < eps)

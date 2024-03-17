@@ -47,7 +47,7 @@ function display_model_cell(model)
 	display(figure)
 end
 
-function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size = 10)
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
         colours::Vector{Float64} = []
@@ -68,13 +68,12 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
 
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle,  markersize = 10, rotations = rotations, color = :black)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = :black)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
 
-	#=
 	for i in 1:nagents(model)
-                text!(model[i].pos, text = "$i", align = (:center, :top))
- 	end =#
+                text!(model[i].pos, text = "$i", align = (:center, :top), fontsize = 20)
+ 	end
 
 	#Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
@@ -243,13 +242,13 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 
 	#figure = give_model_cell_circled(model, fig_box = view_box)
 	#figure = give_model_cell(model, fig_box = view_box)
-	figure, ax = give_model(model, fig_box = view_box)
+	figure, ax = give_model(model, fig_box = view_box, marker_size= marker_size)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size) #The agents sampled positions
-	Makie.scatter!(model[id].pos, color = :blue, marker = :circle, markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
-	Makie.scatter!(pot_pos, markersize = marker_size, color = :cyan)
+        #Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size) #The agents sampled positions
+	Makie.scatter!(model[id].pos, color = :blue, marker ='→', markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
+	Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
 	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-	#draw_agent_cell_bounded!(circled_cell)
+	draw_agent_cell_bounded!(circled_cell)
 	return figure, ax
 end
 
@@ -277,10 +276,10 @@ function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
         Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker=:circle, color = :black, markersize = marker_size)
 	Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size) #The agents sampled positions
-        Makie.scatter!(model[id].pos, color = :blue, marker = :circle, markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
-        Makie.scatter!(pot_pos, markersize = marker_size, color = :cyan)
+        #Makie.scatter!(model[id].pos, color = :blue, marker = :circle, markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
+        Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
         circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-        #draw_agent_cell_bounded!(circled_cell)
+        draw_agent_cell_bounded!(circled_cell)
         #display(figure)
 end
 
