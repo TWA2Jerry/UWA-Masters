@@ -101,8 +101,9 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 
 	###Drawing stuff. Draw the initial setup: Agents and their positions, and the half planes for an agent
-	fig, ax = give_model(model)
+	fig, ax = give_model(model; marker_size = 50)
 	draw_half_planes_generic!(dq)
+	Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
 	save("./Cell_alg/cell_illustration_0.pdf")
 	
 
@@ -176,10 +177,11 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 
 ###################Plot the current state of cell
-		fig, ax = give_model(model)
+		fig, ax = give_model(model; marker_size = 50)
 		draw_half_planes_generic!(newdq)
 		draw_half_planes_generic!([dq[i]])
-		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown)
+		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown, marker_size =20)
+		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))	
 		save("./Cell_alg/cell_illustration_$i.png", fig)
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
@@ -263,9 +265,7 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
 		end
 		
-		if(invalid_half_plane == 1)
-			continue
-		end
+		if(invalid_half_plane != 1)
 
 		#Add the foward intersect
 		if(dq[i][4] == -1)
@@ -283,12 +283,14 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 		#print("$vq\n")
 		#print("$newdq\n")
         	
+		end
 		########################
-                fig, ax = give_model(model)
+                fig, ax = give_model(model; marker_size =50)
+		print("The new dq consists of $newdq\n")
                 draw_half_planes_generic!(newdq)
-                draw_half_planes_generic!([dq[i]])
+		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
                 print("The number of points in vq is $(length(vq))\n")
-                Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :brown)
+                Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :brown, marker_size=20)
                 save("./Cell_alg/cell_illustration_$(i)_post.png", fig)
 
 	end
