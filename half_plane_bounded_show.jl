@@ -24,7 +24,8 @@ function show_cell_calculation(id::Int64, model::UnremovableABM{ContinuousSpace{
 end 
 
 ###Function for generating the set of vertices defining the voronoi cell
-function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0)])
+function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri::Tuple{Float64, Float64}, neighbouring_points::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, rho::Float64,eps::Float64, inf::Float64, temp_half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [], vel::Tuple{Float64, Float64} = (0.0,0.0), relic::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = [(0.0, (0.0, 0.0), (0.0, 0.0), 0)], vr::Float64 = 20.0)
+	#View range represents the bounds of the square box we use for plotting
 	#ri represents the position of our agent i for whom we wish to calculate the voronoi cell, neighbouring points should be a vector containing the positions of the neighbouring agents (the positions should also be represented as vectors)
 ###This is the section for deriving the original voronoi cell
 	#Look at each of the neighbours of the agent, and generate the half planes
@@ -101,9 +102,10 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 
 	###Drawing stuff. Draw the initial setup: Agents and their positions, and the half planes for an agent
-	fig, ax = give_model(model; marker_size = 50)
+	fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)))
 	draw_half_planes_generic!(dq)
 	Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
+	hidedecorations!(ax)
 	save("./Cell_alg/cell_illustration_0.pdf")
 	
 
@@ -177,11 +179,13 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 
 ###################Plot the current state of cell
-		fig, ax = give_model(model; marker_size = 50)
+		#fig, ax = give_model(model;fig_box = (ri .- (vr, vr), ri .+ (vr, vr)))
+		fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr, vr)))
 		draw_half_planes_generic!(newdq)
 		draw_half_planes_generic!([dq[i]])
-		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :brown, marker_size =20)
+		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :red, markersize =20)
 		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))	
+		hidedecorations!(ax)	
 		save("./Cell_alg/cell_illustration_$i.png", fig)
 
 		while(vlen >= 1 && outside(dq[i], vq[vlen][1], eps, inf))
@@ -285,13 +289,15 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
         	
 		end
 		########################
-                fig, ax = give_model(model; marker_size =50)
+                #fig, ax = give_model(model; marker_size =50)
+		fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)))
 		print("The new dq consists of $newdq\n")
                 draw_half_planes_generic!(newdq)
 		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
                 print("The number of points in vq is $(length(vq))\n")
-                Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :brown, marker_size=20)
-                save("./Cell_alg/cell_illustration_$(i)_post.png", fig)
+                Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :red, markersize=20)
+                hidedecorations!(ax)
+		save("./Cell_alg/cell_illustration_$(i)_post.png", fig)
 
 	end
 	#print("$t\n")
