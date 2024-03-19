@@ -185,7 +185,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -233,7 +233,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -269,9 +269,6 @@ function agent_step!(agent, model)
 		move_made_main = move_made_main_tuple[5]
 	end
 	no_move[Int64(agent.id)] = move_made_main
-	
-	agent.distance = distance(agent.pos, move_made_main_tuple[1])	
-	agent.best_A = move_made_main_tuple[2]
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -415,7 +412,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		#draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
