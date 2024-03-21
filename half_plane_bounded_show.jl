@@ -102,11 +102,11 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 
 	###Drawing stuff. Draw the initial setup: Agents and their positions, and the half planes for an agent
-	fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)))
-	draw_half_planes_generic!(dq)
+	fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)),marker_size= 30)
+	#draw_half_planes_generic!(dq)
 	Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
 	hidedecorations!(ax)
-	save("./Cell_alg/cell_illustration_0.pdf")
+	save("./Cell_alg/cell_illustration_0.pdf", fig)
 	
 
 
@@ -180,11 +180,11 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 ###################Plot the current state of cell
 		#fig, ax = give_model(model;fig_box = (ri .- (vr, vr), ri .+ (vr, vr)))
-		fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr, vr)))
+		fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr, vr)), marker_size =30)
 		draw_half_planes_generic!(newdq)
 		draw_half_planes_generic!([dq[i]])
-		Makie.scatter!([vq[i][1] for i in 1:length(vq)], marker=:circle, color = :red, markersize =20)
 		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))	
+		draw_annotate_vertices!(vq)
 		hidedecorations!(ax)	
 		save("./Cell_alg/cell_illustration_$i.png", fig)
 
@@ -290,13 +290,14 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 		end
 		########################
                 #fig, ax = give_model(model; marker_size =50)
-		fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)))
+		fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)), marker_size=30)
 		print("The new dq consists of $newdq\n")
                 draw_half_planes_generic!(newdq)
 		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
                 print("The number of points in vq is $(length(vq))\n")
-                Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :red, markersize=20)
-                hidedecorations!(ax)
+                #Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :red, markersize=20)
+		draw_annotate_vertices!(vq)	                
+		hidedecorations!(ax)
 		save("./Cell_alg/cell_illustration_$(i)_post.png", fig)
 
 	end
@@ -404,6 +405,13 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
                                 #exit()
         end
+	
+	fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr, vr)), marker_size =30)
+                draw_half_planes_generic!(newdq)
+                Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
+                draw_annotate_vertices!(vq)
+                hidedecorations!(ax)
+                save("./Cell_alg/cell_illustration_final.png", fig)
 		
 	return vq
 

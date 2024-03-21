@@ -72,7 +72,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
 
 	for i in 1:nagents(model)
-                text!(model[i].pos, text = "$i", align = (:center, :top), fontsize = 20)
+                text!(model[i].pos .- (0.0, 1.0), text = "$i", align = (:center, :top), fontsize = 30)
  	end
 
 	#Colorbar(figure[1,2], colourbarthing)

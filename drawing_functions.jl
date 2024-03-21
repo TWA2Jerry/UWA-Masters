@@ -149,7 +149,18 @@ function draw_half_planes_generic!(half_planes::Vector{Tuple{Float64, Tuple{Floa
                 rj::Tuple{Float64, Float64} = half_plane[3]
                 pqj::Tuple{Float64, Float64} = half_plane[2]
 		pqj = pqj ./ norm(pqj) .* 15.0
-		Makie.arrows!([rj[1]-pqj[1]], [rj[2]-pqj[2]], [2*pqj[1]], [2*pqj[2]], color = :black, linewidth = 3)
+		text_arrow = rotate_vector(-pi/2, pqj)
+		text_arrow = text_arrow ./norm(text_arrow)
+		Makie.arrows!([rj[1]-pqj[1]], [rj[2]-pqj[2]], [2*pqj[1]], [2*pqj[2]], color = (:blue,0.5), linewidth = 3)
+		special_displacement = (0.0, 0.0)
+		if(half_plane[4] == -1)
+			special_displacement = (-3.0, 0.0)
+		elseif(half_plane[4] == 5)
+			special_displacement = (3.0, 2.0)
+		elseif(half_plane[4] == 4)
+			special_displacement = (1.0, 0.0)
+		end
+		text!(rj .+ pqj .+ special_displacement, text = half_plane[4] > 0 ? latexstring("H_{$(half_plane[4])}") : latexstring("H_r"), align= (:left, :top), fontsize = 40)
         end
 end
 
@@ -197,4 +208,13 @@ function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace
 		push!(positions, model[i].pos)
 	end
 	return draw_half_planes(id, positions; fig_box)
+end
+
+function draw_annotate_vertices!(vq)
+	Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :red, markersize=20)
+	for vertex in vq
+		back_label = vertex[2] >= 0 ? vertex[2] : 'r'
+		forward_label = vertex[3] >= 0 ? vertex[3] : 'r' 
+		text!(vertex[1] .+ (0.0, -0.2), text = latexstring("x_{$(back_label)$(forward_label)}"), align = align= (:right, :top), fontsize=40)
+	end
 end
