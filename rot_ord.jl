@@ -8,7 +8,9 @@ end
 
 function rot_o_alt(model)
         agents_iterable = allagents(model)
-        return rot_ord_alt(agents_iterable)
+        rot_o_alt = rot_ord_alt(agents_iterable)
+	print("Rot o alt at time $(model.n) is $rot_o_alt\n")
+	return rot_o_alt
 end
 
 function rot_o(model)
@@ -56,9 +58,11 @@ function rot_ord_alt(agents)
 		rot_order += abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
         	int_rot = abs(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed))
 		int_rad = dot((agent.pos .- r_g) ./ norm(agent.pos .- r_g),agent.vel .* agent.speed) 
+		#=
 		if(agent.id == 1)
-			print("Cross product calculated to be $int_rot, while the radial component was $int_rad. Total was $(int_rot^2 + int_rad^2)\n")
-		end
+			print("Group center $r_g. Agent position is $(agent.pos). Agent vel $(agent.vel). Cross product calculated to be $int_rot, while the radial component was $int_rad. Total was $(int_rot^2 + int_rad^2)\n")
+		end 
+		=#
 	end
 
         rot_order = rot_order/num_agents

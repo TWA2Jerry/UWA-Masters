@@ -199,7 +199,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
 	init_rot_ord::Float64 = rot_ord(allagents(model))
 	init_rot_ord_alt::Float64 = rot_ord_alt(allagents(model))
-	print("Packing fraction at n = 0 is $(packing_fraction)\n")
+	#print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	write(compac_frac_file, "$packing_fraction ")
 	average_area::Float64 = total_area / nagents(model)
         write(mean_a_file, "$average_area ")
@@ -424,7 +424,7 @@ function model_step!(model)
 		push!(velocities, model[i].vel)
 	end
 	packing_fraction = nagents(model)*pi/model.CHA
-	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
+	#print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	if(model.n < no_steps)
 		write(compac_frac_file, "$packing_fraction ")
 		write(rot_o_file, "$rot_order ")
