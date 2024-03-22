@@ -103,8 +103,10 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 
 	###Drawing stuff. Draw the initial setup: Agents and their positions, and the half planes for an agent
 	fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr,vr)),marker_size= 30)
-	#draw_half_planes_generic!(dq)
+	draw_half_planes_generic!(dq)
 	Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
+	Makie.arrows!([ri[1]], [ri[2]], [0.0], [5.0])
+	text!(ri .+ (0.0, 5.0), text= L"v_1", fontsize = 35, align = (:left, :top))
 	hidedecorations!(ax)
 	save("./Cell_alg/cell_illustration_0.pdf", fig)
 	
@@ -185,6 +187,8 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 		draw_half_planes_generic!([dq[i]])
 		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))	
 		draw_annotate_vertices!(vq)
+		Makie.arrows!([ri[1]], [ri[2]], [0.0], [5.0])
+        	text!(ri .+ (0.0, 5.0), text= L"v_1", align = (:left, :top), fontsize= 35)
 		hidedecorations!(ax)	
 		save("./Cell_alg/cell_illustration_$i.png", fig)
 
@@ -294,7 +298,9 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
 		print("The new dq consists of $newdq\n")
                 draw_half_planes_generic!(newdq)
 		Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
-                print("The number of points in vq is $(length(vq))\n")
+                Makie.arrows!([ri[1]], [ri[2]], [0.0], [5.0])
+        	text!(ri .+ (0.0, 5.0), text= L"v_1", align = (:left, :top), fontsize=35)
+		print("The number of points in vq is $(length(vq))\n")
                 #Makie.scatter!([vq[j][1] for j in 1:length(vq)], marker=:circle, color = :red, markersize=20)
 		draw_annotate_vertices!(vq)	                
 		hidedecorations!(ax)
@@ -407,11 +413,19 @@ function voronoi_cell_bounded_show(model::UnremovableABM{ContinuousSpace{2, true
         end
 	
 	fig, ax = give_model(model; fig_box = (ri .- (vr, vr), ri .+ (vr, vr)), marker_size =30)
-                draw_half_planes_generic!(newdq)
+                Makie.arrows!([ri[1]], [ri[2]], [0.0], [5.0])
+        text!(ri .+ (0.0, 5.0), text= L"v_1", align = (:left, :top), fontsize = 35)
+		draw_half_planes_generic!(newdq)
                 Makie.arc!(ri, rho, -pi, pi; transparency = true, color = (:red, 0.5))
                 draw_annotate_vertices!(vq)
                 hidedecorations!(ax)
                 save("./Cell_alg/cell_illustration_final.png", fig)
+
+	fig, ax = draw_cell_forward_context_quick(1, model; fig_box = (model[1].pos .- (20, 20.0), model[1].pos .+ (20.0, 20.0)), circled = 1, rhop = 10.0)
+	Makie.arrows!([ri[1]], [ri[2]], [0.0], [5.0])
+        text!(ri .+ (0.0, 5.0), text= L"v_1", align = (:left, :top), fontsize=35)
+	hidedecorations!(ax)
+	save("./Cell_alg/cell_final.png", fig)
 		
 	return vq
 

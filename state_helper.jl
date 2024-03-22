@@ -401,9 +401,9 @@ end
 better_positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 
 function draw_cell_context(cell, positions::Vector{Tuple{Float64, Float64}}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), filled= 0)
-	figure, ax, colourbarthing = Makie.scatter(positions, axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 10, color = :black)
+	figure, ax, colourbarthing = Makie.scatter(positions, axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 40, color = :black)
 	for i in 1:length(positions)
-		text!(positions[i], text = "$i", align = (:center, :top))
+		text!(positions[i] .- (0.0, 1.0), text = "$i", align = (:center, :top), fontsize = 40)
 	end
 	
 	if(filled == 0)
