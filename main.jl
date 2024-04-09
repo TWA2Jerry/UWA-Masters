@@ -128,7 +128,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 
 		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
-		#detect_write_periphery(initial_A, initial_cell, model.n) 	
+		detect_write_periphery(initial_A, initial_cell, model.n) 	
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
@@ -185,7 +185,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -201,14 +201,14 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
 	init_rot_ord::Float64 = rot_ord(allagents(model))
 	init_rot_ord_alt::Float64 = rot_ord_alt(allagents(model))
-	#print("Packing fraction at n = 0 is $(packing_fraction)\n")
-	#write(compac_frac_file, "$packing_fraction ")
+	print("Packing fraction at n = 0 is $(packing_fraction)\n")
+	write(compac_frac_file, "$packing_fraction ")
 	average_area::Float64 = total_area / nagents(model)
-        #write(mean_a_file, "$average_area ")
+        write(mean_a_file, "$average_area ")
 	average_speed::Float64 = total_speed/no_birds
-	#write(mean_speed_file, "$average_speed ")
-	#write(rot_o_file, "$init_rot_ord ")
-	#write(rot_o_alt_file, "$init_rot_ord_alt ")
+	write(mean_speed_file, "$average_speed ")
+	write(rot_o_file, "$init_rot_ord ")
+	write(rot_o_alt_file, "$init_rot_ord_alt ")
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
@@ -233,7 +233,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -243,7 +243,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	#write_pos_vel(positions, velocities, pos_vels_file, 0)
+	write_pos_vel(positions, velocities, pos_vels_file, 0)
 	#write_agent_vals(model)	
 
 	return model
@@ -269,6 +269,9 @@ function agent_step!(agent, model)
 		move_made_main = move_made_main_tuple[5]
 	end
 	no_move[Int64(agent.id)] = move_made_main
+	
+	agent.distance = distance(agent.pos, move_made_main_tuple[1])	
+	agent.best_A = move_made_main_tuple[2]
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -308,7 +311,6 @@ function model_step!(model)
         rot_order_alt::Float64 = rot_ord_alt(allagents(model))
 	#print("Alternate rotational order returned as $rot_order_alt\n")	
 
-
 	#Calculate the correlation of the moves between agents just before they move
 	for i in 1:no_birds
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
@@ -316,7 +318,7 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
-	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
 	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
@@ -412,7 +414,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		#draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
@@ -427,26 +429,25 @@ function model_step!(model)
 		push!(velocities, model[i].vel)
 	end
 	packing_fraction = nagents(model)*pi/model.CHA
-	#print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
+	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
+	print("Rotational order is given as $rot_order\n")
 	if(model.n < no_steps)
-		#write(compac_frac_file, "$packing_fraction ")
-		#write(rot_o_file, "$rot_order ")
-		#write(rot_o_alt_file, "$rot_order_alt ")
-		print("Rotational order calculated as $rot_order\n")
+		write(compac_frac_file, "$packing_fraction ")
+		write(rot_o_file, "$rot_order ")
+		write(rot_o_alt_file, "$rot_order_alt ")
 	else
-		#write(compac_frac_file, "$packing_fraction\n")
-		#write(rot_o_file, "$rot_order\n")
-		#write(rot_o_alt_file, "$rot_order_alt\n")
-		print("Rotational order calculated as $rot_order\n")
+		write(compac_frac_file, "$packing_fraction\n")
+		write(rot_o_file, "$rot_order\n")
+		write(rot_o_alt_file, "$rot_order_alt\n")
 	end
 	average_area = total_area / nagents(model)
 	average_speed = total_speed/nagents(model)
 	if(model.n < no_steps)
-		#write(mean_a_file, "$average_area ")
-		#write(mean_speed_file, "$average_speed ")
+		write(mean_a_file, "$average_area ")
+		write(mean_speed_file, "$average_speed ")
 	else 
-		#write(mean_a_file, "$average_area\n")
-		#write(mean_speed_file, "$average_speed\n")
+		write(mean_a_file, "$average_area\n")
+		write(mean_speed_file, "$average_speed\n")
 	end
 	
 	#=
@@ -460,9 +461,10 @@ function model_step!(model)
 	close(last_hp_vert) 
 	=#
 	
-	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
-	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area), lower area of $(model.lower_area) and upper area of $(model.upper_area).\n\n\n")
+	
+	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end
 
 
