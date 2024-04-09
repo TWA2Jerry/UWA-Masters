@@ -293,7 +293,7 @@ function agent_step!(agent, model)
 	#move_agent!(agent, new_agent_pos, model)
 	com::Tuple{Float64, Float64} = center_of_mass(model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
-	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
+	agent.rot_o_alt = rot_o_generic(r_com, agent.vel)	
 	
 	if(agent.collaborator == 0)
 		best_pos[agent.id] = move_made_main_tuple[1]
