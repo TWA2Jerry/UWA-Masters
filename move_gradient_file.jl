@@ -385,6 +385,21 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 				colour = :red
 			end
 			push!(colours, colour)
+
+			num_behind_ignored::Int32 = 0
+                        for vertex in agent_voronoi_cell
+                                if(vertex[3] <= 0)
+                                        continue
+                                end
+                                neighbour = model[vertex[3]]
+                                rij::Tuple{Float64, Float64} = neighbour.pos .- agent.pos
+                                rij_angle::Float64 = atan(rij[2], rij[1])
+                                if(abs(rij_angle - vel_angle) > pi/2)
+                                        num_behind_ignored += 1
+                                end
+                        end
+                        push!(no_hp_behind_ignored, num_behind_ignored)
+
 		end
 		
 		#Check area calculation through voronoi package

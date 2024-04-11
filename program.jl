@@ -1,12 +1,14 @@
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 10000
+const no_steps::Int64 = 5000
 
 include("prog.h")
+
+no_hp_behind_ignored::Vector{Int32} = Vector{Int32}(undef, 0)
 
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, agent_regularity, :distance]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours, no_collabs, num_in_bin]
 
-target_dods = [29000.0]
+target_dods = [1000*sqrt(12)]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
