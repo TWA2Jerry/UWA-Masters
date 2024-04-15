@@ -28,7 +28,7 @@ parameters = Dict(
 	:area_args => lower_upper_areas,	
 )
 
-model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (100*sqrt(12), 1000*sqrt(12)))
+model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (500.0, 1000*sqrt(12)))
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
