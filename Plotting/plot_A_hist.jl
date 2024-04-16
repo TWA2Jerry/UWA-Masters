@@ -1,0 +1,1 @@
+Makie.hist(adf[200000:500100, 12], bins = range(0.0, 1000*sqrt(12), 100), normalization = :probability, axis =(xticklabelsize = 30, yticklabelsize=30, xlabelsize = 40, ylabelsize=40, ylabel = "Relative Frequency", xlabel = "Bounded Area"))

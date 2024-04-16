@@ -45,6 +45,15 @@ function mean_radial_distance(model)
         return mrd
 end
 
+function mean_true_area(model)
+	mean_true_area::Float64 = 0.0
+	n::Int64 = nagents(model)
+	for i in 1:nagents(model)
+		mean_true_area += model[i].true_A/n
+	end
+	return mean_true_area
+end
+
 function polarisation(model)
 	sum_of_vels::Tuple{Float64, Float64} = (0.0, 0.0)
 	for i::Int64 in 1:no_birds
