@@ -250,7 +250,7 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
         Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size) #The agents sampled positions
 	Makie.scatter!(model[id].pos, color = :blue, marker = :circle, markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
 	#Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
-	Makie.scatter!(pot_pos, markersize = marker_size*2, color = :cyan)
+	Makie.scatter!(pot_pos, markersize = marker_size, color = :cyan)
 	#Makie.scatter!(pot_pos, markersize = marker_size, color = :blue)
 	#circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
 	#draw_agent_cell_bounded!(circled_cell)
