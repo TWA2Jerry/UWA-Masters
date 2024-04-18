@@ -199,3 +199,30 @@ function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace
 	end
 	return draw_half_planes(id, positions; fig_box)
 end
+
+function draw_best_pos(model, target_area; view_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+        positions::Vector{Tuple{Float64, Float64}} =Vector{Tuple{Float64, Float64}}(undef, 0)
+        best_positions::Vector{Tuple{Float64, Float64}} =Vector{Tuple{Float64, Float64}}(undef, 0)
+        n = nagents(model)
+        for i in 1:n
+                push!(positions, model[i].pos)
+        end
+
+        fig, ax = Makie.scatter(positions, axis = (;  limits = (view_box[1][1], view_box[2][1], view_box[1][2], view_box[2][2]), aspect = 1), marker = :circle,   color = :blue)
+
+        for i in 1:n
+                k1 = [0.0, 0.0, 0.0, 0.0]
+                move_tuple = move_gradient_alt(model[i], model, k1, 8, 100, rho, target_area)
+                print("The thing was $(move_tuple[1])\n")
+                best_pos_i = move_tuple[1]
+                push!(best_positions, best_pos_i)
+        end
+
+        Makie.scatter!(best_positions,  marker = :circle,   color = :cyan)
+        for i in 1:length(positions)
+                Makie.lines!([positions[i], best_positions[i]], color= :black)
+        end
+
+        return fig, ax
+
+end
