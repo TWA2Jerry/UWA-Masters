@@ -233,7 +233,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -318,7 +318,7 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
-	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
 	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
@@ -414,7 +414,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		#draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	

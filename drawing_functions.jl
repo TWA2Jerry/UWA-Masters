@@ -90,7 +90,7 @@ function draw_delta_DOD(model::UnremovableABM{ContinuousSpace{2, true, Float64, 
 end
 
 
-###Function for drawing future figures and whatnot
+###Function for drawing future figures and whatnot. I.e, plot the agents' current position, as well as their desired (ideal) position from sampling
 function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = []
@@ -138,6 +138,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
         save("./Better_Positions/shannon_flock_n_=_$(model.n).png", figure)
 end
 
+###This functions draws, for the current model, all positions that are better than an agents' current position during sampling
 function draw_better_positions(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, better_positions::Vector{Tuple{Float64, Float64}})
 	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in better_positions], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle, color = (:blue, 0.5))
 	Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker = :circle,  color = :black)
