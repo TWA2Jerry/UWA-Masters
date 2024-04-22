@@ -318,7 +318,7 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
-	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
 	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
