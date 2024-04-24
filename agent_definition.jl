@@ -16,5 +16,6 @@ mutable struct bird <: AbstractAgent
 	collaborator::Int32
 	rl::Float64
 	distance::Float64
+	best_A::Float64
 end
 
