@@ -28,6 +28,9 @@ print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
 rect = Rectangle(Point2(0,0), Point2(Int64(trunc(rect_bound)), Int64(trunc(rect_bound))))
+include("genetic_alg.jl")
+genetic_alg_enforced::Int64 = -1
+
 
 include("some_math_functions.jl")
 include("give_agent_cell.jl")
@@ -411,6 +414,7 @@ function model_step!(model)
         model.n += 1
 
 	
+
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
@@ -461,6 +465,13 @@ function model_step!(model)
 	close(last_hp_vert) 
 	=#
 	
+	if(rot_o(model) > 0.65)
+		dominant_rot_direction = dominant_rotation(model)
+		enforce_rotation(model, dominant_rot_direction)
+		generic_alg_enforced = model.n
+	end
+	
+
 	write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
 	

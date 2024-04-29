@@ -75,4 +75,36 @@ function rot_ord_alt(agents)
         return rot_order
 end
 
+function dominant_rotation(model)
+        num_agents = nagents(model)
+	agents = allagents(model)
+
+        ##Calculate the group center
+        r_g::Tuple{Float64, Float64} = (0.0, 0.0)
+        for agent in agents
+                r_g = r_g .+ agent.pos
+        end
+
+        r_g = r_g ./ length(agents)
+
+        ##Iterate through the agents again and find the absolute value of the sum of the cross products r_ig \times v_i
+        num_neg = 0
+        num_pos = 0
+        rot_order::Float64 = 0.0
+        for agent in agents
+                rot_order += cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed)
+                if(cross((agent.pos .- r_g) ./ norm(agent.pos .- r_g), agent.vel .* agent.speed) < 0.0)
+                        num_neg += 1
+                else
+                        num_pos += 1
+                end
+        end
+
+        rot_order = abs(rot_order)/length(agents)
+
+	dominant_rotation_direction = num_pos > num_neg ? +1 : -1
+
+        #print("The number of negative was $num_neg, the number of pos was $num_pos\n")
+        return dominant_rotation_direction
+end
 
