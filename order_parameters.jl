@@ -314,3 +314,5 @@ function num_in_bin(model)
 	end
 	return num_times
 end
+
+function union

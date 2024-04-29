@@ -413,6 +413,11 @@ function model_step!(model)
 	model.t += model.dt
         model.n += 1
 
+	if(rot_o(model) > 0.65 && genetic_alg_enforced == -1)
+                dominant_rot_direction = dominant_rotation(model)
+                enforce_rotation(model, dominant_rot_direction)
+                global genetic_alg_enforced = model.n
+        end
 	
 
 	###Plotting
@@ -465,11 +470,6 @@ function model_step!(model)
 	close(last_hp_vert) 
 	=#
 	
-	if(rot_o(model) > 0.65)
-		dominant_rot_direction = dominant_rotation(model)
-		enforce_rotation(model, dominant_rot_direction)
-		generic_alg_enforced = model.n
-	end
 	
 
 	write_pos_vel(positions, velocities, pos_vels_file, model.n)
