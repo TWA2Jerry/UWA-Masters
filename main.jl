@@ -188,7 +188,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -413,12 +413,15 @@ function model_step!(model)
 	model.t += model.dt
         model.n += 1
 
+
+
+	###Rotation stuff
 	if(rot_o(model) > 0.65 && genetic_alg_enforced == -1)
                 dominant_rot_direction = dominant_rotation(model)
                 enforce_rotation(model, dominant_rot_direction)
                 global genetic_alg_enforced = model.n
         end
-	
+
 
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))

@@ -19,7 +19,11 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         	#push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
 		rot_o_raw = rot_o_generic(model[id].pos .- com, model[id].vel)
 		push!(colours, rot_o_raw > 0.0 ? :blue : :cyan)
-		
+		if(rot_o_raw * model[id].rot_dir < 0.0)
+			colours[id] = :green
+		end
+		model[id].rot_dir = rot_o_raw < 0.0 ? -1 : 1		
+	
 		#=if(model[id].best_A > 1500.0)
 			colours[id] = :black
 		end
