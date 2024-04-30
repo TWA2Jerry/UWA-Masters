@@ -72,11 +72,9 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, xticklabelsize = 30, yticklabelsize=30), marker = :circle,  rotations = rotations, color = :blue)
 	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;  limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, xticklabelsize = 30, yticklabelsize=30), marker = :circle,  rotations = rotations, color = :black)	
 
-	#=
 	for i in 1:nagents(model)
                 text!(model[i].pos, text = "$i", align = (:center, :top), fontsize = 20)
  	end
-	=#
 
 	#Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
@@ -252,8 +250,8 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	#Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
 	Makie.scatter!(pot_pos, markersize = marker_size, color = :cyan)
 	#Makie.scatter!(pot_pos, markersize = marker_size, color = :blue)
-	#circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-	#draw_agent_cell_bounded!(circled_cell)
+	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
+	draw_agent_cell_bounded!(circled_cell)
 	return figure, ax
 end
 

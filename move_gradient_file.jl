@@ -280,6 +280,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		end
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
+
 			#=if(angular_conflict == 1) 
 				break
 			end
@@ -382,7 +383,11 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 	end
 			
 			colour = :black
-			if(abs(new_area-target_area) < abs(agent.A - target_area)) 
+			if(conflict == 1 || angular_conflict == 1)
+				colour = :purple
+			elseif(new_area < target_area / 2)
+				colour = :pink
+			elseif(abs(new_area-target_area) < abs(agent.A - target_area)) 
 				num_positions_better += 1
 				colour = (conflict == 1) ? :orange : :green
 				push!(better_positions_vec, new_agent_pos)

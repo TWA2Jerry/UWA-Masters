@@ -116,7 +116,7 @@ function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), s
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int64 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, 0.0, 0.0, 0.0, 1, 0.0, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
