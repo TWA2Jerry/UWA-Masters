@@ -1,6 +1,6 @@
 include("intersect_check.jl")
 include("some_math_functions.jl")
-
+using Random
 
 ###Function for calculating whether or not a point lies within a half plane, returning 1 if it does lie outside
 

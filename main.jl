@@ -381,7 +381,7 @@ function model_step!(model)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
 		
-		if(agent_i.no_neighbours > 30) 
+		if(agent_i.no_neighbours > 40) 
 			print("Main here. $true_new_cell_i\n") 
 			exit() 
 		end
@@ -416,12 +416,13 @@ function model_step!(model)
 
 
 	###Rotation stuff
+	#=
 	if(rot_o(model) > 0.65 && genetic_alg_enforced == -1)
                 dominant_rot_direction = dominant_rotation(model)
                 enforce_rotation(model, dominant_rot_direction)
                 global genetic_alg_enforced = model.n
         end
-
+	=#
 
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))

@@ -1,3 +1,6 @@
+include("give_agent_cell.jl")
+#include("order_parameters.jl")
+
 ###Function takes in the agent objects. It calculates the center of the group (average of all agent positions). It then calculates the cross product of r_ig and v_i, the relative position of the agent to the group center and its velocity. 
 
 function rot_o_generic(r_com::Tuple{Float64, Float64}, velocity::Tuple{Float64, Float64})
@@ -106,5 +109,51 @@ function dominant_rotation(model)
 
         #print("The number of negative was $num_neg, the number of pos was $num_pos\n")
         return dominant_rotation_direction
+end
+
+###
+function find_rep(a, rep)
+	while(a != rep[a])
+		a = rep[a]
+	end
+	return a
+end
+
+###Function that takes two integers, representing agents, and a vector/array that holds the reps of the agents
+function union(agent_a, agent_b, rep)
+	a = agent_a
+	b = agent_b
+	rep_a = find_rep(a, rep)
+	rep_b = find_rep(b, rep)
+	
+	if(rep_a == rep_b)
+		return ##This is for if the two agents are already part of the same group
+	end	
+
+	if(size[rep_a] > size[rep_b])
+		size[rep_a] += size[rep_b]
+		rep[rep_b] = rep_a
+	end
+	
+	return 
+end
+
+###
+function group_ids(rep)
+	
+end
+
+###
+function create_neighbourhood_graph(model)
+	n::Int64 = nagents(model)
+	adj::Array{Vector} = Array{Vector}(undef, 100)
+	for i in 1:n
+		adj[i] = Vector{Int64}(undef, 0)
+		cell = give_agent_cell(model, agent)
+		agent_neighbours = neighbours(cell)
+		for neighbour in agent_neighbours
+			push!(adj[i], neighbour)
+		end
+	end
 end
 
