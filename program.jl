@@ -22,6 +22,8 @@ for i in 1:no_simulations
 end
 =#
 
+target_dods = [1000*sqrt(12)]
+
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, agent_regularity]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours, no_collabs]
 
