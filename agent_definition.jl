@@ -18,5 +18,6 @@ mutable struct bird <: AbstractAgent
 	distance::Float64
 	best_A::Float64
 	rot_dir::Int32 
+	direction::Int32 
 end
 

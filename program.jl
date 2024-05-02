@@ -8,7 +8,7 @@ end
 
 no_hp_behind_ignored::Vector{Int32} = Vector{Int32}(undef, 0)
 
-adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, :distance, agent_regularity, :best_A, :A]
+adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, :distance, agent_regularity, :best_A, :A, :direction]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours, no_collabs, num_in_bin, mean_true_area]
 
 target_dods = [100.0]
@@ -28,7 +28,7 @@ parameters = Dict(
 	:area_args => lower_upper_areas,	
 )
 
-model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (1*sqrt(12), 2000.0*sqrt(12)))
+model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (1*sqrt(12), 1000.0*sqrt(12)))
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
