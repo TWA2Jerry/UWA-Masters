@@ -119,8 +119,8 @@ function find_rep(a, rep)
 	return a
 end
 
-###Function that takes two integers, representing agents, and a vector/array that holds the reps of the agents
-function union(agent_a, agent_b, rep)
+###Function that takes two integers, representing agents, and a vector/array that holds the reps of the agents, 
+function merge(agent_a, agent_b, rep, size)
 	a = agent_a
 	b = agent_b
 	rep_a = find_rep(a, rep)
@@ -133,14 +133,29 @@ function union(agent_a, agent_b, rep)
 	if(size[rep_a] > size[rep_b])
 		size[rep_a] += size[rep_b]
 		rep[rep_b] = rep_a
+	else
+		size[rep_b] += size[rep_a]	
+		rep[rep_a] = rep_b
 	end
 	
 	return 
 end
 
 ###
-function group_ids(rep)
-	
+function group_ids(adj, rep, size)
+	n = length(rep)
+	for i in 1:n	
+		rep[i] = i
+		size[i] = 1
+	end
+
+	for i in 1:n
+		for neighbour in adj[i]
+			merge(i, neighbour)
+		end
+	end
+
+	return 
 end
 
 ###
@@ -154,6 +169,41 @@ function create_neighbourhood_graph(model)
 		for neighbour in agent_neighbours
 			push!(adj[i], neighbour)
 		end
+	end
+	
+	rep::Vector{Int64} = Vector{Int64}(undef, n)
+	size::Vector{Int64} = Vector{Int64}(0, n)
+
+	group_ids(adj, rep, size)
+
+	groups = Set()
+	for i in 1:n
+		group_i = find_rep(i, rep)
+		push!(groups, group_i)
+	end
+
+	no_groups = length(groups)
+
+	group_dict = Dict(group => Vector{Int64}(0,0) for group in groups)
+	for i in 1:n
+		rep_i = find_rep(i, rep)
+		push!(group_dict[rep_i], i) 
+	end
+
+	ave_rot_o::Float64 = 0.0
+	for group in groups
+		positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+		com::Tuple{Float64, Float64} = (0.0, 0.0)
+		for i in group_dict[group]
+			push!(positions, model[i].pos)
+		end
+		com::Tuple{Float64, Float64} = center_of_mass(positions)
+			
+		group_rot_o::Float64 = 0.0
+		for i in group_dict[group]
+			group_rot_o += rot_o_generic(model[i].pos .- com, model[i].vel)/n
+		end	
+		ave_rot_o += abs(group_rot_o)/no_groups
 	end
 end
 

@@ -250,6 +250,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	min_diff::Float64 = abs(agent.A - target_area)
 	min_direction::Tuple{Float64, Float64} = (0.0, 0.0) #This is to set it so that the default direction of move is nowehere (stay in place)
 	min_distance::Float64 = inf
+	min_turn = -1
 	move_made::Int64 = 0
 	pos_area_array::Vector{Tuple{Tuple{Float64,Float64}, Float64}}  = []
 	no_angles_considered::Int64 = 0
@@ -369,17 +370,17 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			if((new_area > lower_area && new_area < upper_area && j <=  min_distance) || (move_made == 0 && abs(new_area-target_area) < min_diff && conflict != 1))	
 			#if((new_area > lower_area && new_area < upper_area && j < min_distance) || (move_made == 0 && abs(new_area-target_area) < min_diff))
 				change_equal_distance = 0
-				if(j == min_distance)
-					change_equal_distance = rand([1])
+				if(j == min_distance && min_turn > 0)
+					change_equal_distance = rand([0, 1])
 				end
 				
-				if(!(new_area > lower_area && new_area < upper_area && j== min_distance && change_equal_distance == 1)) ###
+				if(!(new_area > lower_area && new_area < upper_area && j== min_distance && min_turn > 0 && change_equal_distance == 0)) ###
 				min_diff = abs(new_area-target_area)
 				min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
                         	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
 				min_direction = direction_of_move
-							
+				min_turn = i					
 				if((new_area > lower_area && new_area < upper_area && j < min_distance))
                                         min_distance = j
                                 end	
