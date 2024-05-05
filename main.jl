@@ -424,6 +424,8 @@ function model_step!(model)
         end
 	=#
 
+	ave_group_rot_o(model)
+
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)

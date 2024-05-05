@@ -151,7 +151,7 @@ function group_ids(adj, rep, size)
 
 	for i in 1:n
 		for neighbour in adj[i]
-			merge(i, neighbour)
+			merge(i, neighbour, rep, size)
 		end
 	end
 
@@ -159,12 +159,12 @@ function group_ids(adj, rep, size)
 end
 
 ###
-function create_neighbourhood_graph(model)
+function ave_group_rot_o(model)
 	n::Int64 = nagents(model)
-	adj::Array{Vector} = Array{Vector}(undef, 100)
+	adj::Array{Vector} = Array{Vector}(undef, n)
 	for i in 1:n
 		adj[i] = Vector{Int64}(undef, 0)
-		cell = give_agent_cell(model, agent)
+		cell = give_agent_cell(model[i], model)
 		agent_neighbours = neighbours(cell)
 		for neighbour in agent_neighbours
 			push!(adj[i], neighbour)
@@ -172,7 +172,7 @@ function create_neighbourhood_graph(model)
 	end
 	
 	rep::Vector{Int64} = Vector{Int64}(undef, n)
-	size::Vector{Int64} = Vector{Int64}(0, n)
+	size::Vector{Int64} = Vector{Int64}(undef, n)
 
 	group_ids(adj, rep, size)
 
@@ -184,7 +184,7 @@ function create_neighbourhood_graph(model)
 
 	no_groups = length(groups)
 
-	group_dict = Dict(group => Vector{Int64}(0,0) for group in groups)
+	group_dict = Dict(group => Vector{Int64}(undef,0) for group in groups)
 	for i in 1:n
 		rep_i = find_rep(i, rep)
 		push!(group_dict[rep_i], i) 
@@ -197,13 +197,16 @@ function create_neighbourhood_graph(model)
 		for i in group_dict[group]
 			push!(positions, model[i].pos)
 		end
-		com::Tuple{Float64, Float64} = center_of_mass(positions)
+		com = center_of_mass(positions)
 			
 		group_rot_o::Float64 = 0.0
 		for i in group_dict[group]
-			group_rot_o += rot_o_generic(model[i].pos .- com, model[i].vel)/n
+			group_rot_o += rot_o_generic(model[i].pos .- com, model[i].vel)/size[group]
 		end	
 		ave_rot_o += abs(group_rot_o)/no_groups
 	end
+	
+	print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+	return ave_rot_o
 end
 
