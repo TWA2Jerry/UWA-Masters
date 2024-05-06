@@ -1,4 +1,4 @@
-###Function that determines the gradient of movement
+##Function that determines the gradient of movement
 include("record_peripheral_agents.jl")
 include("nearest_agents.jl")
 include("generate_relic.jl")
@@ -316,7 +316,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			
 
-			##Some error detection stuff
+
+			##ERROR DETECTION
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
 				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
 				print("\n\n\nThe dq for this position was \n")
@@ -369,12 +370,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			upper_area::Float64 = model.upper_area
 			if((new_area > lower_area && new_area < upper_area && j <  min_distance) || (move_made == 0 && abs(new_area-target_area) < min_diff && conflict != 1))	
 			#if((new_area > lower_area && new_area < upper_area && j < min_distance) || (move_made == 0 && abs(new_area-target_area) < min_diff))
-				change_equal_distance = 0
-				if(j == min_distance && min_turn > 0)
-					change_equal_distance = rand([0])
-				end
 				
-				if(!(new_area > lower_area && new_area < upper_area && j== min_distance && min_turn >= 0 && change_equal_distance == 0)) ###
 				min_diff = abs(new_area-target_area)
 				min_area = new_area
 				#print("New min area of $min_area, direction of $direction_of_move\n")
@@ -393,9 +389,29 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 				best_pos = new_agent_pos
 				best_voronoi_cell = agent_voronoi_cell
 				
-				agent.direction = i
+				agent.direction = i				
+			elseif(new_area > lower_area && new_area < upper_area && j== min_distance && min_turn == 1) 
+                                print("new thing called\n")
+				change_equal_distance = rand([0, 1])
+
+                                if(change_equal_distance == 1) ###
+                                	min_diff = abs(new_area-target_area)
+                                	min_area = new_area
+                                	#print("New min area of $min_area, direction of $direction_of_move\n")
+                                	#min_direction = i*2*pi/q < pi ? (i > 1 ? (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy) : direction_of_move) : (i<q-1 ? (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy) : direction_of_move)
+                                	min_direction = direction_of_move
+                                	min_turn = i
+                                	if((new_area > lower_area && new_area < upper_area && j < min_distance))
+                                        	min_distance = j
+                                	end
 				
-				end ###
+
+                                	move_made = 1
+                                	best_pos = new_agent_pos
+                                	best_voronoi_cell = agent_voronoi_cell
+					agent.direction = i
+				end
+
                 	end
 			
 			colour = :black
