@@ -253,12 +253,13 @@ function agent_step!(agent, model)
 
         #Now, why have we separated the position and velocity as two different vectors unlike PHYS4070? Because the pos is intrinsically a 2D vector for Julia Agents.
         move_made_main::Int32 = 0
+	move_made_main_tuple = []
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho)
 	else
-		move_made_main =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
+		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
 	end
-	no_move[Int64(agent.id)] = move_made_main
+	no_move[Int64(agent.id)] = move_made_main[1]
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -281,6 +282,10 @@ function agent_step!(agent, model)
 	com::Tuple{Float64, Float64} = center_of_mass(model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
 	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
+
+	if(agent.collaborator == 0)
+		best_pos[agent.id] = move_made_main_tuple[1]
+	end
 end
 	
 
@@ -372,10 +377,10 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
-		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
+		#=change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
 		if(change[1] == 1)
 			agent_i.collaborator = change[2]
-		end	
+		end =#	
         end
         
 	#Now update the model's convex hull
