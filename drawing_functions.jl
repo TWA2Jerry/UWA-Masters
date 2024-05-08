@@ -25,7 +25,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 30, rotations = rotations, color = :black)
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  markersize = 10, rotations = rotations, color = :black)
 	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
 	hidedecorations!(ax)
 
@@ -114,10 +114,11 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		Makie.lines!([new_pos[i], best_pos[i]], color= :black)
 	end
 
-	#=
         for i in 1:nagents(model)
-                text!(new_pos[i], text = "$i", align = (:center, :top))
-        end =#
+                if(distance(best_pos[i], com) < 0.7*distance(model[i].pos, com))
+			text!(model[i].pos, text = "$i", align = (:center, :top))
+		end
+        end 
 
         #print("The number of points in path points is $(length(path_points))\n")
         #draw_path(path_points)
