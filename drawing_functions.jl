@@ -39,11 +39,11 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
 	
 	
-	#=
         for i in 1:nagents(model)
-                text!(new_pos[i], text = "$i", align = (:center, :top))
-        end
-	=#
+                if(colours[i] == :green)
+			text!(new_pos[i], text = "$i", align = (:center, :top))
+        	end
+	end
 
         #print("The number of points in path points is $(length(path_points))\n")
         #draw_path(path_points)

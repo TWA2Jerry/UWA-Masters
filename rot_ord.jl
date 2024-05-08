@@ -207,6 +207,11 @@ function ave_group_rot_o(model)
 	end
 	
 	print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+
+	for group in groups
+		print("$(size[group])\n")
+	end
+
 	return ave_rot_o
 end
 

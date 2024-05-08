@@ -415,7 +415,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 	end
 			
 			colour = :black
-			if(abs(new_area-target_area) < abs(agent.A - target_area)) 
+			if(new_area > lower_area && new_area < upper_area) 
 				num_positions_better += 1
 				colour = (conflict == 1) ? :orange : :green
 				push!(better_positions_vec, new_agent_pos)
