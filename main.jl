@@ -263,7 +263,7 @@ function agent_step!(agent, model)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
-		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 3, rho, target_area)
+		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
 		move_made_main = move_made_main_tuple[5]
 	end
 	no_move[Int64(agent.id)] = move_made_main
