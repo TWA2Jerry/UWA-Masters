@@ -4,11 +4,11 @@ include("convex_hull.jl")
 include("rot_ord.jl")
 include("rot_ord_check.jl")
 
-function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = 42, no_moves_arg = 100)
+function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = 42, no_moves_arg = 100, area_args = (1*sqrt(12), 1000*sqrt(12)))
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => step, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => step, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :lower_area => area_args[1], :upper_area => area_args[2])
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
@@ -116,7 +116,7 @@ function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), s
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg, 0, 0.0, 0.0, 0.0, 0, 0.0, 0.0, 0.0, 0, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)

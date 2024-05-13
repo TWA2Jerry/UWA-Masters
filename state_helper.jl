@@ -246,7 +246,7 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	#figure = give_model_cell(model, fig_box = view_box)
 	figure = give_model(model, fig_box = view_box)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        #Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
+        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
 	Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
 	Makie.scatter!(pot_pos, color = :cyan)
 	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
