@@ -476,8 +476,10 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
                 agent.speed = 1.0
         else 
                 #print("No movement made, agent area was $(agent.A)\n")
-                turn = rand([1, -1])
-                min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
+                turns = [-1, 1]
+		weights = [1.0-model.left_bias, model.left_bias]
+		turn::Int32 = sample(turns, Weights(weights))
+		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
 	#agent.nospots = num_positions_better
