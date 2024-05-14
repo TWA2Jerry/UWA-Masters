@@ -4,11 +4,11 @@ include("convex_hull.jl")
 include("rot_ord.jl")
 include("rot_ord_check.jl")
 
-function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = 42, no_moves_arg = 100, area_args = (1*sqrt(12), 1000*sqrt(12)))
+function load_initialise(pos_vels_file, step; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = 42, no_moves_arg = 100, area_args = (1*sqrt(12), 1000*sqrt(12)), left_bias_arg = 0.5)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => step, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :lower_area => area_args[1], :upper_area => area_args[2])
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => step, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :lower_area => area_args[1], :upper_area => area_args[2], :left_bias => left_bias_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(seed)
