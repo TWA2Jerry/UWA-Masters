@@ -15,5 +15,6 @@ mutable struct bird <: AbstractAgent
 	rot_o_alt_corr::Float64
 	collaborator::Int32
 	rl::Float64
+	delta_dod_var::Float64
 end
 
