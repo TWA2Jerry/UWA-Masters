@@ -1,5 +1,5 @@
 include("give_agent_cell.jl")
-#include("order_parameters.jl")
+include("some_math_functions.jl")
 
 ###Function takes in the agent objects. It calculates the center of the group (average of all agent positions). It then calculates the cross product of r_ig and v_i, the relative position of the agent to the group center and its velocity. 
 

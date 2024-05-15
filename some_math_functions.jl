@@ -115,3 +115,22 @@ end
 function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
         return v1[1] * v2[2] - v1[2]*v2[1]
 end
+
+function center_of_mass(positions::Vector{Tuple{Float64, Float64}})
+        com::Tuple{Float64, Float64} = (0.0, 0.0)
+        n::Int64 = length(positions)
+        for i in 1:n
+                com =  (com .+ 1/n .* (positions[i]))
+        end
+        return com
+end
+
+function center_of_mass(model)
+        com::Tuple{Float64, Float64} = (0.0, 0.0)
+        n::Int64 = nagents(model)
+        for i in 1:n
+                com =  (com .+ 1/n .* (model[i].pos))
+        end
+        return com
+end
+

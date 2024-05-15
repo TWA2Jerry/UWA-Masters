@@ -1,6 +1,5 @@
 include("half_plane_fast.jl")
 include("half_plane_bounded.jl")
-include("move_gradient_file.jl")
 include("draw_circle_part.jl")
 include("global_vars.jl")
 

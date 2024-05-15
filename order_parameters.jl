@@ -8,24 +8,6 @@ function happiness(agent::bird)
         return abs((agent.A - agent.tdod)/max(pi/2*rho^2-agent.tdod, abs(0.0-agent.tdod)))
 end
 
-function center_of_mass(positions::Vector{Tuple{Float64, Float64}})
-	com::Tuple{Float64, Float64} = (0.0, 0.0)
-        n::Int64 = length(positions)
-        for i in 1:n
-                com =  (com .+ 1/n .* (positions[i]))
-        end
-        return com
-end
-
-function center_of_mass(model)
-        com::Tuple{Float64, Float64} = (0.0, 0.0)
-        n::Int64 = nagents(model)
-        for i in 1:n
-                com =  (com .+ 1/n .* (model[i].pos))
-        end
-	return com
-end
-
 function radial_distance(agent, com)
         return norm(agent.pos .- com)
 end

@@ -131,7 +131,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 
 		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
-		detect_write_periphery(initial_A, initial_cell, model.n) 	
+		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
@@ -205,13 +205,13 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	init_rot_ord::Float64 = rot_ord(allagents(model))
 	init_rot_ord_alt::Float64 = rot_ord_alt(allagents(model))
 	print("Packing fraction at n = 0 is $(packing_fraction)\n")
-	write(compac_frac_file, "$packing_fraction ")
+	#write(compac_frac_file, "$packing_fraction ")
 	average_area::Float64 = total_area / nagents(model)
-        write(mean_a_file, "$average_area ")
+        #write(mean_a_file, "$average_area ")
 	average_speed::Float64 = total_speed/no_birds
-	write(mean_speed_file, "$average_speed ")
-	write(rot_o_file, "$init_rot_ord ")
-	write(rot_o_alt_file, "$init_rot_ord_alt ")
+	#write(mean_speed_file, "$average_speed ")
+	#write(rot_o_file, "$init_rot_ord ")
+	#write(rot_o_alt_file, "$init_rot_ord_alt ")
 	print("Initialisation complete. \n\n\n")
 	global initialised = 1
 	
@@ -246,7 +246,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	write_pos_vel(positions, velocities, pos_vels_file, 0)
+	#write_pos_vel(positions, velocities, pos_vels_file, 0)
 	#write_agent_vals(model)	
 
 	return model
@@ -447,22 +447,22 @@ function model_step!(model)
 	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
 	print("Rotational order is given as $rot_order\n")
 	if(model.n < no_steps)
-		write(compac_frac_file, "$packing_fraction ")
-		write(rot_o_file, "$rot_order ")
-		write(rot_o_alt_file, "$rot_order_alt ")
+		#write(compac_frac_file, "$packing_fraction ")
+		#write(rot_o_file, "$rot_order ")
+		#write(rot_o_alt_file, "$rot_order_alt ")
 	else
-		write(compac_frac_file, "$packing_fraction\n")
-		write(rot_o_file, "$rot_order\n")
-		write(rot_o_alt_file, "$rot_order_alt\n")
+		#write(compac_frac_file, "$packing_fraction\n")
+		#write(rot_o_file, "$rot_order\n")
+		#write(rot_o_alt_file, "$rot_order_alt\n")
 	end
 	average_area = total_area / nagents(model)
 	average_speed = total_speed/nagents(model)
 	if(model.n < no_steps)
-		write(mean_a_file, "$average_area ")
-		write(mean_speed_file, "$average_speed ")
+		#write(mean_a_file, "$average_area ")
+		#write(mean_speed_file, "$average_speed ")
 	else 
-		write(mean_a_file, "$average_area\n")
-		write(mean_speed_file, "$average_speed\n")
+		#write(mean_a_file, "$average_area\n")
+		#write(mean_speed_file, "$average_speed\n")
 	end
 	
 	#=
@@ -478,7 +478,7 @@ function model_step!(model)
 	
 	
 
-	write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
