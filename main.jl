@@ -45,11 +45,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, alpha_arg = 0.5, alpha_p_arg = 0.5, r_arg = 0.5*rho, beta_arg = 1.0)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :alpha => alpha_arg, :alpha_p => alpha_p_arg, :r => r_arg, :beta => beta_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -324,7 +324,14 @@ function model_step!(model)
                 if(distance(new_pos[agent.id], agent.pos) < eps)
 			print("I have not moved, I am agent $(agent.id). My collab status is $(agent.collaborator)\n")
 		end
-		move_agent!(agent, Tuple(new_pos[agent.id]), model)
+		if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
+                	print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+                	AgentsIO.save_checkpoint("simulation_save.jld2", model)
+                	exit()
+        	end
+		
+		print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
+		move_agent!(agent, new_pos[agent.id], model)
 		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
         end
@@ -392,10 +399,10 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
-		#=change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = 0.5)
+		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = model.alpha, alpha_p = model.alpha_p, r= model.r, beta=model.beta)
 		if(change[1] == 1)
 			agent_i.collaborator = change[2]
-		end =#	
+		end 
         end
         
 	#Now update the model's convex hull

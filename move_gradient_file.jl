@@ -422,7 +422,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
         correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
         new_pos[agent.id] = (correct_x, correct_y)
-	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
+	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0 || new_pos[agent.id][1] == NaN || new_pos[agent.id][2] == NaN)
 		print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
 		AgentsIO.save_checkpoint("simulation_save.jld2", model)	
 		exit()
@@ -439,7 +439,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         kn[2] = (min_direction .* agent_speed)[2]
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	#print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
-	
+	print("Move alt here. Agent $(agent.id) moving to position of $(new_pos[agent.id])\n")	
 	return best_pos, min_area, sampled_positions, colours, move_made, best_voronoi_cell
 end
 
@@ -476,11 +476,11 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
         correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
 	new_pos[agent.id]  = (correct_x, correct_y)	
-	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0)
-                print("Move gradient file here. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
+	if(new_pos[agent.id][1] > rect_bound || new_pos[agent.id][1] < 0.0 || new_pos[agent.id][2] > rect_bound || new_pos[agent.id][2] < 0.0 || new_pos[agent.id][1] == NaN || new_pos[agent.id][2] == NaN)
+                print("Move gradient file here, collab. Agent $(agent.id) will step overbounds. This is for a rectangle bound of $rect_bound. The position was $(new_pos[agent.id]). This is for time step $(model.n), was the particle part of the convex hull? $(convex_hull_point[agent.id])\n")
                 AgentsIO.save_checkpoint("simulation_save.jld2", model)
                 exit()
         end
-
+	print("Move collab here. Agent $(agent.id) moving to position of $(new_pos[agent.id]). The value of theta_tpp was $(theta_tpp)\n")
 	return 1
 end
