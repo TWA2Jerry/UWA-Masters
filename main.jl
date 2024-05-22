@@ -87,10 +87,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		#push!(last_half_planes, [])
 		#=if(model.simulation_number==1)
 			push!(new_pos, (0.0, 0.0))
-		end=#
+		end
 		if(i == tracked_agent)
 			push!(tracked_path, initial_positions[i])
 		end
+		=#
 	end 
 
 	
@@ -236,7 +237,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -429,11 +430,11 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		#draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
-	push!(tracked_path, new_pos[tracked_agent])
+	#push!(tracked_path, new_pos[tracked_agent])
 	
 
 	##Statistics recording
@@ -481,7 +482,7 @@ function model_step!(model)
 	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
 	
-	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
+	print("Finished step $(model.n) for simulation $(model.simulation_number) with a left_bias of $(model.left_bias).\n\n\n")
 end
 
 
