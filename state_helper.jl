@@ -47,6 +47,7 @@ function display_model_cell(model)
 	display(figure)
 end
 
+###Function which returns a figure of the model
 function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
@@ -80,7 +81,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 	#Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
         #display(figure)
-        return figure
+        return figure, ax
 end
 
 
