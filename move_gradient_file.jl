@@ -481,6 +481,6 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
                 AgentsIO.save_checkpoint("simulation_save.jld2", model)
                 exit()
         end
-	print("Move collab here. Agent $(agent.id) moving to position of $(new_pos[agent.id]). The value of theta_tpp was $(theta_tpp)\n")
+	print("Move collab here. Agent $(agent.id) moving to position of $(new_pos[agent.id]). The value of theta_tpp was $(theta_tpp), the length of theta vec was $(length(theta_vec))\n")
 	return 1
 end
