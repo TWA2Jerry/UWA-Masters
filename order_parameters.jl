@@ -297,3 +297,11 @@ function num_in_bin(model)
 	return num_times
 end
 
+function mean_speed(model)
+	n::Int64 = nagents(model)
+	mean_speed = 0.0
+	for i in 1:n
+		mean_speed += model[i].speed/n
+	end
+	return mean_speed
+end
