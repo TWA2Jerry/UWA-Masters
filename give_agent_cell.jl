@@ -43,11 +43,12 @@ function give_cell_circled(cell, pos; rhop = rho)
         end
         print("Starting\n")
                 if(length(cell) <=  1)
+			print("Full circled detected\n")
 			circle_points = circle_seg(pos, rhop, 0.0, 2*pi)
                         for j in 1:length(circle_points[1])
                                  push!(cell_including_circle, ((circle_points[1][j], circle_points[2][j]), 0, 0))
                         end
-
+			exit()
 		end
 		for i in 1:length(new_cell_i)
                         point = new_cell_i[i]
@@ -55,7 +56,7 @@ function give_cell_circled(cell, pos; rhop = rho)
                         push!(cell_including_circle, point)
                         #print("$(point[3]) $(point_pp[2])\n")
                         if(point[3] == 0 && point_pp[2] == 0)
-                                print("State helper.jl here. Circle confirmed\n")
+                                #print("give_agent_cell here. Circle confirmed\n")
                                 vec_to_point = point[1] .- pos
                                 vec_to_pointpp = point_pp[1] .- pos
                                 theta_1 = atan(vec_to_point[2], vec_to_point[1])
@@ -119,7 +120,11 @@ function give_agent_cell_circled(agent_i, model; rhop = rho)
                 end
 
                 uncircled_cell = give_cell(agent_i.pos, neighbour_positions, model; rhop = rhop)
-                circle_bounded_cell = give_cell_circled(uncircled_cell, agent_i.pos)
+                if(length(uncircled_cell) <= 1)
+			print("Full circle cell detected for agent $i\n")
+			exit()
+		end
+		circle_bounded_cell = give_cell_circled(uncircled_cell, agent_i.pos)
                 return circle_bounded_cell
 end
 

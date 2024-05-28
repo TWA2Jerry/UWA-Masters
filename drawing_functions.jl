@@ -200,3 +200,14 @@ function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace
 	end
 	return draw_half_planes(id, positions; fig_box)
 end
+
+###A function that draws a graph, with the adjacency list adj, and positions array positions, where the ith vertice has its position as position[i] and edges given by adj[i] 
+function draw_graph(positions, adj)
+	fig, ax = Makie.scatter(positions, color = :blue, axis = (; aspect=1, limits = (0, rect_bound, 0, rect_bound)))
+	for i in 1:length(adj)
+		for j in 1:length(adj[i])
+			Makie.lines!([positions[i], positions[adj[i][j]]], color = :black)
+		end
+	end
+	return fig, ax
+end

@@ -94,3 +94,25 @@ function init_thesis(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx, o
 	push!(initial_vels, (1.0, 1.0))
 	push!(initial_vels, (1.0, 1.0))
 end
+
+function initialise_two_clusters(initial_positions, initial_vels, no_agents; domain_span = rect_bound)
+	cluster_center_1::Tuple{Float64, Float64} = (1/4.0 * domain_span, 0.5*domain_span)
+	cluster_center_2::Tuple{Float64, Float64} = (3/4*domain_span, 0.5*domain_span)
+
+	for i in 1:no_agents
+		cluster = rand([1,2])
+		rand_direction = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+                rand_direction = rand_direction ./norm(rand_direction)
+		rand_rad = 1/8*domain_span*rand()
+		if(cluster == 1)
+			push!(initial_positions, cluster_center_1 .+ rand_direction .* rand_rad)
+		else
+			push!(initial_positions, cluster_center_2 .+ rand_direction .* rand_rad)
+		end	
+		
+		rand_vel = 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0)
+		push!(initial_vels, rand_vel)
+	end
+
+	return
+end

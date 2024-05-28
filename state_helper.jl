@@ -96,7 +96,7 @@ function give_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 	miny = model[1].pos[2]
 	maxy = model[2].pos[2]
 	for i in 1:nagents(model)
-		push!(colours, model[i].nospots)
+		#push!(colours, :black)
                 push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
 		push!(b_positions, model[i].pos)
 		minx = min(minx, model[i].pos[1])	
@@ -149,7 +149,7 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
         end
 
 
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = :blue)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 10, rotations = rotations, color = :blue)
 
 
         ##Draw the cells
@@ -167,8 +167,8 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
 
                 #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp)
                 #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_circled(model[i], model)
-                cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_cell_forward_quick(i, model)
-		cell = give_cell_circled(cell, model[i].pos)
+                cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_circled(model[i], model)
+		#cell = give_cell_circled(cell, model[i].pos)
 		points::Vector{Tuple{Float64, Float64}} = []
                 for i in 1:length(cell)
                         push!(points, cell[i][1])
@@ -179,7 +179,7 @@ function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, 
         #Colorbar(figure[1,2], colourbarthing)
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
         #display(figure)
-        return figure
+        return figure, ax
 end
 
 

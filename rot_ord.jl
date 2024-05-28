@@ -158,18 +158,25 @@ function group_ids(adj, rep, size)
 	return 
 end
 
-###
+###Function that constructs the adjacency list rep of the voronoi graph
+function construct_voronoi_adj_list(model, adj)
+	n::Int64 = nagents(model)
+        for i in 1:n
+                adj[i] = Vector{Int64}(undef, 0)
+                cell = give_agent_cell(model[i], model)
+                agent_neighbours = neighbours(cell)
+                for neighbour in agent_neighbours
+                        push!(adj[i], neighbour)
+                end
+        end
+	return
+end
+
+###Function that constructs the groups, and finds the rot_o of each group
 function ave_group_rot_o(model)
 	n::Int64 = nagents(model)
 	adj::Array{Vector} = Array{Vector}(undef, n)
-	for i in 1:n
-		adj[i] = Vector{Int64}(undef, 0)
-		cell = give_agent_cell(model[i], model)
-		agent_neighbours = neighbours(cell)
-		for neighbour in agent_neighbours
-			push!(adj[i], neighbour)
-		end
-	end
+	construct_voronoi_adj_list(model, adj)
 	
 	rep::Vector{Int64} = Vector{Int64}(undef, n)
 	size::Vector{Int64} = Vector{Int64}(undef, n)
