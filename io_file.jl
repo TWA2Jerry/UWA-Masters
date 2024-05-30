@@ -360,3 +360,6 @@ function df_for_plotting(df)
 	return 	step_val_vec
 end
 
+function average_across_df_combine(df, column)
+	combine(groupby(df, :left_bias_arg), :rot_o => mean)
+end
