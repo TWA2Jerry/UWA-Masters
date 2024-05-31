@@ -363,3 +363,25 @@ end
 function average_across_df_combine(df, column)
 	combine(groupby(df, :left_bias_arg), :rot_o => mean)
 end
+
+function process_size_rot_o()
+	d= Dict([])
+	s = Set([])
+	for i in 1:length(size_rot_o_array)
+       		push!(s, size_rot_o_array[i][1])
+       	end
+	
+	for size in s
+		d[size] = []
+	end
+
+	for (size, rot_o_val) in size_rot_o_array
+		push!(d[size], rot_o_val)
+	end
+
+	size_mean_rot_o_array = []
+	for (size, rot_o_vals) in d 
+		push!(size_mean_rot_o_array, (size, mean(rot_o_vals)))
+	end
+	return
+end
