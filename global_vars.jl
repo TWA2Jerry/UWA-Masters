@@ -1,7 +1,7 @@
 const no_birds::Int32 = 100
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
-const rect_bound::Float64 = 10000.0
+const rect_bound::Float64 = 5000.0
 const spawn_dim_x::Float64 = 100.0 #This gives the x dimesnion size of the initial spawning area for the agents
 const spawn_dim_y::Float64 = 100.0 #This gives the y dimension size of the initial spawning area for the agents
 const rho::Float64 = 100.0
