@@ -20,7 +20,7 @@ for i in a
 end
 =#
 
-left_biases = [0.5]
+left_biases = [0.5, 0.75]
 areas_of_interest = [sqrt(12), 50*sqrt(12), 100*sqrt(12), 200*sqrt(12), 1000*sqrt(12), 2000*sqrt(12), 18000.0, 23000.0, 10000*pi*rho^2]
 lower_upper_areas = []
 for upper_area in areas_of_interest
@@ -32,10 +32,10 @@ end
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
-        :area_args => [(1*sqrt(12), 2000*sqrt(12))]
+        #:area_args => [(1*sqrt(12), 2000*sqrt(12))]
 	#:target_area_arg => target_dods,
 	#:area_args => lower_upper_areas,
-	#:left_bias_arg => left_biases	
+	:left_bias_arg => left_biases	
 )
 
 #=
