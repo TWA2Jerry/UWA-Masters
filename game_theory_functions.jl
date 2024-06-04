@@ -30,9 +30,9 @@ function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, tr
 	##Calculate the profit the agent would have under both the selfish and collab strats
 	pl::Float64 = pl_quick(agent_l, model, alpha=alpha, r= 0.5*rho)
 	pl_selfish::Float64 = pl_selfish_quick(agent_l, model, alpha=alpha, r= r)
-	neighbour_pos_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	neighbour_pos_vec::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:no_birds
-		push!(neighbour_pos_vec, model[i].pos) 
+		push!(neighbour_pos_vec, (model[i].pos, i)) 
 	end	
 	neighbour_vec::Vector{Int64} = neighbours_l_r(agent_l.id, rho, neighbour_pos_vec)
 	alphap::Float64 = alpha	
@@ -96,4 +96,35 @@ function translate_periodic_quick(positions::Vector{Tuple{Tuple{Float64, Float64
 	end
 	#print("Length of positions after is $(length(positions))\n")
 	return
-end	
+end
+
+function translate_periodic_quick(positions::Vector{Tuple{Float64, Float64}}, period::Float64 = rect_bound)
+        only_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+        all_translated_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+        index_to_identity::Vector{Int64} = Vector{Int64}(undef, 0)
+
+        for i in 1:length(positions)
+                push!(only_positions, positions[i])
+        end
+
+        add_translated_positions(only_positions, all_translated_positions, period, 0.0)
+        add_translated_positions(only_positions, all_translated_positions, period, period)
+        add_translated_positions(only_positions, all_translated_positions, 0.0, period)
+        add_translated_positions(only_positions, all_translated_positions, -period, period)
+        add_translated_positions(only_positions, all_translated_positions, -period, 0.0)
+        add_translated_positions(only_positions, all_translated_positions, -period, -period)
+        add_translated_positions(only_positions, all_translated_positions, 0.0, -period)
+        add_translated_positions(only_positions, all_translated_positions, period, -period)
+
+        #print("The length of positions is $(length(positions)), while the length of only_positions is $(length(only_positions))\n")
+
+        no_neighbours::Int64 = Int64(length(positions))
+        for i in (no_neighbours+1):length(all_translated_positions)
+                index = (i-1)%(no_neighbours)+1
+                #print("Index is $index, i is $i\n")
+                push!(positions, all_translated_positions[i])
+        end
+        #print("Length of positions after is $(length(positions))\n")
+        return
+end
+	

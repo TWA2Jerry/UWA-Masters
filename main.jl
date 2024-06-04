@@ -271,7 +271,7 @@ function agent_step!(agent, model)
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
-	new_agent_vel::Tuple{Float64, Float64} = Tuple(k1[1:2]) #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
+	new_agent_vel::Tuple{Float64, Float64} = agent.vel .+ Tuple(k1[3:4]) .* dt #So note that we're not doing incremental additions to the old velocity anymore, and that's because under Shannon's model, the velocity is just set automatically to whatever is needed to go to a better place. 
 	change_in_position::Tuple{Float64, Float64} = new_agent_pos .- (agent.pos)
 	if(move_made_main==1)
 		#agent.vel = new_agent_vel
@@ -330,7 +330,7 @@ function model_step!(model)
                 	exit()
         	end
 		
-		print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
+		#print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
 		move_agent!(agent, new_pos[agent.id], model)
 		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")

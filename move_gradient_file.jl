@@ -437,9 +437,11 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         #It really doesn't have to be like this, since  at least just for the simple SHH model of Dr.Algar, we can simply return a velocity
         kn[1] = (min_direction .* agent_speed)[1]
         kn[2] = (min_direction .* agent_speed)[2]
+	kn[3] = (min_direction[1] .- agent.vel[1]) ./ dt
+	kn[4] = (min_direction[2] .- agent.vel[2]) ./ dt
 	#return Tuple(min_direction .* agent.speed .* model.dt .+ agent.pos .+ sigma*dW)
 	#print("Best pos was $best_pos, with a difference of $min_diff, with an area of $min_area\n")
-	print("Move alt here. Agent $(agent.id) moving to position of $(new_pos[agent.id])\n")	
+	#print("Move alt here. Agent $(agent.id) moving to position of $(new_pos[agent.id])\n")	
 	return best_pos, min_area, sampled_positions, colours, move_made, best_voronoi_cell
 end
 
@@ -448,10 +450,14 @@ end
 
 function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float64 = rho, eta::Float64 = 1.0)
 	##Create vector of neighbour positions
-	neighbour_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
 	for i in 1:no_birds
-		push!(neighbour_positions, model[i].pos) 
+		if(i == agent.id) continue end
+		push!(neighbour_positions, (model[i].pos, i)) 
 	end
+	
+	##Add periodicity
+	translate_periodic_quick(neighbour_positions)
 
 	##Find neighbours
 	neighbour_set::Vector{Int64} = neighbours_l_r(agent.id, r, neighbour_positions)
@@ -467,8 +473,8 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	##Set kn[1,4]
 	kn[1] = agent.vel[1]
 	kn[2] = agent.vel[2]
-	kn[3] = (cos(theta_tpp) .- agent.vel[1])
-	kn[4] = (sin(theta_tpp) .- agent.vel[2])
+	kn[3] = (cos(theta_tpp) .- agent.vel[1])./model.dt
+	kn[4] = (sin(theta_tpp) .- agent.vel[2])./model.dt
 
 	agent.speed = 1.0
 		
@@ -481,6 +487,6 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
                 AgentsIO.save_checkpoint("simulation_save.jld2", model)
                 exit()
         end
-	print("Move collab here. Agent $(agent.id) moving to position of $(new_pos[agent.id]). The value of theta_tpp was $(theta_tpp), the length of theta vec was $(length(theta_vec))\n")
+	#print("Move collab here. Agent $(agent.id) moving to position of $(new_pos[agent.id]). The value of theta_tpp was $(theta_tpp), the length of theta vec was $(length(theta_vec))\n")
 	return 1
 end
