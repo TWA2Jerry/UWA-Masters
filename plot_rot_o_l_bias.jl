@@ -11,4 +11,5 @@ for line in l_bias_rot_o_lines
 	push!(bias_rot_o_array, (split_line[1], split_line[2]))
 end
 
-Makie.plot(bias_rot_o_array)
+#Makie.plot(bias_rot_o_array)
+fig = Plots.plot(bias_rot_o_array)
