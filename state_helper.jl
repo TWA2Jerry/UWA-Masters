@@ -5,7 +5,7 @@ include("draw_circle_part.jl")
 include("load_initialise.jl")
 include("global_vars.jl")
 include("give_agent_cell.jl")
-
+using LaTeXStrings
 ###Takes in any cell, of the type returned by voronoi_cell from half_plane bounded (which includes vertex info), and draw lines between vertices of the cell. 
 function draw_cell(cell)
 	print("Draw cell called\n")	
@@ -48,7 +48,7 @@ function display_model_cell(model)
 end
 
 ###Function which returns a figure of the model
-function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size = 20, colour = :black)
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
         colours::Vector{Float64} = []
@@ -69,7 +69,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
 
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
-        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = marker,  markersize = marker_size, rotations = rotations, color = colour)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (minx-100, maxx+100, miny-100, maxy+100), aspect = 1), marker = :circle,  rotations = rotations, color = :blue)
 
 	#=
@@ -222,7 +222,7 @@ function draw_tesselation(positions, model)
 
 end
 
-function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size= 20, colour = :black)
 	##First, show the position that the agent with id of id will go to 
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
@@ -248,15 +248,13 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		push!(sampled_colours, number)
 	end
 	
-	print("$sampled_colours\n")
-	
 	#figure = give_model_cell_circled(model, fig_box = view_box)
 	#figure = give_model_cell(model, fig_box = view_box)
-	figure, ax = give_model(model, fig_box = view_box)
+	figure, ax = give_model(model, fig_box = view_box, marker= marker, marker_size= marker_size, colour = colour)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, colormap = cgrad(:viridis, 5, categorical = true), colorrange=  (0.0, 1.0), markersize = 10)
-	Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
-	Makie.scatter!(pot_pos, color = :cyan)
+        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, colormap = cgrad(:viridis, 5, categorical = true), colorrange=  (0.0, 1.0), markersize = marker_size)
+	#Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
+	#Makie.scatter!(pot_pos, color = :cyan)
 	Colorbar(figure[1,2], limits = (0.0, 1.0), colormap = cgrad(:viridis, 5, categorical = true), ticks = [0.3, 0.8])
 	#circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
 	#draw_agent_cell_bounded!(circled_cell)
@@ -447,3 +445,41 @@ function give_model_moves(model::UnremovableABM{ContinuousSpace{2, true, Float64
         return figure, ax
 end
 
+function return_show_move_figure(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size= 20, colour = :black)
+        ##First, show the position that the agent with id of id will go to
+        kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
+        q::Int64 = 8
+        m::Int64 = 3
+        move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area)
+        pot_pos::Tuple{Float64, Float64} = move_tuple[1]
+        sampled_positions = move_tuple[3]
+        temp_sampled_colours = move_tuple[4]
+        sampled_colours::Vector{Float64} = Vector{Float64}(undef, 0)
+        best_area = move_tuple[2]
+        best_voronoi_cell = move_tuple[6]
+        ##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent
+        positions::Vector{Tuple{Float64, Float64}} = []
+        for i in 1:nagents(model)
+                if(i == id)
+                        push!(positions, pot_pos)
+                        continue
+                end
+                push!(positions, model[i].pos)
+        end
+
+        for number in temp_sampled_colours
+                push!(sampled_colours, number)
+        end
+
+        #figure = give_model_cell_circled(model, fig_box = view_box)
+        #figure = give_model_cell(model, fig_box = view_box)
+        figure, ax = give_model(model, fig_box = view_box, marker= marker, marker_size= marker_size, colour = colour)
+        print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
+        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, colormap = cgrad(:viridis, 5, categorical = true), colorrange=  (0.0, 1.0), markersize = marker_size)
+        #Makie.scatter!(model[id].pos, color = :dodgerblue, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
+        #Makie.scatter!(pot_pos, color = :cyan)
+        Colorbar(figure[1,2], limits = (0.0, 1.0), colormap = cgrad(:viridis, 5, categorical = true), ticks = ([0.1, 0.8], [L"l", L"r"]), ticklabelsize = 50)
+        #circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
+        #draw_agent_cell_bounded!(circled_cell)
+	return figure, ax
+end

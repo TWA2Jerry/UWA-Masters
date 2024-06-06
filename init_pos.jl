@@ -83,7 +83,7 @@ end
 function init_thesis(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx, offsety, initial_positions, initial_vels)
 	ro::Tuple{Float64, Float64} = (rect_bound/2, rect_bound/2)
 	push!(initial_positions, ro)
-	push!(initial_positions, ro .+ (-0.5, 0.7))
+	push!(initial_positions, ro .+ (-0.1, 0.9))
 	#push!(initial_positions, ro .+ (-sqrt(2)*75, sqrt(2)*75))
 	#push!(initial_positions, ro .+ (190.0, 0.0))
 	#push!(initial_positions, ro .+ (cos(70*pi/180)*180, sin(70*pi/180)*180))
