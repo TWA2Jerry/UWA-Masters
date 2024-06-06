@@ -78,7 +78,7 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
  	end
 	=#
 
-	#Colorbar(figure[1,2], colourbarthing)
+	#Colorbar(figure[1,2], limits = (0.0, 1.0), colormap = :viridis, ticks = (0.3, 0.8))
         #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
         #display(figure)
         return figure, ax
@@ -230,7 +230,8 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area) 
 	pot_pos::Tuple{Float64, Float64} = move_tuple[1]
 	sampled_positions = move_tuple[3]
-	sampled_colours = move_tuple[4]	
+	temp_sampled_colours = move_tuple[4]	
+	sampled_colours::Vector{Float64} = Vector{Float64}(undef, 0)
 	best_area = move_tuple[2]
 	best_voronoi_cell = move_tuple[6]
 	##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent	
@@ -242,16 +243,23 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 		end
 		push!(positions, model[i].pos)
 	end
-
+	
+	for number in temp_sampled_colours
+		push!(sampled_colours, number)
+	end
+	
+	print("$sampled_colours\n")
+	
 	#figure = give_model_cell_circled(model, fig_box = view_box)
 	#figure = give_model_cell(model, fig_box = view_box)
-	figure = give_model(model, fig_box = view_box)
+	figure, ax = give_model(model, fig_box = view_box)
 	print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
-        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = 10)
+        Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, colormap = cgrad(:viridis, 5, categorical = true), colorrange=  (0.0, 1.0), markersize = 10)
 	Makie.scatter!(model[id].pos, color = :purple, marker = '→', markersize = 20, rotations = atan(model[id].vel[2], model[id].vel[1]))
 	Makie.scatter!(pot_pos, color = :cyan)
-	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-	draw_agent_cell_bounded!(circled_cell)
+	Colorbar(figure[1,2], limits = (0.0, 1.0), colormap = cgrad(:viridis, 5, categorical = true), ticks = [0.3, 0.8])
+	#circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
+	#draw_agent_cell_bounded!(circled_cell)
 	display(figure)
 end
 

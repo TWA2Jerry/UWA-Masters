@@ -425,7 +425,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			else
 				colour = :red
 			end
-			push!(colours, colour)
+			push!(colours, rand(Float64)*0.25 + 0.35)
 
 			num_behind_ignored::Int32 = 0
 			for vertex in agent_voronoi_cell
