@@ -431,7 +431,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		#draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	

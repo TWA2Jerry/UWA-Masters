@@ -1,0 +1,2 @@
+using LaTeXStrings
+fig = Makie.lines(mdf[:, 3], axis =(xticklabelsize = 30, yticklabelsize=30, xlabelsize = 40, ylabelsize=40, ylabel = L"\textrm{Rotational order } (\Phi_R)", xlabel = "Step", xgridvisible = false, ygridvisible = false))
