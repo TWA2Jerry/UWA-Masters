@@ -58,26 +58,6 @@ function random_radius(model)
         return radial_distance(model[model.tracked_agent], center_of_mass(model))
 end
 
-function mean_happiness(model)
-	meanhappiness::Float64 = 0.0
-	n::Int32 = nagents(model)
-	for i in 1:nagents(model)
-		meanhappiness += happiness(model[i])/n
-	end
-	return meanhappiness
-end
-
-function thingo(model)
- 	
-		kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
-                q::Int64 = 8
-                m::Int64 = 100
-                next_pos_area = move_gradient_alt(model[i], model, kn, q, m, rho, model.target_area)
-                area_next_step::Float64 = next_pos_area[2]
-                next_pos::Tuple{Float64, Float64} = next_pos_area[1]
-                distance_to_next_pos::Float64 = norm(next_pos .- model[i].pos)
-end
-
 function no_neighbours(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
 	neighbour_count::Int32 = 0
 	for i in 1:length(cell)
