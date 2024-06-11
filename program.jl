@@ -23,6 +23,7 @@ end
 =#
 
 target_dods = [1000*sqrt(12)]
+alphaps = [1.0]
 
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, agent_regularity]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours, no_collabs]
@@ -30,7 +31,7 @@ mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polar
 parameters = Dict(
         :seed => [i for i::Int64 in 1:no_simulations],
         :target_area_arg => target_dods,
-        #:left_bias_arg => left_biases
+	:alpha_p_arg => alphaps 
 )
 
 #= Original program runner. 
