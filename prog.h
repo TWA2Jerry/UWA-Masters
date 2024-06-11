@@ -1,4 +1,4 @@
-const no_simulations::Int64 = 5
+const no_simulations::Int64 = 15
 const no_steps::Int64 = 30000
 
 ###Define IO. files
