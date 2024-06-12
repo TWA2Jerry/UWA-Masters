@@ -249,10 +249,17 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	if(move_made==1)
                 agent.speed = 1.0
         else 
-                #print("No movement made, agent area was $(agent.A)\n")
-                turns = [-1, 1]
 		weights = [1.0-model.left_bias, model.left_bias]
-		turn::Int32 = sample(turns, Weights(weights))
+		turn::Int32 = 0.0
+		left_turn = (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy)
+		right_turn = (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy)
+		vector_from_center = agent.pos .- center_of_mass(model)
+		if(dot(left_turn, vector_from_center) < 0.0)
+			turn = 1
+		else
+			turn = -1
+		end
+		
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
