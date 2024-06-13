@@ -69,11 +69,9 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		end
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
-			#=
 			if(angular_conflict == 1) 
 				break
 			end
-			=#	
 			
 			conflict::Int64 = 0
 			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
@@ -84,16 +82,14 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 					if(j == 1)
 						angular_conflict = 1
 					end
-					#conflict = 1
+					conflict = 1
 					break
 				end			
 			end			
 			
-			#=
 			if (conflict == 1 || angular_conflict == 1)		
 				continue
 			end
-			=#			
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	
@@ -249,18 +245,10 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	if(move_made==1)
                 agent.speed = 1.0
         else 
+                #print("No movement made, agent area was $(agent.A)\n")
+                turns = [-1, 1]
 		weights = [1.0-model.left_bias, model.left_bias]
-		turn::Int32 = 0.0
-		left_turn = (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy)
-		right_turn = (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy)
-		vector_from_center = agent.pos .- center_of_mass(model)
-		print("move gradient file here. Agent vel was $(agent.vel), left turn was $left_turn, right turn was $right_turn, vector from center was $vector_from_center, dot product is $(dot(left_turn, vector_from_center))\n")
-		if(dot(left_turn, vector_from_center) < dot(right_turn, vector_from_center))
-			turn = 1
-		else
-			turn = -1
-		end
-		
+		turn::Int32 = sample(turns, Weights(weights))
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end

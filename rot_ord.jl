@@ -214,7 +214,7 @@ function ave_group_rot_o(model)
 		ave_rot_o += abs(group_rot_o)/no_groups
 	end
 	
-	#print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+	print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
 
 	#=
 	for group in groups
