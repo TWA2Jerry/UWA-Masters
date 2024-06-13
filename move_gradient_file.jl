@@ -254,7 +254,8 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 		left_turn = (cos(1*2*pi/q)*vix - sin(1*2*pi/q)*viy, sin(1*2*pi/q)*vix + cos(1*2*pi/q)*viy)
 		right_turn = (cos(-1*2*pi/q)*vix - sin(-1*2*pi/q)*viy, sin(-1*2*pi/q)*vix + cos(-1*2*pi/q)*viy)
 		vector_from_center = agent.pos .- center_of_mass(model)
-		if(dot(left_turn, vector_from_center) < 0.0)
+		print("move gradient file here. Agent vel was $(agent.vel), left turn was $left_turn, right turn was $right_turn, vector from center was $vector_from_center, dot product is $(dot(left_turn, vector_from_center))\n")
+		if(dot(left_turn, vector_from_center) < dot(right_turn, vector_from_center))
 			turn = 1
 		else
 			turn = -1

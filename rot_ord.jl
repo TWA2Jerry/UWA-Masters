@@ -210,11 +210,11 @@ function ave_group_rot_o(model)
 		for i in group_dict[group]
 			group_rot_o += rot_o_generic(model[i].pos .- com, model[i].vel)/size[group]
 		end	
-		print("Rot o for group of size $(size[group]) is $group_rot_o\n")
+		#print("Rot o for group of size $(size[group]) is $group_rot_o\n")
 		ave_rot_o += abs(group_rot_o)/no_groups
 	end
 	
-	print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+	#print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
 
 	#=
 	for group in groups

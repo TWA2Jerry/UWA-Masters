@@ -1,5 +1,5 @@
 const no_simulations::Int64 = 15
-const no_steps::Int64 = 30000
+const no_steps::Int64 = 70000
 
 ###Define IO. files
 compac_frac_file = open("compaction_frac.txt", "w")
