@@ -23,7 +23,7 @@ end
 =#
 
 target_dods = [1000*sqrt(12)]
-alphaps = [1.0]
+alphaps = [1.0, 1000.0]
 
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, agent_regularity]
 mdata = [mean_radial_distance, rot_o_alt, random_happiness, mean_no_moves, polarisation, random_radius, mean_happiness, rot_o, mean_no_neighbours, no_collabs]
@@ -34,13 +34,11 @@ parameters = Dict(
 	:alpha_p_arg => alphaps 
 )
 
-#= Original program runner. 
-model = initialise(target_area_arg = 1000.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds)
+model = initialise(target_area_arg = 1000.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, alpha_p_arg = 1000.0)
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
-=#
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
-adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
+#adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
 
 #do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 #do_more_io_stuff(adf, mdf)

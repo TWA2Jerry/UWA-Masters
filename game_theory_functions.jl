@@ -48,8 +48,8 @@ function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, tr
 	end
 	prob::Float64 = rand(Float64)
 
-	if(model.n == no_steps)
-		print("Agent $(agent.id) here. Selfish profit was $pl_selfish, the change in dod is $(agent_l.delta_dod_var)\n")
+	if(model.n == no_steps-10)
+		print("Agent $(agent_l.id) here. Selfish profit was $pl_selfish, the change in dod is $(agent_l.delta_dod_var)\n")
 	end
 	
 	return prob < wl ? (1, agent_l.collaborator == 1 ? 0 : 1) : (0, 1) #This line says, if the probability sampled is less than wl, we need to change (1) and change to the opp. strat of the agents' current strat, otherwise do nothing. 
