@@ -29,7 +29,7 @@ end
 function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0, alpha_p::Float64 = 0.5, beta::Float64 = 1.0, r::Float64 = 0.5*rho)
 	##Calculate the profit the agent would have under both the selfish and collab strats
 	pl::Float64 = pl_quick(agent_l, model, alpha=alpha, r= 0.5*rho)
-	pl_selfish::Float64 = pl_selfish_quick(agent_l, model, alpha=alpha, r= r)
+	pl_selfish::Float64 = pl_selfish_quick(agent_l, model, alpha=alpha_p, r= r)
 	neighbour_pos_vec::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:no_birds
 		push!(neighbour_pos_vec, (model[i].pos, i)) 
