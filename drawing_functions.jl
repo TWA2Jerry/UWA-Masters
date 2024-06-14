@@ -5,7 +5,7 @@ using ColorSchemes
 import ColorSchemes.balance
 
 ###Function for drawing the plots for model step
-function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, new_pos::Vector{Tuple{Float64, Float64}} = [], path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = Vector{Float64}(undef, 0)
         rotations::Vector{Float64} = []

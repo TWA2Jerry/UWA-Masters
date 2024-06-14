@@ -48,7 +48,7 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, area_args = (sqrt(12), 1000*sqrt(12)))
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, area_args = (sqrt(12), 1000*sqrt(12)))
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -74,14 +74,14 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	regularities = zeros(Float64, 100)
 	init_sides_squared = zeros(Float64, 100)
 	
-	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
+	pack_positions = Vector{Point2{Float64}}(undef, no_bird)
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
-	#init_thesis(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
-	for i in 1:no_birds
+	assign_positions(2.0, 2.0, no_bird, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	#assign_positions(2.0, 2.0, no_bird, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
+	#init_thesis(2.0, 2.0, no_bird, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
+	for i in 1:no_bird
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
 		#push!(last_half_planes, [])
@@ -104,11 +104,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#initial_dods = voronoi_area(model, initial_positions, rho)
 	initial_dods::Vector{Float64} = []
 	true_initial_dods::Vector{Float64} = []
-	for i::Int32 in 1:no_birds
+	for i::Int32 in 1:no_bird
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
-		for j::Int32 in 1:no_birds
+		for j::Int32 in 1:no_bird
 			if(i == j)
 				continue 
 			end
@@ -188,7 +188,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Now make the agents with their respective DoDs and add to the model
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
-	for i::Int32 in 1:no_birds
+	for i::Int32 in 1:no_bird
 		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0, 0, 0)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
@@ -209,7 +209,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#write(compac_frac_file, "$packing_fraction ")
 	average_area::Float64 = total_area / nagents(model)
         #write(mean_a_file, "$average_area ")
-	average_speed::Float64 = total_speed/no_birds
+	average_speed::Float64 = total_speed/no_bird
 	#write(mean_speed_file, "$average_speed ")
 	#write(rot_o_file, "$init_rot_ord ")
 	#write(rot_o_alt_file, "$init_rot_ord_alt ")
@@ -227,7 +227,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	end	
 	#=
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
-annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_bird])
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
@@ -316,7 +316,7 @@ function model_step!(model)
 	#print("Alternate rotational order returned as $rot_order_alt\n")	
 
 	#Calculate the correlation of the moves between agents just before they move
-	for i in 1:no_birds
+	for i in 1:nagents(model)
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		agent_neighbour_set::Vector{Int64} = neighbours(cell)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
@@ -431,7 +431,7 @@ function model_step!(model)
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		draw_figures(model, actual_areas, previous_areas, delta_max, new_pos, tracked_path)
+		draw_figures(model,  new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
