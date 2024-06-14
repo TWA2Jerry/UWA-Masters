@@ -38,8 +38,8 @@ end
 
 function polarisation(model)
 	sum_of_vels::Tuple{Float64, Float64} = (0.0, 0.0)
-	for i::Int64 in 1:no_birds
-		sum_of_vels = sum_of_vels .+ 1/no_birds .* model[i].vel	
+	for i::Int64 in 1:nagents(model)
+		sum_of_vels = sum_of_vels .+ 1/nagents(model) .* model[i].vel	
 	end
 
 	polarisation_order::Float64 = norm(sum_of_vels)
@@ -237,7 +237,7 @@ end
 function rl_quick(l::Int64, r::Float64, model)
 	positions_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	vel_vecs::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
-	for i in 1:no_birds
+	for i in 1:nagents(model)
 		push!(positions_vec, model[i].pos)
 		push!(vel_vecs, model[i].vel)
 	end
@@ -269,7 +269,7 @@ end
 
 function num_in_bin(model)
 	num_times::Int64 = 0
-	for i in 1:no_birds
+	for i in 1:nagents(model)
 		if(happiness(model[i]) > bin_range[1] && happiness(model[i]) < bin_range[2])
 			num_times += 1
 		end
