@@ -38,7 +38,7 @@ parameters = Dict(
 
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
-adf, mdf  = paramscan(parameters, initialise; adata, mdata, agent_step!, model_step!, n = no_steps)
+_, mdf  = paramscan(parameters, initialise; mdata, agent_step!, model_step!, n = no_steps)
 
 #do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 #do_more_io_stuff(adf, mdf)
