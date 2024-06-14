@@ -285,3 +285,75 @@ function mean_speed(model)
 	end
 	return mean_speed
 end
+
+###Function which returns group info. It transmits info via the group argument, which should give the group each agent belongs to, and the rot_o argument transmits the rotational order of each agent.  
+function group_info(model, group)
+        n::Int64 = nagents(model)
+        adj::Array{Vector} = Array{Vector}(undef, n)
+        construct_voronoi_adj_list(model, adj)
+
+        rep::Vector{Int64} = Vector{Int64}(undef, n)
+        size::Vector{Int64} = Vector{Int64}(undef, n)
+
+        group_ids(adj, rep, size)
+
+        groups = Set()
+        for i in 1:n
+                group_i = find_rep(i, rep)
+                group[i] = group_i
+        end
+
+	return
+end
+
+###group is meant to be an array that transmits the info about which group each agent belongs, group_rot_o an array that transmits the rot_o of the group to which the i-th agent belongs. 
+function group_rot_o_info(model, group, group_rot_o; group_colour = Array{Float64}(undef, no_birds))
+	group_info(model, group)	
+
+	groups = Set()
+        n = nagents(model)
+	for i in 1:n
+                group_i = group[i]
+		push!(groups, group_i)
+        end
+
+        no_groups = length(groups)
+
+        group_dict = Dict(group => Vector{Int64}(undef,0) for group in groups)
+        size::Array{Int64} = Array{Int64}(undef, nagents(model))
+	for i in 1:n
+                rep_i = group[i]
+                push!(group_dict[rep_i], i)
+        end
+	
+
+        ave_rot_o::Float64 = 0.0
+        for groupp in groups
+                positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+                com::Tuple{Float64, Float64} = (0.0, 0.0)
+                for i in group_dict[groupp]
+                        push!(positions, model[i].pos)
+                end
+                com = center_of_mass(positions)
+
+                group_rot_op::Float64 = 0.0
+                size[groupp] = length(group_dict[groupp])
+		for i in group_dict[groupp]
+                        group_rot_op += model[i].speed * rot_o_generic(model[i].pos .- com, model[i].vel)/size[groupp]
+                end
+                print("group_rot_o here. Rot o for group of size $(size[groupp]) is $group_rot_op\n")
+                group_rot_o[groupp] = group_rot_op
+        	#push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
+        end
+
+        print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+
+        #=
+        for group in groups
+                print("$(size[group])\n")
+        end
+        =#
+        return 
+end
+
+
