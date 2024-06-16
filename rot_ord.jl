@@ -208,9 +208,9 @@ function ave_group_rot_o(model)
 			
 		group_rot_o::Float64 = 0.0
 		for i in group_dict[group]
-			group_rot_o += rot_o_generic(model[i].pos .- com, model[i].vel)/size[group]
+			group_rot_o += model[i].speed * rot_o_generic(model[i].pos .- com, model[i].vel)/size[group]
 		end	
-		print("rot_ord thang here. Rot o for group of size $(size[group]) is $group_rot_o\n")
+		#print("rot_ord thang here. Rot o for group of size $(size[group]) is $group_rot_o\n")
 		ave_rot_o += abs(group_rot_o)/no_groups
 	end
 	
