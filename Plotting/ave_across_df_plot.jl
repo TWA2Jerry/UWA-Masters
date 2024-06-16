@@ -20,3 +20,10 @@ function return_filtered_data(df)
 	bro = filter(df -> df.step >= 55000)
 	return bro
 end
+
+###This is what's used for finding the mean rot_o for long term cluster size vs rot_o simulations. 
+function return_filtered_rot_o_mean(df)
+	fdf = filter(row -> row.step >= 55000, df)
+	com_df = combine(groupby(fdf, :no_bird), :rot_o => mean)
+	return com_df[1, 1]
+end
