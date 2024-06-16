@@ -1,6 +1,6 @@
 #using Agents
 using Random
-
+using DataFrames
 
 include("agent_definition.jl")
 include("order_parameters.jl")
