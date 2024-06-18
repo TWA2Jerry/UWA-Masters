@@ -253,6 +253,11 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                 turns = [-1, 1]
 		weights = [1.0-model.left_bias, model.left_bias]
 		turn::Int32 = sample(turns, Weights(weights))
+		left_turn = rotate_vector(2*pi/q, agent.vel)
+		right_turn = rotate_vector(-2*pi/q, agent.vel)
+		left_turn_rot_o = rot_o_generic(agent.pos .- center_of_mass(model), left_turn)
+		right_turn_rot_o = rot_o_generic(agent.pos .- center_of_mass(model), right_turn)
+		turn = left_turn_rot_o * agent.rot_dir > right_turn_rot_o * agent.rot_dir ? 1 : -1
 		min_direction = (cos(turn*2*pi/q)*vix - sin(turn*2*pi/q)*viy, sin(turn*2*pi/q)*vix + cos(turn*2*pi/q)*viy)
 		agent.speed = 0.0
         end
