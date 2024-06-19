@@ -220,3 +220,58 @@ function draw_graph(positions, adj)
 	end
 	return fig, ax
 end
+
+function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = :circle, marker_size = 30, hide_decorations = 0)
+        ##Draw the standard figure of the agents with their DODs after the step
+        colours::Vector{Float64} = Vector{Float64}(undef, 0)
+        rotations::Vector{Float64} = []
+        allagents_iterable = allagents(model)
+        target_area::Float64 = model.target_area
+        com::Tuple{Float64, Float64} = center_of_mass(model)
+
+        ###CALCULATE ROT O FOR EACH GROUP
+        group::Array{Int64} = Array{Int64}(undef, nagents(model))
+        group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
+        group_rot_o_info(model, group, group_rot_o)
+
+        for id in 1:nagents(model)
+                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+
+                rot_o_raw = rot_o_generic(model[id].pos .- com, model[id].vel)
+
+                #=
+                push!(colours, rot_o_raw > 0.0 ? :blue : :cyan)
+                if(rot_o_raw * model[id].rot_dir < 0.0)
+                        colours[id] = :green
+                end
+                =#
+
+                push!(colours, abs(group_rot_o[group[id]]))
+                model[id].rot_dir = rot_o_raw < 0.0 ? -1 : 1
+
+                #=if(model[id].best_A > 1500.0)
+                        colours[id] = :black
+                end
+                =#
+        end
+        #figure, _ = abmplot(model)
+        print("\n\n\ndraw_figures here. The number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
+        #print("About to do the figure\n")
+
+
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;
+        xticklabelsize = 30,
+        yticklabelsize = 30,
+        xticks = range(fig_box[1][1], fig_box[2][1], 3),
+        yticks = range(fig_box[1][2], fig_box[2][2], 3),
+        limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :viridis) #This is for detecting cave ins better
+
+
+        #print("The number of points in path points is $(length(path_points))\n")
+        #draw_path(path_points)
+        #title!("Model state at step $(model.n)")
+        #text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
+        Colorbar(figure[1,2], colourbarthing, ticklabelsize = 30)
+        return figure, ax
+end
+
