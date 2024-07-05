@@ -465,7 +465,7 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	##Align velocity with neighbour velocities
 	theta_vec::Vector{Float64} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for nid in neighbour_set
-		push!(theta_vec, atan(model[nid].vel[2], model[nid].vel[1]))
+		push!(theta_vec, (atan(model[nid].vel[2], model[nid].vel[1])+2*pi)%(2*pi))
 	end
 
 	theta_tpp::Float64 = mean(theta_vec) + 2* eta .* rand(Float64) .- (eta)
