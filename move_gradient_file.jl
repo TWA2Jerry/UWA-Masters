@@ -469,7 +469,9 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	end
 
 	theta_tpp::Float64 = mean(theta_vec) + 2* eta .* rand(Float64) .- (eta)
-
+	if(agent.id == tracked_agent)
+		print("Move gradient file here, theta_tpp was $theta_tpp\n")
+	end
 	##Set kn[1,4]
 	kn[1] = agent.vel[1]
 	kn[2] = agent.vel[2]
