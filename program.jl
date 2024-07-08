@@ -23,7 +23,7 @@ end
 left_biases = [0.5, 0.75]
 lower_upper_areas = [(1*sqrt(12), 2000*sqrt(12))]
 
-no_birds_vec = [25]
+no_birds_vec = [50]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
