@@ -401,7 +401,7 @@ function model_step!(model)
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
 		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = model.alpha, alpha_p = model.alpha_p, r= model.r, beta=model.beta)
 		if(change[1] == 1)
-			#agent_i.collaborator = change[2]
+			agent_i.collaborator = change[2]
 		end 
         end
         
