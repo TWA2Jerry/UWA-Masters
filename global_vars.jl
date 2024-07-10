@@ -1,4 +1,4 @@
-const no_birds::Int32 = 25
+const no_birds::Int32 = 12
 initialised::Int32 = 0
 area_zero = zeros(Int32, 100)
 const rect_bound::Float64 = 120.0
