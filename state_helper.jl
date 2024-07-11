@@ -70,10 +70,10 @@ function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; title = "Model state at step $(model.n)", limits = (minx-10, maxx+10, miny-10, maxy+10), aspect = 1), marker = :circle, markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true), colorrange = (0, 300))
        #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = :black)
         #figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;title = "Model state at step $(model.n)",  limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, xticklabelsize = 30, yticklabelsize=30), marker = :circle,  rotations = rotations, color = :blue)
-	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;  limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, xticklabelsize = 30, yticklabelsize=30), marker = :circle,  rotations = rotations, color = :black)	
+	figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (;  limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, xticklabelsize = 30, yticklabelsize=30), marker = :circle,  rotations = rotations, color = :black, markersize =marker_size)	
 
 	for i in 1:nagents(model)
-                text!(model[i].pos, text = "$i", align = (:center, :top), fontsize = 20)
+                text!(model[i].pos .-(0.0, 5.0), text = "$i", align = (:center, :top), fontsize = 20)
  	end
 
 	#Colorbar(figure[1,2], colourbarthing)
