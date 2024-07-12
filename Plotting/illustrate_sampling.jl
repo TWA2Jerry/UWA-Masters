@@ -1,0 +1,8 @@
+fig, ax = return_show_move_figure(model, 1, view_box = (model[1].pos .- (3, 1), model[1].pos .+ (3, 5)), marker = :circle, marker_size=30, colour= :black)
+hidedecorations!(ax)
+text!([model[1].pos .+ (0, -0.05)], text = "1", fontsize = 25, align = (:right, :top))
+text!([model[2].pos .+ (0, -0.05)], text = "2", fontsize = 25, align = (:right, :top)) 
+Makie.arrows!([model[1].pos[1]], [model[1].pos[2]], [model[1].vel[1]]/2, [model[1].vel[2]/2])
+text!(model[1].pos .+ (eps, 0.5), text = L"v_1", fontsize = 25, align= (:left, :top))
+Makie.arc!(model[1].pos .+ (0.0, 1.0), 0.3, -pi, pi;color = :red)
+#Makie.arc!(model[1].pos .+ (cos(-2*pi/8), cos(-2*pi/8)), 0.3, -pi, pi;color = :red)
