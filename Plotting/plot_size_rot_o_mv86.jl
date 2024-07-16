@@ -1,7 +1,7 @@
 using Plots
 using CairoMakie
 
-rot_o_l_bias_file = open("Records/mv82/rot_o_v_no_bird.txt", "r")
+rot_o_l_bias_file = open("../Records/mv86/mv86_size_vs_rot_o.txt", "r")
 l_bias_rot_o_lines = readlines(rot_o_l_bias_file)
 
 bias_rot_o_array = Vector{Tuple{Float64, Float64}}(undef, 0)
@@ -21,4 +21,4 @@ end
 #Makie.plot(bias_rot_o_array)
 #fig = Plots.plot(bias_rot_o_array)
 #fig = Makie.scatter(bias_rot_o_array)
-Plots.plot(size_array, rot_o_array, yerror = std_array) 
+fig = Plots.plot(size_array, rot_o_array, yerror = std_array) 
