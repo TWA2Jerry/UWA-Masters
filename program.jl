@@ -33,12 +33,12 @@ parameters = Dict(
 	#:left_bias_arg => left_biases	
 )
 
-#model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (1*sqrt(12), 1000*sqrt(12)), left_bias_arg = 0.5)
-#adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
+model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (1000*sqrt(12), 2500*sqrt(12)), left_bias_arg = 0.5)
+adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
-_, mdf  = paramscan(parameters, initialise; mdata, agent_step!, model_step!, n = no_steps)
+#_, mdf  = paramscan(parameters, initialise; mdata, agent_step!, model_step!, n = no_steps)
 
 #do_io_stuff(compac_frac_file, mean_a_file, rot_o_file, rot_o_alt_file, mean_speed_file)
 #do_more_io_stuff(adf, mdf)
