@@ -25,7 +25,7 @@ end
 target_dods = [2000*sqrt(12)]
 alphaps = [1.0, 1000.0]
 
-adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, agent_regularity]
+adata = [:delta_dod_var, :collab_p]
 mdata = [rot_o_alt, polarisation, rot_o, no_collabs]
 
 parameters = Dict(
@@ -34,7 +34,7 @@ parameters = Dict(
 	:alpha_p_arg => alphaps 
 )
 
-model = initialise(target_area_arg = 1000.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, alpha_p_arg = 1000000.0)
+model = initialise(target_area_arg = 1000.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, alpha_p_arg = 1.0)
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params

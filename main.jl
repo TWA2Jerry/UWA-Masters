@@ -41,7 +41,8 @@ include("game_theory_functions.jl")
 
 print("Agent template created\n")
 
-
+selfish_lifetimes = Vector{Int32}(undef, 0)
+collab_lifetimes = Vector{Int32}(undef, 0)
 
 ###Create the initialisation function
 using Random #for reproducibility
@@ -184,7 +185,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	total_speed::Float64 = 0.0
 	for i::Int32 in 1:no_birds
 		delta_dod_var::Float64 = 0.0
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0, 1]), 0.0, delta_dod_var)
+		init_lifetime = 1
+		init_p_collab = 0.0
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0, 1]), 0.0, delta_dod_var, init_lifetime, init_p_collab)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -399,9 +402,18 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
+		agent_i.collab_p = pl_quick(agent_i, model, alpha = model.alpha) 
 		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = model.alpha, alpha_p = model.alpha_p, r= model.r, beta=model.beta)
 		if(change[1] == 1)
+			if(agent_i.collaborator == 1)
+				push!(collab_lifetimes, agent_i.lifetime)
+			else
+				push!(selfish_lifetimes, agent_i.lifetime)
+			end
+			agent_i.lifetime = 1
 			agent_i.collaborator = change[2]
+		else
+			agent_i.lifetime += 1
 		end 
         end
         
