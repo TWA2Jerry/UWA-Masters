@@ -11,6 +11,10 @@ end
 function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0, r::Float64 = rho)
 	l::Int64 = agent_l.id
 	rl::Float64 = rl_quick(l, r, model)
+	if(isnan(rl - alpha*cl(agent_l.collaborator, r, rect_bound)) == true)
+		print("profit is NaN, rl is $rl\n")
+		exit()
+	end
 	return rl - alpha*cl(agent_l.collaborator, r, rect_bound)
 end
 

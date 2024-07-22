@@ -225,11 +225,30 @@ function rlm(theta_l, theta_m)
 	x_com_rhs::Float64 = (cos(theta_l) + cos(theta_m))/2
 	x_com_lhs::Float64 = cos((theta_l+theta_m)/2)
 	rlm = x_com_rhs/x_com_lhs
+	if(isnan(rlm) == true) 
+		print("NaN for rl detected. Value of xcomlhs is $x_com_lhs\n")
+		exit()
+	end
 	return rlm
 end
 
 function rl(rlm_vec::Vector{Float64})
-	return mean(rlm_vec)
+	for i in 1:length(rlm_vec)
+		if(isnan(rlm_vec[i]) == true)
+			print("Encountered NaN in rlm vec\n")
+		end
+	end
+	if(isnan(mean(rlm_vec)) == true)
+		print("mean of rlm vec is NaN, length is $(length(rlm_vec))\n")
+		for val in rlm_vec
+			print("$val\n")
+		end
+	end
+	if(length(rlm_vec) == 0)
+		return 0.0
+	else
+		return mean(rlm_vec)
+	end
 end	
 
 function neighbours_l_r(l::Int64, r::Float64, positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}})
