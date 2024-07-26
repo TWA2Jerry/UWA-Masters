@@ -9,7 +9,7 @@ end
 no_hp_behind_ignored::Vector{Int32} = Vector{Int32}(undef, 0)
 
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, :distance, agent_regularity, :best_A, :A, :direction]
-mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o]
+mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_rot_o, max_rot_o_group_size]
 
 target_dods = [100.0]
 #=

@@ -15,10 +15,10 @@ for line in l_bias_rot_o_lines
         push!(bias_rot_o_array, (split_line[1], split_line[2]))
 		push!(size_array, split_line[1])
 		push!(rot_o_array, split_line[2])
-		push!(std_array, split_line[3])
+		#push!(std_array, split_line[3])
 end
 
 #Makie.plot(bias_rot_o_array)
 #fig = Plots.plot(bias_rot_o_array)
 #fig = Makie.scatter(bias_rot_o_array)
-Plots.plot(size_array, rot_o_array, yerror = std_array) 
+Plots.plot(size_array, rot_o_array) 

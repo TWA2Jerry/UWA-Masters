@@ -341,12 +341,12 @@ function group_rot_o_info(model, group, group_rot_o; group_colour = Array{Float6
 		for i in group_dict[groupp]
                         group_rot_op += model[i].speed * rot_o_generic(model[i].pos .- com, model[i].vel)/size[groupp]
                 end
-                print("group_rot_o here. Rot o for group of size $(size[groupp]) is $group_rot_op\n")
+                #print("group_rot_o here. Rot o for group of size $(size[groupp]) is $group_rot_op\n")
                 group_rot_o[groupp] = group_rot_op
         	#push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
         end
 
-        print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+        #print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
 
         #=
         for group in groups
@@ -356,4 +356,60 @@ function group_rot_o_info(model, group, group_rot_o; group_colour = Array{Float6
         return 
 end
 
+function max_rot_o_group(model)
+	group::Array{Int64} = Array{Int64}(undef, nagents(model))
+	group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
+	group_rot_o_info(model, group, group_rot_o)
+	
+	max_rot_o::Float64 = 0.0
+	max_group::Int64 = -1
+	for i in 1:nagents(model)
+		if(abs(group_rot_o[group[i]]) > max_rot_o)
+			max_rot_o = group_rot_o[group[i]]
+			max_group = group[i]
+		end
+	end
+
+	return max_group
+end
+
+function max_group_rot_o(model)
+    group::Array{Int64} = Array{Int64}(undef, nagents(model))
+    group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
+    group_rot_o_info(model, group, group_rot_o)
+    
+    max_rot_o::Float64 = 0.0
+    max_group::Int64 = -1
+    for i in 1:nagents(model)
+        if(abs(group_rot_o[group[i]]) > max_rot_o)
+            max_rot_o = group_rot_o[group[i]]
+            max_group = group[i]
+        end
+    end
+
+    return max_rot_o
+end
+
+function max_rot_o_group_size(model)
+    group::Array{Int64} = Array{Int64}(undef, nagents(model))
+    group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
+    group_rot_o_info(model, group, group_rot_o)
+    
+    max_rot_o::Float64 = 0.0
+    max_group::Int64 = -1
+	size::Array{Int64} = Array{Int64}(undef, nagents(model))
+	for i in 1:nagents(model)
+		size[i] = 0
+	end
+
+    for i in 1:nagents(model)
+        if(abs(group_rot_o[group[i]]) > max_rot_o)
+            max_rot_o = group_rot_o[group[i]]
+            max_group = group[i]
+        end
+		size[group[i]] += 1 
+    end
+
+    return size[max_group]
+end
 
