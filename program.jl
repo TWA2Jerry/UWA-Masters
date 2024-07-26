@@ -23,7 +23,7 @@ end
 left_biases = [0.5, 0.75]
 lower_upper_areas = [(1*sqrt(12), 2000*sqrt(12))]
 
-no_birds_vec = [15]
+no_birds_vec = [100]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
@@ -33,7 +33,7 @@ parameters = Dict(
 	#:left_bias_arg => left_biases	
 )
 
-model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (1*sqrt(12), 3000*sqrt(12)), left_bias_arg = 0.5)
+model = initialise(target_area_arg = 100.0, simulation_number_arg = 1, no_bird = no_birds, area_args = (1*sqrt(12), 2500*sqrt(12)), left_bias_arg = 0.5)
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 
