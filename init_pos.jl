@@ -116,3 +116,20 @@ function initialise_two_clusters(initial_positions, initial_vels, no_agents; dom
 
 	return
 end
+
+function init_pos_vels_5(initial_positions, initial_vels)
+	center::Tuple{Float64, Float64} = (rect_bound/2, rect_bound/2)
+	for i in 1:5
+		push!(initial_positions, center .+ 20 .* Tuple(rand(Float64, 2)))
+		push!(initial_vels, 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0))
+	end
+
+	push!(initial_positions, center .+ (75.0, 75.0))
+    push!(initial_vels, 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0))
+
+		
+	for i in 1:no_birds-6
+			push!(initial_positions, 140 .* Tuple(rand(Float64, 2)))
+	        push!(initial_vels, 2 .* Tuple(rand(Float64, 2)) .- (1.0, 1.0))	
+	end
+end
