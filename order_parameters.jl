@@ -360,12 +360,25 @@ function max_rot_o_group(model)
 	group::Array{Int64} = Array{Int64}(undef, nagents(model))
 	group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
 	group_rot_o_info(model, group, group_rot_o)
+
+	n = nagents(model)
+	groups = Set()
+	sizes = Vector{Int64}(undef, nagents(model))
+	for i in 1:n sizes[i] = 0 end
+    for i in 1:n
+		push!(groups, group[i])
+		sizes[group[i]] += 1
+	end
+
+	for group in groups
+		print("ord_parameters here. Group of size $(sizes[group]) with rot_o of $(group_rot_o[group])\n")
+	end
 	
 	max_rot_o::Float64 = 0.0
 	max_group::Int64 = -1
 	for i in 1:nagents(model)
 		if(abs(group_rot_o[group[i]]) > max_rot_o)
-			max_rot_o = group_rot_o[group[i]]
+			max_rot_o = abs(group_rot_o[group[i]])
 			max_group = group[i]
 		end
 	end
@@ -382,7 +395,7 @@ function max_group_rot_o(model)
     max_group::Int64 = -1
     for i in 1:nagents(model)
         if(abs(group_rot_o[group[i]]) > max_rot_o)
-            max_rot_o = group_rot_o[group[i]]
+            max_rot_o = abs(group_rot_o[group[i]])
             max_group = group[i]
         end
     end
@@ -404,11 +417,26 @@ function max_rot_o_group_size(model)
 
     for i in 1:nagents(model)
         if(abs(group_rot_o[group[i]]) > max_rot_o)
-            max_rot_o = group_rot_o[group[i]]
+            max_rot_o = abs(group_rot_o[group[i]])
             max_group = group[i]
         end
 		size[group[i]] += 1 
     end
+	
+	#=
+	n = nagents(model)
+    groups = Set()
+    sizes = Vector{Int64}(undef, nagents(model))
+    for i in 1:n sizes[i] = 0 end
+    for i in 1:n
+        push!(groups, group[i])
+        sizes[group[i]] += 1
+    end
+		
+    for group in groups
+        print("ord_parameters here. Group of size $(sizes[group]) with rot_o of $(group_rot_o[group])\n")
+    end
+	=#
 
     return size[max_group]
 end
