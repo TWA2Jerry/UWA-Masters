@@ -464,19 +464,25 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 
 	##Align velocity with neighbour velocities
 	theta_vec::Vector{Float64} = Vector{Tuple{Float64, Float64}}(undef, 0)
+	vel_vec::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for nid in neighbour_set
 		push!(theta_vec, (atan(model[nid].vel[2], model[nid].vel[1])+2*pi)%(2*pi))
+		push!(vel_vec, model[nid].vel)
 	end
 
 	theta_tpp::Float64 = mean(theta_vec) + 2* eta .* rand(Float64) .- (eta)
-	if(agent.id == tracked_agent)
-		print("Move gradient file here, theta_tpp was $theta_tpp\n")
-	end
+	mean_n_vel::Tuple{Float64, Float64} = mean_velocity(vel_vec)
+	mean_n_vel = mean_n_vel ./ norm(mean_n_vel)
+	#if(agent.id == tracked_agent)
+		#print("Move gradient file here, mean vel of neighbours was $mean_n_vel\n")
+	#end
 	##Set kn[1,4]
 	kn[1] = agent.vel[1]
 	kn[2] = agent.vel[2]
-	kn[3] = (cos(theta_tpp) .- agent.vel[1])./model.dt
-	kn[4] = (sin(theta_tpp) .- agent.vel[2])./model.dt
+	#kn[3] = (cos(theta_tpp) .- agent.vel[1])./model.dt
+	#kn[4] = (sin(theta_tpp) .- agent.vel[2])./model.dt
+	kn[3] = (mean_n_vel[1] .- agent.vel[1])./model.dt
+	kn[4] = (mean_n_vel[2] .- agent.vel[2])./model.dt
 
 	agent.speed = 1.0
 		

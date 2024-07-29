@@ -115,3 +115,14 @@ end
 function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
         return v1[1] * v2[2] - v1[2]*v2[1]
 end
+
+
+###Function that takes in a vector of velocities, and returns the mean velocity
+function mean_velocity(velocities)
+	n = length(velocities)
+	mean_velocity = (0.0, 0.0)
+	for velocity in velocities
+		mean_velocity = mean_velocity .+ (velocity ./ n)
+	end
+	return mean_velocity
+end

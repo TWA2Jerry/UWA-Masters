@@ -81,6 +81,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
+		print("Velocity of $i is $(initial_vels[i])\n")
 		#push!(last_half_planes, [])
 		#=if(model.simulation_number==1)
 			push!(new_pos, (0.0, 0.0))
