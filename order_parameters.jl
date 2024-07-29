@@ -441,3 +441,19 @@ function max_rot_o_group_size(model)
     return size[max_group]
 end
 
+function no_groups(model)
+	group::Array{Int64} = Array{Int64}(undef, nagents(model))
+    group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
+    group_rot_o_info(model, group, group_rot_o)
+
+	n = nagents(model)
+    groups = Set()
+    sizes = Vector{Int64}(undef, nagents(model))
+    for i in 1:n sizes[i] = 0 end
+    for i in 1:n
+        push!(groups, group[i])
+        sizes[group[i]] += 1
+    end
+
+	return length(groups)
+end
