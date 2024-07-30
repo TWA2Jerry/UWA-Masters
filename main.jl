@@ -335,7 +335,7 @@ function model_step!(model)
                 	exit()
         	end
 		
-		#print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
+		print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id]). Agent collab status is $(agent.collaborator)\n")
 		move_agent!(agent, new_pos[agent.id], model)
 		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")

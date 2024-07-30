@@ -471,8 +471,11 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	end
 
 	theta_tpp::Float64 = mean(theta_vec) + 2* eta .* rand(Float64) .- (eta)
-	mean_n_vel::Tuple{Float64, Float64} = mean_velocity(vel_vec)
-	mean_n_vel = mean_n_vel ./ norm(mean_n_vel)
+	mean_n_vel::Tuple{Float64, Float64} = (0.0, 0.0)
+	if(length(vel_vec) > 0)
+		mean_n_vel = mean_velocity(vel_vec)
+		mean_n_vel = mean_n_vel ./ norm(mean_n_vel)
+	end
 	#if(agent.id == tracked_agent)
 		#print("Move gradient file here, mean vel of neighbours was $mean_n_vel\n")
 	#end
@@ -487,6 +490,10 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	agent.speed = 1.0
 		
 	new_pos[agent.id] = agent.pos .+ (agent.vel .+ (kn[3], kn[4])) .* agent.speed		
+	if(isnan(new_pos[agent.id][1]) == true)
+		print("Move gradient collab here. new pos for $(agent.id) is NaN. new_pos is $(new_pos[agent.id]) and kn is $(kn)\n, vel vec was $(vel_vec), agent vel was $(agent.vel)\n")
+		exit()
+	end
 	correct_x::Float64 = (((new_pos[agent.id])[1])%rect_bound+rect_bound)%rect_bound
         correct_y::Float64 = (((new_pos[agent.id])[2])%rect_bound+rect_bound)%rect_bound
 	new_pos[agent.id]  = (correct_x, correct_y)	
