@@ -335,7 +335,7 @@ function model_step!(model)
                 	exit()
         	end
 		
-		print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id]). Agent collab status is $(agent.collaborator)\n")
+		#print("Agent position for $(agent.id) is now $(agent.pos) for a new agent pos of $(new_pos[agent.id]). Agent collab status is $(agent.collaborator)\n")
 		move_agent!(agent, new_pos[agent.id], model)
 		agent.vel = new_vel[agent.id]
 		#print("Agent position is now $(agent.pos) for a new agent pos of $(new_pos[agent.id])\n")
@@ -378,8 +378,10 @@ function model_step!(model)
 		agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
 		if(agent_i.A > pi*rho^2)
-			print("Conventional area exceeded for agent. Cell was $(new_cell_i), and area was $(new_area)\n")
-                        exit()
+			print("Conventional area exceeded for agent $(agent_i.id). Cell was $(new_cell_i), and area was $(new_area). Agent position was $(agent_i.pos)\n")
+                       	print("temp hp was $temp_hp\n")
+			AgentsIO.save_checkpoint("simulation_save.jld2", model) 
+			exit()
                 end
 		#For measuring parameters, we measure the true voronoi cell, which will not use the bounded vision. 
 		#print("\n\n\n The time for calulating the voronoi cell in model step is ")

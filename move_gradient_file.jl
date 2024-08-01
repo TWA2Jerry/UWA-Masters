@@ -474,7 +474,9 @@ function move_gradient_collab(agent::bird, model, kn::Vector{Float64}, r::Float6
 	mean_n_vel::Tuple{Float64, Float64} = (0.0, 0.0)
 	if(length(vel_vec) > 0)
 		mean_n_vel = mean_velocity(vel_vec)
-		mean_n_vel = mean_n_vel ./ norm(mean_n_vel)
+		if(norm(mean_n_vel) > eps)
+			mean_n_vel = mean_n_vel ./ norm(mean_n_vel)
+		end
 	end
 	#if(agent.id == tracked_agent)
 		#print("Move gradient file here, mean vel of neighbours was $mean_n_vel\n")
