@@ -365,8 +365,11 @@ function model_step!(model)
 		vix::Float64 = agent_i.vel[1]
 		viy::Float64 = agent_i.vel[2]
 		relic_x::Float64 = -1.0*(-viy)
+		#relic_x = relic_x /abs(relic_x) #This is for stopping relic_pq from being too small
         	relic_y::Float64 = -vix
+		#relic_y = relic_y/abs(relic_y) #This is for stopping relic_pq from being too small
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
+		#relic_pq = relic_pq ./ norm(relic_pq)
         	relic_angle::Float64 = atan(relic_y, relic_x)
         	relic_is_box::Int64 = -2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
