@@ -16,3 +16,4 @@ const R::Float64 = 80.0
 best_pos::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, no_birds)
 eta::Float64 = 1.0
 bin_range::Tuple{Float64, Float64} = (0.195, 0.2)
+cluster_sizes::Vector{Int64} = Vector{Int64}(undef, 0)
