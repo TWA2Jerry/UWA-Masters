@@ -15,6 +15,9 @@ function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, 
 		print("profit is NaN, rl is $rl\n")
 		exit()
 	end
+	#=if(model.n == no_steps-1)
+		print("rl_quick is $rl, cost is $(alpha*cl(agent_l.collaborator, r, rect_bound)), r is $r. Agent collab is $(agent_l.collaborator), alpha is $alpha\n")
+	end =#
 	return rl - alpha*cl(agent_l.collaborator, r, rect_bound)
 end
 

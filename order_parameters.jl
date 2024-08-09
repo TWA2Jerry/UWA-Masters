@@ -47,8 +47,9 @@ end
 
 function polarisation(model)
 	sum_of_vels::Tuple{Float64, Float64} = (0.0, 0.0)
-	for i::Int64 in 1:no_birds
-		sum_of_vels = sum_of_vels .+ 1/no_birds .* model[i].vel	
+	n = nagents(model)
+	for i::Int64 in 1:n
+		sum_of_vels = sum_of_vels .+ 1/n .* model[i].vel	
 	end
 
 	polarisation_order::Float64 = norm(sum_of_vels)
@@ -224,7 +225,11 @@ function rlm(theta_l, theta_m)
 	rlm::Float64 = 0.0
 	x_com_rhs::Float64 = (cos(theta_l) + cos(theta_m))/2
 	x_com_lhs::Float64 = cos((theta_l+theta_m)/2)
-	rlm = x_com_rhs/x_com_lhs
+	y_com_rhs::Float64 = (sin(theta_l) + sin(theta_m))/2
+	
+	#rlm_old = x_com_rhs/x_com_lhs
+	rlm = norm((x_com_rhs, y_com_rhs))
+	#print("rlm under old calculation is $rlm_old, rlm under new is $rlm\n") 
 	if(isnan(rlm) == true) 
 		print("NaN for rl detected. Value of xcomlhs is $x_com_lhs\n")
 		exit()
@@ -255,29 +260,53 @@ function neighbours_l_r(l::Int64, r::Float64, positions::Vector{Tuple{Tuple{Floa
 	l_pos::Tuple{Float64, Float64} = positions[l][1]
 	no_neighbours::Int64 = 0
 	neighbours_vec::Vector{Int64} = [] #I know this is bad practice in C since allocated memory is popped, but eh
+	
+	##Since we have periodic boundary conditions, we use a set to keep track of neighbours, since neighbours may be repeated due to overlap.
+	neighbours_set = Set()
 	for i in 1:length(positions)	
 		if(positions[i][2] != l && distance(l_pos, positions[i][1]) < r)
-			push!(neighbours_vec, positions[i][2])
+			push!(neighbours_set, positions[i][2])
 			no_neighbours +=1 		
 		end
 	end
+
+	for neighbour in neighbours_set
+		push!(neighbours_vec, neighbour)
+	end
+	
 	return neighbours_vec
 end
 
+
+###Function that takes the agent of interest, l, r the radius of communication, positions of all agents and vector of velocities. Returns vector of rlm values for each neighbour of l. 
 function rlm_generator(l::Int64, r::Float64, positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, vel_vec::Vector{Tuple{Float64, Float64}})
 	neighbour_pos::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:length(positions)
 			push!(neighbour_pos, positions[i])
 	end
 	l_pos::Tuple{Float64, Float64} = positions[l][1]
+	
+	###Add periodic boundary conditions so that we can also detect neighbours that way
+	translate_periodic_quick(neighbour_pos)
 	neighbours::Vector{Int64} = neighbours_l_r(l, r, neighbour_pos)
 	
 
 	theta_l::Float64 = atan(vel_vec[l][2], vel_vec[l][1])
 	rlm_vec::Vector{Float64} = Vector{Float64}(undef, 0)
+	neighbour_vel_vec = []
+	if(l == tracked_agent)
+	#print("\n\nOrd param here. For tracked agent $l, vel was $(vel_vec[l]), theta_l was $theta_l\n")
+	end 
 	for neighbour_id in neighbours
 		theta_m::Float64 = atan(vel_vec[neighbour_id][2], vel_vec[neighbour_id][1])
 		push!(rlm_vec, rlm(theta_l, theta_m))
+		if(l == tracked_agent)
+			push!(neighbour_vel_vec, vel_vec[neighbour_id]) 	
+			#print("Ord param here. Neighbour vel was $(vel_vec[neighbour_id]), theta_m val of $theta_m, rlm val of $(rlm(theta_l, theta_m))\n")
+		end
+	end
+	if(l == tracked_agent)
+	#print("Order parameters here. Tracked agent has an alignment of $(vel_alignment(vel_vec[l], neighbour_vel_vec)) with its neighbours. Neighbours length was $(length(vel_vec))\n")
 	end
 	return rlm_vec
 end
@@ -291,6 +320,9 @@ function rl_quick(l::Int64, r::Float64, model)
 	end
 	
 	rlm_vec::Vector{Float64} = rlm_generator(l, r, positions_vec, vel_vecs)
+	if(l == tracked_agent)
+		#print("Ord params here. For step $(model.n), the rl for agent $l is $(rl(rlm_vec))\n") 
+	end
 	return rl(rlm_vec)
 end
 
@@ -313,4 +345,16 @@ function va(model)
 	end
 
 	return avexcomponent/(cos(ave_direction))
+end
+
+
+###Function which measures how much vel0 aligns with the velocities of vels on average
+function vel_alignment(vel0, vels)
+	ave_dot = 0.0
+	n = length(vels)
+	for i in 1:n
+		ave_dot += dot(vel0, vels[i])/n
+	end
+	
+	return ave_dot
 end

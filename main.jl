@@ -46,7 +46,7 @@ collab_lifetimes = Vector{Int32}(undef, 0)
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, alpha_arg = 0.5, alpha_p_arg = 0.5, r_arg = 0.5*rho, beta_arg = 1.0)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, alpha_arg = 1.0, alpha_p_arg = 0.5, r_arg = 0.5*rho, beta_arg = 1.0)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
@@ -102,7 +102,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	initial_dods::Vector{Float64} = []
 	true_initial_dods::Vector{Float64} = []
 	for i::Int32 in 1:no_birds
-		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
+		#print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
 		for j::Int32 in 1:no_birds
@@ -189,9 +189,10 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		init_lifetime = 1
 		init_p_collab = 0.0
 		init_selfish_p = 0.0
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0, 1]), 0.0, delta_dod_var, init_lifetime, init_p_collab, init_selfish_p)
+		init_collaborator = rand([0,1])
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, init_collaborator, 0.0, delta_dod_var, init_lifetime, init_p_collab, init_selfish_p)
 		agent.vel = agent.vel ./ norm(agent.vel)
-		print("The area for agent $i was $(agent.A)\n")
+		#print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
 		add_agent!(agent, initial_positions[i], model)
 		total_area += true_initial_dods[i]/(pi*rho^2)
@@ -409,7 +410,7 @@ function model_step!(model)
 
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
-		agent_i.collab_p = pl_quick(agent_i, model, alpha = model.alpha) 
+		agent_i.collab_p = pl_quick(agent_i, model, alpha = model.alpha, r = model.r) 
 		agent_i.selfish_p = pl_selfish_quick(agent_i, model, alpha_p = model.alpha_p)
 		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = model.alpha, alpha_p = model.alpha_p, r= model.r, beta=model.beta)
 		if(change[1] == 1)
