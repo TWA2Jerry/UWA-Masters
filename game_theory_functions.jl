@@ -8,9 +8,15 @@ function pl(rl, cl, alpha)
 	return rl-alpha*cl
 end
 
+
+no_neg_rl = 0
+no_pos_rl = 0
 function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; alpha::Float64 = 1.0, r::Float64 = 0.5*rho)
 	l::Int64 = agent_l.id
 	rl::Float64 = rl_quick(l, r, model)
+	if(rl > 0) global no_pos_rl += 1
+	else global no_neg_rl += 1
+	end
 	if(isnan(rl - alpha*cl(agent_l.collaborator, r, rect_bound)) == true)
 		print("profit is NaN, rl is $rl\n")
 		exit()
