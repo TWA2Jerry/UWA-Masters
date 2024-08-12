@@ -226,9 +226,11 @@ function rlm(theta_l, theta_m)
 	x_com_rhs::Float64 = (cos(theta_l) + cos(theta_m))/2
 	x_com_lhs::Float64 = cos((theta_l+theta_m)/2)
 	y_com_rhs::Float64 = (sin(theta_l) + sin(theta_m))/2
-	
+	ycom_lhs::Float64 = cos((theta_l+theta_m)/2)	
+
 	#rlm_old = x_com_rhs/x_com_lhs
-	rlm = norm((x_com_rhs, y_com_rhs))
+	#rlm = norm((x_com_rhs, y_com_rhs))
+	rlm = cos((theta_l - theta_m)/2)
 	#print("rlm under old calculation is $rlm_old, rlm under new is $rlm\n") 
 	if(isnan(rlm) == true) 
 		print("NaN for rl detected. Value of xcomlhs is $x_com_lhs\n")
