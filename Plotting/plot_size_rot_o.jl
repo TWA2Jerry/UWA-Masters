@@ -1,5 +1,7 @@
 using Plots
+using Plots.PlotMeasures
 using CairoMakie
+using LaTeXStrings
 
 rot_o_l_bias_file = open("Records/mv82/rot_o_v_no_bird.txt", "r")
 l_bias_rot_o_lines = readlines(rot_o_l_bias_file)
@@ -18,13 +20,20 @@ for line in l_bias_rot_o_lines
 		#push!(std_array, split_line[3])
 end
 
-pop!(size_array)
-pop!(rot_o_array)
 
 #Makie.plot(bias_rot_o_array)
 #fig = Plots.plot(bias_rot_o_array)
 #fig = Makie.scatter(bias_rot_o_array)
-fig = Plots.plot(size_array, rot_o_array,
-	xlabel = "Cluster size",	
-	ylabel = "Average group rot o"
-) 
+fig = Plots.plot(size_array, rot_o_array, plot_title = L"Rotational Order($\Phi_{R*}$) vs Size",
+    plot_titlefontsize = 50,
+    size = (1800, 1200),
+    left_margin = 10mm,
+    bottom_margin = 10mm,
+    dpi = 400,
+    linewidth = 10,
+    legend=false,
+    grid = false,
+    xguide = "Cluster Size", xguidefontsize = 60, xtickfontsize= 50,
+    yguide = L"$\Phi_{R*}$", yguidefontsize=60, ytickfontsize= 50
+)
+
