@@ -21,10 +21,12 @@ function pl_quick(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, true, 
 		print("profit is NaN, rl is $rl\n")
 		exit()
 	end
-	#=if(model.n == no_steps-1)
-		print("rl_quick is $rl, cost is $(alpha*cl(agent_l.collaborator, r, rect_bound)), r is $r. Agent collab is $(agent_l.collaborator), alpha is $alpha\n")
-	end =#
-	return rl - alpha*cl(agent_l.collaborator, r, rect_bound)
+	if(model.n <=  no_steps-1)
+		print("rl_quick is $rl, cost is $(alpha*cl(Int32(1), r, rect_bound)), r is $r. Agent collab is $(agent_l.collaborator), alpha is $alpha\n")
+	end 
+	
+	#Note that we automatically put 1 for agent collaborator strategy because this is the profit ASSUMING agent is collaborator
+	return rl - alpha*cl(Int32(1), r, rect_bound)
 end
 
 function pl_selfish_quick(agent_l::bird, model; alpha::Float64 = 1.0, alpha_p::Float64 = 0.5, r::Float64 = rho)
@@ -61,9 +63,9 @@ function change_strat(agent_l::bird, model::UnremovableABM{ContinuousSpace{2, tr
 	end
 	prob::Float64 = rand(Float64)
 
-	if(model.n == no_steps-1)
+	#=if(model.n == no_steps-1)
 		print("Agent $(agent_l.id) here. Selfish profit was $pl_selfish, the change in dod is $(agent_l.delta_dod_var). Alpha_p is $alpha_p\n")
-	end
+	end =#
 	
 	return prob < wl ? (1, agent_l.collaborator == 1 ? 0 : 1) : (0, 1) #This line says, if the probability sampled is less than wl, we need to change (1) and change to the opp. strat of the agents' current strat, otherwise do nothing. 
 end

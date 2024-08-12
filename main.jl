@@ -411,6 +411,7 @@ function model_step!(model)
 		##Update agent correlation
 		agent_i.rl = rl_quick(agent_i.id, rho, model)
 		agent_i.collab_p = pl_quick(agent_i, model, alpha = model.alpha, r = model.r) 
+		print("Agent $(agent_i.id) here. Profit was $(agent_i.collab_p)\n")
 		agent_i.selfish_p = pl_selfish_quick(agent_i, model, alpha_p = model.alpha_p)
 		change::Tuple{Int64, Int32} = change_strat(agent_i, model, alpha = model.alpha, alpha_p = model.alpha_p, r= model.r, beta=model.beta)
 		if(change[1] == 1)

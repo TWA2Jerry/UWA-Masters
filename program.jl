@@ -21,7 +21,7 @@ parameters = Dict(
 	:alpha_p_arg => alphaps 
 )
 
-model = initialise(target_area_arg = 22000.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, alpha_p_arg = 1.0, r_arg = rho)
+model = initialise(target_area_arg = 4000*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, alpha_p_arg = 1.0, r_arg = rho)
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
