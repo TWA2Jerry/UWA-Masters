@@ -408,7 +408,7 @@ function max_rot_o_group_size(model)
     group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
     group_rot_o_info(model, group, group_rot_o)
     
-    max_rot_o::Float64 = 0.0
+    max_rot_o::Float64 = -0.1
     max_group::Int64 = -1
 	size::Array{Int64} = Array{Int64}(undef, nagents(model))
 	for i in 1:nagents(model)
