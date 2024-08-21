@@ -9,7 +9,7 @@ end
 no_hp_behind_ignored::Vector{Int32} = Vector{Int32}(undef, 0)
 
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, :distance, agent_regularity, :best_A, :A, :direction]
-mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_rot_o, max_rot_o_group_size, no_groups]
+mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_rot_o, max_rot_o_group_size, no_groups, ave_group_rot_o_forward, no_groups_forward]
 
 target_dods = [100.0]
 #=
@@ -23,7 +23,7 @@ end
 left_biases = [0.5, 0.75]
 lower_upper_areas = [(1*sqrt(12), 2000*sqrt(12))]
 
-no_birds_vec = [7]
+no_birds_vec = [100]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],

@@ -483,3 +483,51 @@ function return_show_move_figure(model::UnremovableABM{ContinuousSpace{2, true, 
         #draw_agent_cell_bounded!(circled_cell)
 	return figure, ax
 end
+
+
+###Function that draws the circle and forward bounded voronoi tesselation
+function give_model_cell_forward_circled(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+        ##Scatter the agent positions
+        b_positions::Vector{Tuple{Float64, Float64}} = []
+        colours::Vector{Float64} = []
+        rotations::Vector{Float64} = []
+        for i in 1:nagents(model)
+                #push!(colours, model[i].nospots)
+                push!(rotations, atan(model[i].vel[2], model[i].vel[1]))
+                push!(b_positions, model[i].pos)
+        end
+
+
+        figure, ax, colourbarthing = Makie.scatter(b_positions,axis = (; limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = :circle, markersize = 10, rotations = rotations, color = :blue)
+
+
+        ##Draw the cells
+        ##For each agent, generate the cells and plot using the normal half plane bounded thingo.
+        for i in 1:nagents(model)
+                ##Just some colour stuff for the plot
+                text!(model[i].pos, text = "$i", align = (:center, :top))
+                temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+                positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
+                for j in 1:nagents(model)
+                        if(j == i) continue
+                        end
+                        push!(positions, (model[j].pos, model[j].id))
+                end
+
+                #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell(model, model[i].pos, positions, rho, eps, inf, temp_hp)
+                #cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell_circled(model[i], model)
+                cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_forward_cell_circled(model[i], model)
+        #cell = give_cell_circled(cell, model[i].pos)
+        points::Vector{Tuple{Float64, Float64}} = []
+                for i in 1:length(cell)
+                        push!(points, cell[i][1])
+                end
+                push!(points, cell[1][1])
+                Makie.lines!(points, color = :black)
+        end
+        #Colorbar(figure[1,2], colourbarthing)
+        #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
+        #display(figure)
+        return figure, ax
+end
+

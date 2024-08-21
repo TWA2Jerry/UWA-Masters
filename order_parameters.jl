@@ -69,7 +69,7 @@ end
 function neighbours(cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}})
 	neighbour_set::Vector{Int64} = Vector{Int32}(undef, 0) #We could make this a set, but the vec should work since every vertex can be associated with one unique neighbour
 	for i in 1:length(cell)
-                if(cell[i][3] != 0) push!(neighbour_set, cell[i][3]) end
+                if(cell[i][3] > 0) push!(neighbour_set, cell[i][3]) end
         end
 	return neighbour_set
 end       
@@ -457,3 +457,94 @@ function no_groups(model)
 
 	return length(groups)
 end
+
+
+###Function that is the same as group_info, but using forward and circle bounded voronoi cells
+function group_info_forward(model, group)
+        n::Int64 = nagents(model)
+        adj::Array{Vector} = Array{Vector}(undef, n)
+        construct_forward_voronoi_adj_list(model, adj)
+
+        rep::Vector{Int64} = Vector{Int64}(undef, n)
+        size::Vector{Int64} = Vector{Int64}(undef, n)
+
+        group_ids(adj, rep, size)
+
+        groups = Set()
+        for i in 1:n
+                group_i = find_rep(i, rep)
+                group[i] = group_i
+        end
+
+	return
+end
+
+
+
+###Function that is the same as group_rot_o_info, but calculates the clusters based on forward and circle bounded voronoi cells. 
+function group_rot_o_info_forward(model, group, group_rot_o; group_colour = Array{Float64}(undef, no_birds))
+	group_info_forward(model, group)	
+
+	groups = Set()
+        n = nagents(model)
+	for i in 1:n
+                group_i = group[i]
+		push!(groups, group_i)
+        end
+
+        no_groups = length(groups)
+
+        group_dict = Dict(group => Vector{Int64}(undef,0) for group in groups)
+        size::Array{Int64} = Array{Int64}(undef, nagents(model))
+	for i in 1:n
+                rep_i = group[i]
+                push!(group_dict[rep_i], i)
+        end
+	
+
+        ave_rot_o::Float64 = 0.0
+        for groupp in groups
+                positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+                com::Tuple{Float64, Float64} = (0.0, 0.0)
+                for i in group_dict[groupp]
+                        push!(positions, model[i].pos)
+                end
+                com = center_of_mass(positions)
+
+                group_rot_op::Float64 = 0.0
+                size[groupp] = length(group_dict[groupp])
+		for i in group_dict[groupp]
+                        group_rot_op += model[i].speed * rot_o_generic(model[i].pos .- com, model[i].vel)/size[groupp]
+                end
+                #print("group_rot_o here. Rot o for group of size $(size[groupp]) is $group_rot_op\n")
+                group_rot_o[groupp] = group_rot_op
+        	#push!(colours, distance(model[id].pos, best_pos[id])) #This is for helping cave ins. 
+        end
+
+        #print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+
+        #=
+        for group in groups
+                print("$(size[group])\n")
+        end
+        =#
+        return 
+end
+
+function no_groups_forward(model)
+	group::Array{Int64} = Array{Int64}(undef, nagents(model))
+    group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
+    group_rot_o_info_forward(model, group, group_rot_o)
+
+	n = nagents(model)
+    groups = Set()
+    sizes = Vector{Int64}(undef, nagents(model))
+    for i in 1:n sizes[i] = 0 end
+    for i in 1:n
+        push!(groups, group[i])
+        sizes[group[i]] += 1
+    end
+
+	return length(groups)
+end
+

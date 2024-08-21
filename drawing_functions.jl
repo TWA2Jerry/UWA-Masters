@@ -7,8 +7,8 @@ import ColorSchemes.balance
 ###Function for drawing the plots for model step
 function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, new_pos::Vector{Tuple{Float64, Float64}} = [], path_points::Vector{Tuple{Float64, Float64}} = []; marker_size = 40)
         ##Draw the standard figure of the agents with their DODs after the step
-        #colours::Vector{Float64} = Vector{Float64}(undef, 0)
-        colours = []
+        colours::Vector{Float64} = Vector{Float64}(undef, 0)
+        #colours = []
 	rotations::Vector{Float64} = []
         allagents_iterable = allagents(model)
         target_area::Float64 = model.target_area
@@ -17,19 +17,21 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	###CALCULATE ROT O FOR EACH GROUP
         group::Array{Int64} = Array{Int64}(undef, nagents(model))
 	group_rot_o::Array{Float64} = Array{Float64}(undef, nagents(model))
-	group_rot_o_info(model, group, group_rot_o)
+	#group_rot_o_info(model, group, group_rot_o)
+	group_rot_o_info_forward(model, group, group_rot_o)
 	
 	for id in 1:nagents(model)
                 push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
 		
 		rot_o_raw = rot_o_generic(model[id].pos .- com, model[id].vel)
 		
-		push!(colours, rot_o_raw > 0.0 ? :blue : :cyan)
+		#=push!(colours, rot_o_raw > 0.0 ? :blue : :cyan)
 		if(rot_o_raw * model[id].rot_dir < 0.0)
 			colours[id] = :green
 		end
+		=#
 
-		#push!(colours, abs(group_rot_o[group[id]]))
+		push!(colours, abs(group_rot_o[group[id]]))
 		model[id].rot_dir = rot_o_raw < 0.0 ? -1 : 1		
 	
 		#=if(model[id].best_A > 1500.0)
@@ -43,8 +45,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
-	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :viridis) #This is for detecting cave ins better
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours) 	
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :viridis) #This is for detecting cave ins better
+	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours) 	
 
 	#=	
         for i in 1:nagents(model)
@@ -66,8 +68,9 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         for i in 1:nagents(model)
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
-        #Colorbar(figure[1,2], colourbarthing)
-        save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
+        Colorbar(figure[1,2], colourbarthing)
+        #Colorbar(figure[1,2], limits=(0.0, 1.0), colormap = :viridis)
+		save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 end
 
 

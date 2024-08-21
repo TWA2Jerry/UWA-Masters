@@ -172,6 +172,23 @@ function construct_voronoi_adj_list(model, adj)
 	return
 end
 
+###Function that constructs the adj list for forward bounded voronoi cells
+function construct_forward_voronoi_adj_list(model, adj)
+n::Int64 = nagents(model)
+        for i in 1:n
+                adj[i] = Vector{Int64}(undef, 0)
+                #cell = give_agent_forward_cell(model[i], model)
+                cell = give_cell_forward_quick(i, model)
+                agent_neighbours = neighbours(cell)
+                for neighbour in agent_neighbours
+                        push!(adj[i], neighbour)
+                end
+        end
+    return
+
+end
+
+
 ###Function that constructs the groups, and finds the rot_o of each group
 function ave_group_rot_o(model)
 	n::Int64 = nagents(model)
@@ -276,5 +293,56 @@ function record_group_rot_o(model)
 	=#
 
         return 
+end
+
+function ave_group_rot_o_forward(model)
+	n::Int64 = nagents(model)
+	adj::Array{Vector} = Array{Vector}(undef, n)
+	construct_forward_voronoi_adj_list(model, adj)
+	
+	rep::Vector{Int64} = Vector{Int64}(undef, n)
+	size::Vector{Int64} = Vector{Int64}(undef, n)
+
+	group_ids(adj, rep, size)
+
+	groups = Set()
+	for i in 1:n
+		group_i = find_rep(i, rep)
+		push!(groups, group_i)
+	end
+
+	no_groups = length(groups)
+
+	group_dict = Dict(group => Vector{Int64}(undef,0) for group in groups)
+	for i in 1:n
+		rep_i = find_rep(i, rep)
+		push!(group_dict[rep_i], i) 
+	end
+
+	ave_rot_o::Float64 = 0.0
+	for group in groups
+		positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
+		com::Tuple{Float64, Float64} = (0.0, 0.0)
+		for i in group_dict[group]
+			push!(positions, model[i].pos)
+		end
+		com = center_of_mass(positions)
+			
+		group_rot_o::Float64 = 0.0
+		for i in group_dict[group]
+			group_rot_o += model[i].speed * rot_o_generic(model[i].pos .- com, model[i].vel)/size[group]
+		end	
+		#print("rot_ord thang here. Rot o for group of size $(size[group]) is $group_rot_o\n")
+		ave_rot_o += abs(group_rot_o)/no_groups
+	end
+	
+	print("Number of groups detected was $no_groups and the average rot_o was $ave_rot_o\n")
+
+	#=
+	for group in groups
+		print("$(size[group])\n")
+	end
+	=#
+	return ave_rot_o
 end
 

@@ -23,7 +23,7 @@ function give_cell_forward(pos::Tuple{Float64, Float64}, neighbour_positions::Ve
                 relic_y::Float64 = -vix
                 relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
                 relic_angle::Float64 = atan(relic_y, relic_x)
-                relic_is_box::Int64 = 2
+                relic_is_box::Int64 = -1
                 relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, pos, relic_is_box)
 
                 new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rhop, eps, inf, temp_hp, vel, [relic_half_plane])
@@ -137,3 +137,27 @@ function give_cell_forward_quick(id::Int64, model; rhop = rho)
 	end
 	return give_cell_forward(model[id].pos, neighbour_positions, model, model[id].vel; rhop = rhop)
 end
+
+
+###
+function give_agent_forward_cell_circled(agent_i, model; rhop = rho)
+        all_agents_iterable =  allagents(model)
+        temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
+
+                neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = []
+                for agent_j in all_agents_iterable
+                        if(agent_i.id == agent_j.id)
+                                continue
+                        end
+                        push!(neighbour_positions, (agent_j.pos, agent_j.id))
+                end
+
+                uncircled_cell = give_cell_forward_quick(agent_i.id, model; rhop = rhop)
+                if(length(uncircled_cell) <= 1)
+            print("Full circle cell detected for agent $i\n")
+            exit()
+        end
+        circle_bounded_cell = give_cell_circled(uncircled_cell, agent_i.pos)
+                return circle_bounded_cell
+end
+

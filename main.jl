@@ -363,7 +363,7 @@ function model_step!(model)
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = -2
+        	relic_is_box::Int64 = -1
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		
 		#print("The time for calculating a cell was\n")
