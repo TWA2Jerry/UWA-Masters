@@ -360,3 +360,9 @@ function vel_alignment(vel0, vels)
 	
 	return ave_dot
 end
+
+
+
+function collab_level(model)
+	return no_collabs(model)/nagents(model)
+end
