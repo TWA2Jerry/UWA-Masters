@@ -15,10 +15,12 @@ function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg
 			ygridvisible = false
 		),
 	
-		label = label_arg
+		label = label_arg,
 	)
 
-	axislegend(ax)
+	axislegend(ax,
+		labelsize = 30
+	)
 	return fig, ax, thing
 end
 
