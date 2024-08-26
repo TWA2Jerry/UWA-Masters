@@ -1,9 +1,9 @@
 using CairoMakie
 using Plots
 
-function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "")
+function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", line_width_arg = 10)
 	fig, ax, thing = Makie.lines(data_points,
-		linewidth = 10,
+		linewidth = line_width_arg,
 		axis = (;
 			xlabelsize = 50,
 			ylabelsize = 50,
@@ -18,9 +18,10 @@ function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg
 		label = label_arg,
 	)
 
-	axislegend(ax,
+	#=axislegend(ax,
 		labelsize = 30
 	)
+		=#
 	return fig, ax, thing
 end
 
