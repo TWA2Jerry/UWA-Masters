@@ -42,9 +42,9 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #print("About to do the figure\n")
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = :black)
+        figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = :black)
 	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :viridis) #This is for detecting cave ins better
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours) 	
+	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours) 	
 
 	#=	
         for i in 1:nagents(model)
