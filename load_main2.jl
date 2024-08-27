@@ -225,7 +225,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	draw_figures(model, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays

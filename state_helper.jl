@@ -505,7 +505,7 @@ function give_model_cell_forward_circled(model::UnremovableABM{ContinuousSpace{2
         ##For each agent, generate the cells and plot using the normal half plane bounded thingo.
         for i in 1:nagents(model)
                 ##Just some colour stuff for the plot
-                text!(model[i].pos, text = "$i", align = (:center, :top))
+                #text!(model[i].pos, text = "$i", align = (:center, :top))
                 temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
                 positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
                 for j in 1:nagents(model)
