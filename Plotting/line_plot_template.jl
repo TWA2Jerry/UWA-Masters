@@ -1,10 +1,11 @@
 using CairoMakie
 using Plots
 
-function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", line_width_arg = 10)
+function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", line_width_arg = 10, limits_arg = (nothing, nothing, nothing, nothing))
 	fig, ax, thing = Makie.lines(data_points,
 		linewidth = line_width_arg,
 		axis = (;
+			limits = limits_arg,
 			xlabelsize = 50,
 			ylabelsize = 50,
 			xlabel = xlabel_arg,
