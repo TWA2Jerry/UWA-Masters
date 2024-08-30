@@ -14,8 +14,8 @@ for neighbour in all_agents_iterable
            end
 
 ##Get and plot the sampled cell
-sampled_cell = give_cell_forward(model[1].pos, positions, model, model[1].vel, relic_half_plane, relic_passed = 1)
-#sampled_cell = give_cell(sampled_point, positions, model, model[1].vel, relic_half_plane)
+#sampled_cell = give_cell(model[1].pos, positions, model, model[1].vel, relic_half_plane, relic_passed = 1)
+sampled_cell = give_cell(model[1].pos, positions, model, model[1].vel, relic_half_plane)
 sampled_cell = give_cell_circled(sampled_cell, model[1].pos)
 draw_cell!(sampled_cell)
 Makie.arc!(model[1].pos, 100.0, -pi, pi; transparency = true, color = (:red, 0.2))
