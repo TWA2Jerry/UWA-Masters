@@ -1,5 +1,5 @@
 using LaTeXStrings
-fig, ax = give_model(model, fig_box = ((200, 200), (600, 600)), marker_size = 30)
+fig, ax = give_model(model, fig_box = ((200, 200), (600, 600)), marker_size = 40)
 hidedecorations!(ax)
 
 ##Getting ready to plot cell for sampled point
@@ -22,5 +22,8 @@ Makie.arc!(model[1].pos, 100.0, -pi, pi; transparency = true, color = (:red, 0.2
 
 
 ##Just illustrating the velocity of the current agent
-Makie.arrows!([model[1].pos[1]], [model[1].pos[2]], [model[1].vel[1]*20], [model[1].vel[2]*20])
-text!(model[1].pos .+ model[1].vel .* 20, text = L"\hat{v}_1", align = (:left, :bottom), fontsize = 30)
+Makie.arrows!([model[1].pos[1]], [model[1].pos[2] + 10.0], [model[1].vel[1]*20], [model[1].vel[2]*20])
+text!(model[1].pos .+ model[1].vel .* 20, text = L"\hat{v}_1", align = (:left, :bottom), fontsize = 50)
+
+colsize!(fig.layout, 1, Aspect(1, 1.0))
+resize_to_layout!(fig)
