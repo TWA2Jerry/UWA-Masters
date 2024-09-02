@@ -155,7 +155,7 @@ function draw_half_planes_generic!(half_planes::Vector{Tuple{Float64, Tuple{Floa
         end
 end
 
-function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), markersize_arg = 40, label_offset = (0.0, 0.0))
 	ri::Tuple{Float64, Float64} = positions[id]
 	half_planes::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}(undef, 0)
 	n::Int64 = Int64(length(positions))
@@ -179,9 +179,9 @@ function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}};
 		push!(half_planes, half_plane) 
 	end
 
-	figure, ax, colourbarthing = Makie.scatter(positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, ), marker = :circle,  markersize = 10, color = :black)
+	figure, ax, colourbarthing = Makie.scatter(positions,axis = (;   limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1, ), marker = :circle,  markersize = markersize_arg, color = :black)
 	for i in 1:n
-		text!(positions[i], text = "$i", align= (:center, :top))
+		text!(positions[i] .+ label_offset, text = "$i", align= (:center, :top), fontsize = 40)
 	end
 	hidedecorations!(ax)
 	for half_plane in half_planes
@@ -193,12 +193,12 @@ function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}};
 	return figure	
 end
 
-function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), label_offset = (0.0, 0.0))
 	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:nagents(model)
 		push!(positions, model[i].pos)
 	end
-	return draw_half_planes(id, positions; fig_box)
+	return draw_half_planes(id, positions; fig_box, label_offset = label_offset)
 end
 
 function draw_best_pos(model, target_area; view_box = ((0.0, 0.0), (rect_bound, rect_bound)))
