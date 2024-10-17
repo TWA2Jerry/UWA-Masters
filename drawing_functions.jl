@@ -44,7 +44,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = :black)
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :viridis) #This is for detecting cave ins better
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :cool) #This is for detecting cave ins better
 	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours) 	
 
 	#=	
@@ -222,7 +222,7 @@ function draw_graph(positions, adj)
 	return fig, ax
 end
 
-function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = :circle, marker_size = 30, hide_decorations = 0)
+function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = :circle, marker_size = 30, hide_decorations = 0, colourmap  = :viridis)
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = Vector{Float64}(undef, 0)
         rotations::Vector{Float64} = []
@@ -265,7 +265,7 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
         yticklabelsize = 30,
         xticks = range(fig_box[1][1], fig_box[2][1], 3),
         yticks = range(fig_box[1][2], fig_box[2][2], 3),
-        limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :viridis) #This is for detecting cave ins better
+        limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = colourmap) #This is for detecting cave ins better
 
 
         #print("The number of points in path points is $(length(path_points))\n")
