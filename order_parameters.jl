@@ -548,3 +548,7 @@ function no_groups_forward(model)
 	return length(groups)
 end
 
+function uh_entropy(model)
+	entropy = 0.0
+	return entropy
+end
