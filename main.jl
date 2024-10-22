@@ -75,8 +75,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	#init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -231,7 +231,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
+	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -317,7 +317,7 @@ function model_step!(model)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
 	end
 
-	draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
+	#draw_figures_futures(model,Vector{Float64}(undef, 0), Vector{Float64}(undef, 0), max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2)), new_pos, tracked_path)
 	#draw_better_positions(model, better_positions_vec)
 	better_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
 
