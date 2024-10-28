@@ -6,6 +6,7 @@ include("agent_definition.jl")
 include("order_parameters.jl")
 include("plot_histograms.jl")
 include("drawing_functions.jl")
+include("entropy_calculator.jl")
 #=
 ###Animate
 model = initialise(1000.0*sqrt(12), 1);
@@ -360,3 +361,10 @@ function df_for_plotting(df)
 	return 	step_val_vec
 end
 
+
+###Function that returns entropy based on happiness data collected for agents
+function data_to_entropy(data)
+	filtered_data = filter(row -> row.step >= 2000, adf)
+	entropy = calculate_entropy(filtered_data[:,:happiness])
+	return entropy	
+end
