@@ -134,3 +134,6 @@ function center_of_mass(model)
         return com
 end
 
+function logistic(x, k, x0)
+	return 1/(1+exp(-k*(x-x0)))
+end

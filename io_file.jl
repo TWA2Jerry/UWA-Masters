@@ -385,3 +385,36 @@ function process_size_rot_o()
 	end
 	return
 end
+
+function calculate_stability_rotation(data)
+    stability_score = calculate_stability_score(data)
+    rot_o = calculate_single_cluster_rot_o(data)
+    return stability_score * rot_o
+end
+
+function calculate_single_cluster_rot_o(data)
+	filtered_data = filter(row -> row.no_groups == 1, data)
+	rot_o = mean(filtered_data[:, :ave_group_rot_o])
+	return rot_o
+end
+
+function calculate_stability_score(data; lower = 0.01, upper = 0.5)
+    filtered_data = filter(row -> row.no_groups == 1, data)
+    proportion_of_ones = nrow(filtered_data)/nrow(data)
+    k, x0 = calculate_logistic_parameters(lower, upper)
+    return logistic(proportion_of_ones, k, x0)
+end
+
+function calculate_logistic_parameters(lower, upper)
+    #k(lower) - kx0 = -4.59
+    #k(upper) - kx0 = 4.59
+    #k(upper) - k(lower) = 2*4.59
+    #k = 2*(4.59)/(upper-lower)
+    #kx0 = 4.59 + k*lower   
+    stdl = log(0.01/(1-0.01))
+    stdu = log(0.99/(1-0.99))
+    k = 2*stdu/(upper-lower)
+    x0 = stdu/k + lower
+    return k, x0
+end
+
