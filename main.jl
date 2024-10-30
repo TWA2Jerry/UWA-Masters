@@ -247,7 +247,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	write_pos_vel(positions, velocities, pos_vels_file, 0)
+	#write_pos_vel(positions, velocities, pos_vels_file, 0)
 	#write_agent_vals(model)	
 
 	return model
@@ -480,7 +480,7 @@ function model_step!(model)
 	
 	
 
-	write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a left_bias of $(model.left_bias).\n\n\n")
