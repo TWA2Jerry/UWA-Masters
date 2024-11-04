@@ -12,7 +12,7 @@ upper_ax2 = Axis(upper_figs[1,2]; limits = (0, 1000, 0, 1000), aspect =1)
 upper_ax3 = Axis(upper_figs[1,3]; limits = (0, 10000, 0, 10000), aspect = 1)
 
 lower_ax1 = Axis(lower_figs)
-
+rowsize!(f.layout, 2, Fixed(400))
 #=
 hidedecorations!(upper_ax1)
 hidespines!(upper_ax1)
