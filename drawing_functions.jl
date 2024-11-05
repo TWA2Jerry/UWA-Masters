@@ -3,6 +3,7 @@ using InteractiveDynamics
 using CairoMakie # choosing a plotting backend
 using ColorSchemes
 import ColorSchemes.balance
+include("marker_template.jl")
 
 ###Function for drawing the plots for model step
 function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
