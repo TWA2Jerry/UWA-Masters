@@ -3,12 +3,12 @@ scaling_factor = 2.5
 
 arrow_marker = BezierPath([
        MoveTo(Point(0,0)),
-       LineTo(Point(-0.3, -0.3)*scaling_factor),
-           LineTo(Point(-0.3, -0.10)*scaling_factor),
+       LineTo(Point(-0.5, -0.5)*scaling_factor),
+           LineTo(Point(-0.5, -0.10)*scaling_factor),
 	   LineTo(Point(-1.5, -0.1)*scaling_factor),
 	   LineTo(Point(-1.5, 0.1)*scaling_factor),
-		LineTo(Point(-0.3, 0.1)*scaling_factor),
-       LineTo(Point(-0.3, 0.3)*scaling_factor),
+		LineTo(Point(-0.5, 0.1)*scaling_factor),
+       LineTo(Point(-0.5, 0.5)*scaling_factor),
        ClosePath()
        ])
 

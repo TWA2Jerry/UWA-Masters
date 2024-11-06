@@ -7,7 +7,7 @@ include("prog.h")
 adata = [happiness]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [1*sqrt(12)]
+target_dods = [1000*sqrt(12)]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
@@ -15,7 +15,7 @@ parameters = Dict(
         #:left_bias_arg => left_biases
 ) 
 
-model = initialise(target_area_arg = 1.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds)
+model = initialise(target_area_arg = 1000.0*sqrt(12), simulation_number_arg = 1, no_bird = no_birds)
 adf, mdf = @time run!(model, agent_step!, model_step!, no_steps; adata, mdata)
 
 ###New thingo for running, just because there's never reason you wouldn't use this general method of running possibly multiple params
