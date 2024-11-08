@@ -28,3 +28,5 @@ hidespines!(lower_ax1)
 crystal_model  = AgentsIO.load_checkpoint("./Records/stdod61/stdod61_crystal")
 Makie.scatter!(upper_ax1, [crystal_model[i].pos for i in 1:nagents(crystal_model)], marker = arrow_marker, markersize = 3, rotations = [atan(crystal_model[i].vel[2], crystal_model[i].vel[1]) for i in 1:nagents(crystal_model)])
 
+liquid_model = AgentsIO.load_checkpoint("./Records/stdod61/stdod61_liquid")
+Makie.scatter!(upper_ax2, [crystal_model[i].pos for i in 1:nagents(liquid_model)], marker = arrow_marker, markersize = 3, rotations = [atan(liquid_model[i].vel[2], liquid_model[i].vel[1]) for i in 1:nagents(liquid_model)])
