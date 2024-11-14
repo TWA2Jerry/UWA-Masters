@@ -1,7 +1,7 @@
 using CairoMakie
 using Plots
 
-function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", linewidth_arg = 10, labelvisible_arg = true, limits_arg = (nothing, nothing), figure_padding_arg = (:auto, :auto, :auto, :auto))
+function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", linewidth_arg = 10, labelvisible_arg = true, limits_arg = (nothing, nothing), figure_padding_arg = (1, 1, 1, 1))
 	fig = Figure(figure_padding = figure_padding_arg)
 	ax = Axis(fig[1,1],
 		limits = limits_arg,

@@ -418,3 +418,9 @@ function calculate_logistic_parameters(lower, upper)
     return k, x0
 end
 
+###Function to calculate proporiton of ones from stability score assuming default k and x_0 parameters
+function stability_to_prop_one(stability_score; k = 18.75559122503914, x0 = 0.25499999999999995)
+	S = stability_score
+	proportion_of_one_cluster = (log(1/S - 1)-k*x0)/-k
+	return proportion_of_one_cluster
+end
