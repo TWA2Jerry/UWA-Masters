@@ -15,7 +15,7 @@ upper_ax3 = Axis(upper_figs[1,3]; limits = (0, 10000, 0, 10000), aspect = 1)
 lower_ax1 = Axis(lower_figs, 
 	xscale = log10,
 	#xticks = ([10, 10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000], ["10", L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000"]),
-	xticks = ([10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000], [L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000"]),
+	xticks = ([10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000, 6000*sqrt(12)], [L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000", L"6000*\sqrt{12}"]),
 	#limits = ((10, 10000*sqrt(12)), nothing),
 	limits = ((10*sqrt(12), 20000*sqrt(12)), nothing),
 	xgridvisible = false, 
