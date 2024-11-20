@@ -2,7 +2,7 @@ using CairoMakie
 using LaTeXStrings
 include("prog.h")
 
-f = Figure(size= (400, 300))
+f = Figure(size= (2000, 300))
 main_figures = f[1,1] = GridLayout()
 main_axis = Axis(f[1,1])
 upper_figs = main_figures[1,1] = GridLayout()
@@ -12,12 +12,21 @@ upper_ax1 = Axis(upper_figs[1,1]; limits = (0, 800, 0, 800), aspect = 1)
 upper_ax2 = Axis(upper_figs[1,2]; limits = (0, 1000, 0, 1000), aspect =1)
 upper_ax3 = Axis(upper_figs[1,3]; limits = (0, 10000, 0, 10000), aspect = 1)
 
+offset = 5/4
+
 lower_ax1 = Axis(lower_figs, 
+	width = 800,
 	xscale = log10,
-	#xticks = ([10, 10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000], ["10", L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000"]),
-	xticks = ([10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000, 6000*sqrt(12)], [L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000", L"6000*\sqrt{12}"]),
+	xlabelsize = 50,
+	xlabel = "tDOD",
+	ylabelsize = 50, 
+	ylabel = "Rotational Order",
+	xticklabelsize = 30,
+	yticklabelsize = 30,
+	#xticks = ([10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000], [L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000"]),
 	#limits = ((10, 10000*sqrt(12)), nothing),
-	limits = ((10*sqrt(12), 20000*sqrt(12)), nothing),
+	xticks = ([10*sqrt(12),  100*sqrt(12), 1000*sqrt(12)], [L"10\times\sqrt{12}", L"100\times\sqrt{12}", L"1000\times\sqrt{12}"]),
+	limits = ((10*sqrt(12)/offset, 20000*sqrt(12)/offset), nothing),
 	xgridvisible = false, 
 	ygridvisible = false	
 )
@@ -61,8 +70,9 @@ Makie.lines!(lower_ax1, tdods, rot_o_alts)
 hidespines!(lower_ax1, :t, :r)
 #Makie.xlims!(10*sqrt(12), 10000*sqrt(12))
 
-Makie.bracket!(lower_ax1,  log10(10*sqrt(12)), 0.1, log10(100*sqrt(12)), 0.1, text = "Crystal", style = :curly)
+#Makie.bracket!(lower_ax1,  log10(10*sqrt(12)), 0.1, log10(100*sqrt(12)), 0.1, text = "Crystal", style = :curly)
+Makie.bracket!(lower_ax1,  log10(10*sqrt(12)/offset), 0.1, log10(100*sqrt(12)), 0.1, text = "Crystal", style = :curly)
 Makie.bracket!(lower_ax1,  log10(100*sqrt(12)), 0.1, log10(2000*sqrt(12)), 0.1, text = "Liquid", style = :curly)
-Makie.bracket!(lower_ax1, log10(2000*sqrt(12)), 0.1, log10(10000*sqrt(12)), 0.1, text = "Gas", style = :curly)
-
-#Makie.bracket!(upper_ax1,100, 50, 100*sqrt(12), 50, text = "Crystal", style = :curly)
+#Makie.bracket!(lower_ax1, log10(2000*sqrt(12)), 0.1, log10(20000*sqrt(12)), 0.1, text = "Gas", style = :curly)
+Makie.bracket!(lower_ax1, log10(2000*sqrt(12)), 0.1, log10(20000*sqrt(12)/offset), 0.1, text = "Gas", style = :curly)
+resize_to_layout!(f)
