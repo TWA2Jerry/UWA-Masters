@@ -223,10 +223,10 @@ function draw_graph(positions, adj)
 	return fig, ax
 end
 
-function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap  = :viridis)
+function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50)
         ##Draw the standard figure of the agents with their DODs after the step
-        #colours::Vector{Float64} = Vector{Float64}(undef, 0)
-        colours= []
+        colours::Vector{Float64} = Vector{Float64}(undef, 0)
+        #colours= []
 		rotations::Vector{Float64} = []
         allagents_iterable = allagents(model)
         target_area::Float64 = model.target_area
@@ -242,12 +242,14 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
 
                 rot_o_raw = rot_o_generic(model[id].pos .- com, model[id].vel)
 
+				#=
                 push!(colours, rot_o_raw > 0.0 ? :blue : :cyan)
                 if(rot_o_raw * model[id].rot_dir < 0.0)
                         colours[id] = :green
                 end
+				=#
 
-                #push!(colours, abs(group_rot_o[group[id]]))
+                push!(colours, abs(group_rot_o[group[id]]))
                 model[id].rot_dir = rot_o_raw < 0.0 ? -1 : 1
 
                 #=if(model[id].best_A > 1500.0)
@@ -268,14 +270,14 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
         limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), 
 		marker = marker,
 		markersize = marker_size, 
-		rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = colourmap) #This is for detecting cave ins better
+		rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = colourmap_arg) #This is for detecting cave ins better
 
 
         #print("The number of points in path points is $(length(path_points))\n")
         #draw_path(path_points)
         #title!("Model state at step $(model.n)")
         #text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
-        #Colorbar(figure[1,2], colourbarthing, ticklabelsize = 30)
+        Colorbar(figure[1,2], colourbarthing, ticklabelsize = 30, label = colourbarlabel_arg, labelsize = colourbarlabelsize_arg)
         return figure, ax
 end
 
