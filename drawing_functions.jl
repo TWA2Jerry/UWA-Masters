@@ -223,7 +223,7 @@ function draw_graph(positions, adj)
 	return fig, ax
 end
 
-function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50)
+function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50, colourbarvisible_arg = 1)
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = Vector{Float64}(undef, 0)
         #colours= []
@@ -277,7 +277,9 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
         #draw_path(path_points)
         #title!("Model state at step $(model.n)")
         #text!(model[model.tracked_agent].pos, text = "$(model.tracked_agent)", align = (:center, :top))
+		if(colourbarvisible_arg == 1)
         Colorbar(figure[1,2], colourbarthing, ticklabelsize = 30, label = colourbarlabel_arg, labelsize = colourbarlabelsize_arg)
-        return figure, ax
+        end
+		return figure, ax
 end
 
