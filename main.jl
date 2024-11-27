@@ -263,12 +263,12 @@ function agent_step!(agent, model)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
-		move_made_main_tuple =  move_gradient_alt(agent, model, k1, 8, 100, rho, target_area)
-		move_made_main = move_made_main_tuple[5]
+		move_made_main_tuple =  move_gradient(agent, model, k1, 8, 100, rho, target_area)
+		move_made_main = move_made_main_tuple
 	end
 	no_move[Int64(agent.id)] = move_made_main
 
-	agent.distance = distance(move_made_main_tuple[1], agent.pos)
+	#agent.distance = distance(move_made_main_tuple[1], agent.pos)
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -291,11 +291,13 @@ function agent_step!(agent, model)
 	com::Tuple{Float64, Float64} = center_of_mass(model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
 	agent.rot_o_alt = rot_o_alt_generic(r_com, agent.vel)	
-	
+
+	#=	
 	if(agent.collaborator == 0)
 		best_pos[agent.id] = move_made_main_tuple[1]
 		agent.best_A = move_made_main_tuple[2]
 	end
+	=#
 end
 	
 
