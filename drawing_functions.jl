@@ -223,7 +223,7 @@ function draw_graph(positions, adj)
 	return fig, ax
 end
 
-function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50, colourbarvisible_arg = 1)
+function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50, colourbarvisible_arg = 1, padding_arg = (10, 10, 10, 10))
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = Vector{Float64}(undef, 0)
         #colours= []
@@ -262,7 +262,9 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
         #print("About to do the figure\n")
 
 
-        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], 
+		figure_padding = padding_arg,
+		axis = (;
         xticklabelsize = 30,
         yticklabelsize = 30,
         xticks = range(fig_box[1][1], fig_box[2][1], 3),
