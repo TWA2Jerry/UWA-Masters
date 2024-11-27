@@ -77,7 +77,7 @@ function give_cell_circled(cell, pos; rhop = rho)
 end
 
 
-
+##Function that takes an agent, and given the model, gives the cell of that agent under that configuration
 function give_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; rhop = rho)
         all_agents_iterable =  allagents(model)
         temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
@@ -110,6 +110,7 @@ function give_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2,
 end
 
 
+###Given an agent and the current model state, give the cell of the agent with intermediate circle points added. 
 function give_agent_cell_circled(agent_i, model; rhop = rho)
         all_agents_iterable =  allagents(model)
         temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
