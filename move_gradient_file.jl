@@ -48,8 +48,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	alpha = 5*pi/4	#The total field of view, symmetric about the agent's current velocity
 	left_velocity_half_plane = generate_relic_alt(agent.pos, unit_v) #half plane to contain the left side of the field of view from the pov of the agent
 	right_velocity_half_plane = generate_relic_alt(agent.pos, rotate_vector(Float64(pi), unit_v)) #half plane to contain the left side of the field of view from the pov of the agent
-	left_half_plane = generate_relic_alt(agent.pos, unit_v, -pi/4, relic_id = -3) 
-	right_half_plane = generate_relic_alt(agent.pos, unit_v, pi/4-pi, relic_id = -3)	
+	left_half_plane = generate_relic_alt(agent.pos, unit_v, -(pi-alpha/2), relic_id = -3) 
+	right_half_plane = generate_relic_alt(agent.pos, unit_v, (pi-alpha/2)-pi, relic_id = -3)	
 	cell_illustrated = 0
 
 	for i::Int64 in 0:(q-1) #For every direction
@@ -94,10 +94,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			### Agent cell calculation
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-			show_calc = (agent.id == 1 && cell_illustrated == 0 && j > 30) ? 1 : 0
+			show_calc = (agent.id == 1 && cell_illustrated == 0) ? 1 : 0
 			bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_velocity_half_plane, left_half_plane], show_calculations = show_calc)
 			bounded_cell_2 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [right_velocity_half_plane, right_half_plane], show_calculations = show_calc)
-			if(agent.id == 1 && cell_illustrated == 0 && j > 30)
+			if(agent.id == 1 && cell_illustrated == 0)
 				print("For agent position at $(agent.pos), model step $(model.n) with vel $(agent.vel), the vel half plane was $(left_velocity_half_plane), and the left hp was $(left_half_plane)\n")
 				bounded_cell_1_circled = give_cell_circled(bounded_cell_1, new_agent_pos)
 				bounded_cell_2_circled = give_cell_circled(bounded_cell_2, new_agent_pos)

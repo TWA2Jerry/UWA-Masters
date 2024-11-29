@@ -14,7 +14,7 @@ function draw_cell(cell)
 		push!(points, cell[i][1])
 	end		
 	push!(points, cell[1][1])
-	figure = Makie.lines(points, aspect = 1)
+	figure = Makie.lines(points, axis = (;aspect = 1))
 	#display(Plots.plot(points))
 	return figure
 end
