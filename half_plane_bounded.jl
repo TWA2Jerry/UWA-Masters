@@ -55,7 +55,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 	for relic_half_plane in relic
 		push!(dq, relic_half_plane)
 		if(show_calculations == 1)
-			print("Half plane bounded here. Pushed half plane $(relic_half_plane)\n")
+			#print("Half plane bounded here. Pushed half plane $(relic_half_plane)\n")
 		end
 	end 
 
@@ -152,10 +152,13 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
                                         AgentsIO.save_checkpoint("simulation_save.jld2", model)
 					exit()
                                 end
+				if((vq[vlen][3] == -3 || vq[vlen][3] == -2) && show_calculations == 1)
+                    print("hp bounded here. Tried to delete a relic. Position is $(ri). Relic was $(newdq[len]). hp that did it is $(dq[i])\n. vq is $(vq)\n\n")
+                end
 				pop!(newdq)
 				len -= 1
 			end
-			#print("Popping from the back of the newdq. The back is $(vq[vlen])\n")
+			#if(show_calculations == 1) print("Popping from the back of the newdq. The back is $(vq[vlen])\n") end
 			pop!(vq)
                         vlen -= 1
                 end
@@ -168,10 +171,14 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 					AgentsIO.save_checkpoint("simulation_save.jld2", model)
 					exit()
 				end
+
+				if((vq[1][2] == -3 || vq[1][2] == -2) && show_calculations == 1)
+					print("hp bounded here. Tried to delete a relic. Position is $(ri). Relic was $(newdq[1]). hp that did it is $(dq[i])\n. vq is $(vq)\n\n")
+				end
 				popfirst!(newdq)
 				len -= 1
 			end
-			#print("Popping from the front of the dequeue. The front is $(vq[1])\n")
+			#if(show_calculations == 1) print("Popping from the front of the dequeue. The front is $(vq[1])\n") end
 			popfirst!(vq)
                         vlen -= 1
                 end
@@ -202,7 +209,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 			if(is_outside == 0 && invalid == 0)
 				push!(vq, (intersect_i, newdq[len][4], dq[i][4]))
 				vlen += 1
-				#print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n")
+				#if(show_calculations == 1) print("Normal intersect pushed for i = $i. Intersect was $intersect_i\n") end
 			elseif(!outside(newdq[len], b_circle_intersect_i, eps, inf))
 				if(dq[i][4] == -1)
 					push!(vq, (b_circle_intersect_i, 0, -1))
@@ -210,7 +217,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 					push!(vq, (b_circle_intersect_i, 0, dq[i][4]))
 				end
 				vlen += 1
-				#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+				#if(show_calculations == 1) print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n") end
 			else 
 				invalid_half_plane = 1
 			end	
@@ -223,10 +230,11 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 			end
 
 			vlen += 1
-			#print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n")
+			#if(show_calculations == 1) print("Circle intersect pushed for i = $i. Intersect was $b_circle_intersect_i\n") end
 		end
 		
 		if(invalid_half_plane == 1)
+			if((dq[i][4] == -3 || dq[i][4] == -2) && show_calculations == 1) print("Relic $(dq[i])  being ignored\n") end
 			continue
 		end
 
@@ -242,7 +250,7 @@ function voronoi_cell_bounded(model::UnremovableABM{ContinuousSpace{2, true, Flo
 		#Add the new half plane
                 push!(newdq, dq[i])
                 len += 1
-		#print("Half plane $i added. The dequeues vq and dq are now \n")
+		if(show_calculations == 1 && (dq[i][4] == -3 || dq[i][4] == -2)) print("Half plane $(dq[i]) added. The dequeues vq and dq are now \n") end
 		#print("$vq\n")
 		#print("$newdq\n")
         end

@@ -6,7 +6,7 @@ include("global_vars.jl")
 
 using StatsBase
 using VoronoiCells
-function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; qp = 1)
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
 	theta_0::Float64 = atan(unit_v[2], unit_v[1])
@@ -58,7 +58,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
 		
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (qp)*2*pi/q + eps)
 			continue
 		end
 		
@@ -94,10 +94,10 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			### Agent cell calculation
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-			show_calc = (agent.id == 1 && cell_illustrated == 0) ? 1 : 0
+			show_calc = (agent.id == 1 && cell_illustrated == 0 && j > 30 && i > 1) ? 1 : 0
 			bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_velocity_half_plane, left_half_plane], show_calculations = show_calc)
 			bounded_cell_2 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [right_velocity_half_plane, right_half_plane], show_calculations = show_calc)
-			if(agent.id == 1 && cell_illustrated == 0)
+			if(agent.id == 1 && cell_illustrated == 0 && j > 30 && i > 1)
 				print("For agent position at $(agent.pos), model step $(model.n) with vel $(agent.vel), the vel half plane was $(left_velocity_half_plane), and the left hp was $(left_half_plane)\n")
 				bounded_cell_1_circled = give_cell_circled(bounded_cell_1, new_agent_pos)
 				bounded_cell_2_circled = give_cell_circled(bounded_cell_2, new_agent_pos)
