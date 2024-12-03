@@ -1,5 +1,5 @@
 const no_simulations::Int64 = 20
-const no_steps::Int64 = 100
+const no_steps::Int64 = 5000
 
 
 include("prog.h")
@@ -7,7 +7,7 @@ include("prog.h")
 adata = [happiness]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [22000.0]
+target_dods = [1000*sqrt(12)]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],

@@ -45,12 +45,9 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
         relic_is_box::Int64 = -2
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 	
-	alpha = 5*pi/4	#The total field of view, symmetric about the agent's current velocity
-	left_velocity_half_plane = generate_relic_alt(agent.pos, unit_v) #half plane to contain the left side of the field of view from the pov of the agent
-	right_velocity_half_plane = generate_relic_alt(agent.pos, rotate_vector(Float64(pi), unit_v)) #half plane to contain the left side of the field of view from the pov of the agent
-	left_half_plane = generate_relic_alt(agent.pos, unit_v, -(pi-alpha/2), relic_id = -3) 
-	right_half_plane = generate_relic_alt(agent.pos, unit_v, (pi-alpha/2)-pi, relic_id = -3)	
-	cell_illustrated = 0
+	
+	velocity_half_plane = generate_relic_alt(agent.pos, unit_v)
+	
 
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
@@ -64,11 +61,9 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 		
 		no_angles_considered += 1
 		for j::Int64 in 1:m #For every position up to m
-			#= 
 			if(angular_conflict == 1) 
 				break
 			end
-			=#
 
 			conflict::Int64 = 0
 			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
@@ -88,38 +83,20 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 			if (conflict == 1)		
 				continue
 			end
-			
+
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
                 	
 			### Agent cell calculation
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
 			#agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, relic_half_plane) #Generates the set of vertices which define the voronoi cell
-			show_calc = (agent.id == 1 && cell_illustrated == 0 && j > 30 && i > 1) ? 1 : 0
-			bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_velocity_half_plane, left_half_plane], show_calculations = show_calc)
-			bounded_cell_2 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [right_velocity_half_plane, right_half_plane], show_calculations = show_calc)
-			if(agent.id == 1 && cell_illustrated == 0 && j > 30 && i > 1)
-				print("For agent position at $(agent.pos), model step $(model.n) with vel $(agent.vel), the vel half plane was $(left_velocity_half_plane), and the left hp was $(left_half_plane)\n")
-				bounded_cell_1_circled = give_cell_circled(bounded_cell_1, new_agent_pos)
-				bounded_cell_2_circled = give_cell_circled(bounded_cell_2, new_agent_pos)
-				fig = draw_cell(bounded_cell_1_circled)
-				Makie.scatter!([agent.pos], rotations = [atan(agent.vel[2], agent.vel[1])], marker= arrow_marker)
-				Makie.scatter!([new_agent_pos])
-				Makie.lines!([agent.pos, agent.pos .+ agent.vel .* 100], color = :red)
-				save("Cell_Images/s$(model.n)_left_cell.pdf", fig)
-				fig = draw_cell(bounded_cell_2_circled)
-                Makie.scatter!([agent.pos], rotations = [atan(agent.vel[2], agent.vel[1])], marker= arrow_marker)
-                Makie.scatter!([new_agent_pos])
-                Makie.lines!([agent.pos, agent.pos .+ agent.vel .* 100], color = :red)
-				save("Cell_Images/s$(model.n)_right_cell.pdf", fig)
-				cell_illustrated = 1
-			end	
+            bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}(undef, 0))
 			bounded_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
 			new_area::Float64 = bounded_area 
 
 
 			##Some error detection stuff
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
-				print("Conventional area exceeded by agent. For agent position of $(new_agent_pos), the cell was $(agent_voronoi_cell), with area of $new_area\n")
+				print("Conventional area exceeded by agent. For agent position of $new_agent_pos, the cell was $agent_voronoi_cell, with area of $new_area\n")
 				print("\n\n\nThe dq for this position was \n")
                         	for i in 1:length(temp_hp)
                                 	print("$(temp_hp[i])\n")
@@ -128,7 +105,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 				exit()
 			end
 
-			if(rot_ord_check(new_agent_pos, bounded_cell_1) != 1 && outside(left_velocity_half_plane, new_agent_pos, eps, inf) != 1)
+			if(rot_ord_check(new_agent_pos, bounded_cell_1) != 1)
+				#=
 				print("Rotational order violated for a potential position of $new_agent_pos\n")
 				print("\n\n\nThe dq for this position was \n")
                         	for i in 1:length(temp_hp)
@@ -140,18 +118,9 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 			angle_of_vec = atan(vec_to_point[2], vec_to_point[1])
                         		print("$(bounded_cell_1[i]), $(angle_of_vec)")
 				end
-				print("The cell vertices were\n")
-				for i in 1:length(bounded_cell_1)
-					print("$(bounded_cell_1[i][1])\n")
-				end
-				bounded_cell_1_circled = give_cell_circled(bounded_cell_1, new_agent_pos)
-                fig = draw_cell(bounded_cell_1_circled)
-                Makie.scatter!([agent.pos], rotations = [atan(agent.vel[2], agent.vel[1])], marker= arrow_marker)
-                Makie.scatter!([new_agent_pos])
-                Makie.lines!([agent.pos, agent.pos .+ agent.vel .* 100], color = :red)
-                save("Cell_Images/s$(model.n)_error_cell.pdf", fig)
+				=#
 				AgentsIO.save_checkpoint("simulation_save.jld2", model)
-				exit()
+				#exit()
 			end
 
 			#=		
