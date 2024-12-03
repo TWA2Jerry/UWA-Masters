@@ -1,5 +1,5 @@
 const no_simulations::Int64 = 20
-const no_steps::Int64 = 5000
+const no_steps::Int64 = 2000
 
 
 include("prog.h")
