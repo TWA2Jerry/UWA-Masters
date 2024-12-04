@@ -104,11 +104,11 @@ function init_thesis_2(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx,
 	push!(initial_positions, ro)
 	push!(initial_positions, ro .+ (1.0, -150.0))
 	push!(initial_positions, ro .+ (-sqrt(2)*75, sqrt(2)*75))
-	push!(initial_positions, ro .+ (190.0, 0.0))
+	push!(initial_positions, ro .+ (120.0, 0.0))
 	push!(initial_positions, ro .+ (cos(70*pi/180)*180, sin(70*pi/180)*180))
 
 	push!(initial_vels, (eps, 1.0))
-	push!(initial_vels, (1.0, 1.0))
+	push!(initial_vels, (cos(2*pi/16),sin(2*pi/16)))
 	push!(initial_vels, (1.0, 1.0))
 	push!(initial_vels, (1.0, 1.0))
 	push!(initial_vels, (1.0, 1.0))
