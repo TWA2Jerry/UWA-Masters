@@ -218,7 +218,7 @@ end
 
 
 
-function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; m_spacing = 1, qp = 1)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
@@ -267,7 +267,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
         relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 	best_pos::Tuple{Float64, Float64} = agent.pos
 	sampled_positions::Vector{Tuple{Float64, Float64}} = []
-	colours = []	
+	#colours = []	
+	colours::Vector{Float64} = Vector{Float64}(undef, 0) 
 	best_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = []	
 
 	for i::Int64 in 0:(q-1) #For every direction
@@ -275,7 +276,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 		angle_of_move::Float64 = atan(direction_of_move[2], direction_of_move[1])
 		rel_angle::Float64 = ((angle_of_move - theta_0 + pi)+2*pi)%(2*pi) - pi
 		angular_conflict::Int64 = 0
-		if(abs(rel_angle) > (1)*2*pi/q + eps)
+		if(abs(rel_angle) > (qp)*2*pi/q + eps)
 			continue
 		end
 		no_angles_considered += 1
@@ -287,7 +288,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			
 
 			conflict::Int64 = 0
-			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt
+			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt .* m_spacing
 			push!(sampled_positions, new_agent_pos)	
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position_tup in positions
@@ -380,6 +381,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 				best_voronoi_cell = agent_voronoi_cell
                 	end
 			
+			#=
 			colour = :black
 			if(conflict == 1 || angular_conflict == 1)
 				colour = :purple
@@ -393,6 +395,8 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 				colour = :red
 			end
 			push!(colours, colour)
+			=#
+			push!(colours, new_area/(pi*rho^2))
 
 		end
 		

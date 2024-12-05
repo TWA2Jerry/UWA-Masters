@@ -33,3 +33,5 @@ text!(model[1].pos .+ model[1].vel .* 30 .+ (10, 0), text = L"\hat{v}_1", align 
 #text!(model[2].pos .+ model[2].vel .* 30 .+ (10, 0), text = L"\hat{v}_1", align = (:left, :bottom), fontsize = 50)
 colsize!(fig.layout, 1, Aspect(1, 1.0))
 resize_to_layout!(fig)
+
+Colorbar(fig[1,2], limits = (0, 1), colormap = :cool)
