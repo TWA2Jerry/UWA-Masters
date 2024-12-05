@@ -45,11 +45,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, qp_arg = 1)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -125,17 +125,17 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
         	relic_is_box::Int64 = -1
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
 
-		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
-		num_neighbours[i] = no_neighbours(true_initial_cell)		
-		
+		num_neighbours[i] = no_neighbours(true_initial_cell)				
 		if(num_neighbours[i] > 20)
 			print("$(true_initial_cell)\n")
 		end
+		print("Bounded cell area was $initial_A, true area was $true_initial_A\n")
 		
 		init_sides_squared[i] = cell_sides_squared(true_initial_cell)	
 		#regularities[i] = regularity_metric(true_initial_cell, true_initial_A)	
@@ -263,7 +263,7 @@ function agent_step!(agent, model)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
-		move_made_main_tuple =  move_gradient(agent, model, k1, 8, 100, rho, target_area, qp = 4)
+		move_made_main_tuple =  move_gradient(agent, model, k1, 8, 100, rho, target_area, qp = model.qp)
 		move_made_main = move_made_main_tuple
 	end
 	no_move[Int64(agent.id)] = move_made_main

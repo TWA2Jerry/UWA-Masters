@@ -7,11 +7,13 @@ include("prog.h")
 adata = [happiness]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [100*sqrt(12)]
+target_dods = [1000.0*sqrt(12)]
+qp_args = [4]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
         :target_area_arg => target_dods,
+		:qp_arg => qp_args,
         #:left_bias_arg => left_biases
 ) 
 
