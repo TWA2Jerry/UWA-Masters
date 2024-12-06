@@ -104,7 +104,7 @@ function init_thesis_2(cellx, celly, no_agents, spacexspan, spaceyspan, offsetx,
 	push!(initial_positions, ro)
 	push!(initial_positions, ro .+ (1.0, -150.0))
 	push!(initial_positions, ro .+ (-sqrt(2)*75, sqrt(2)*75))
-	push!(initial_positions, ro .+ (120.0, 0.0))
+	push!(initial_positions, ro .+ (105.0, 0.0))
 	push!(initial_positions, ro .+ (cos(70*pi/180)*180, sin(70*pi/180)*180))
 
 	push!(initial_vels, (eps, 1.0))

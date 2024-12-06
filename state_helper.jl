@@ -255,16 +255,19 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	return figure, ax
 end
 
-function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1)
+function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1)
         ##First, show the position that the agent with id of id will go to
         kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
         q::Int64 = 8
         m::Int64 = m_arg
-        move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area, m_spacing = m_spacing_arg)
+        move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area, m_spacing = m_spacing_arg, qp = qp_arg)
         pot_pos::Tuple{Float64, Float64} = move_tuple[1]
         sampled_positions = move_tuple[3]
         sampled_colours = move_tuple[4]
-        best_area = move_tuple[2]
+        for colour in sampled_colours
+			print("$colour\n")
+		end
+		best_area = move_tuple[2]
         best_voronoi_cell = move_tuple[6]
         ##Next, evaluate and draw the voronoi tesselation of the model given that move of the agent
         positions::Vector{Tuple{Float64, Float64}} = []

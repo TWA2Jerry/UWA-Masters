@@ -295,12 +295,14 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			for neighbour_position_tup in positions
 				neighbour_position::Tuple{Float64, Float64} = neighbour_position_tup[1]
 				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+				#=
 					if(j == 1)
 						angular_conflict = 1
 					end
 					conflict = 1
 					break
-				end			
+				=#
+				end
 			end			
 			
 			if (conflict == 1 || angular_conflict == 1)		
@@ -312,9 +314,9 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			                	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane]) #Generates the set of vertices which define the voronoi cell
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, 2*rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane]) #Generates the set of vertices which define the voronoi cell
 			new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
-			
+			if(new_area < eps) print("move gradient file here, new area was weird. cell was $agent_voronoi_cell\n") end			
 
 			##Some error detection stuff
 			if(new_area > pi*rho^2 && abs(new_area-pi*rho^2) > 10^(7))
@@ -398,7 +400,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			push!(colours, colour)
 			=#
 			push!(colours, new_area/(pi*rho^2))
-
+			print("move_gradient file here. For direction $i, dist $j the colour was $(new_area/(pi*rho^2))\n")
 		end
 		
 		#Check area calculation through voronoi package
