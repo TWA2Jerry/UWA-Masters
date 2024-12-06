@@ -7,7 +7,7 @@ include("prog.h")
 adata = [happiness]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [1000.0*sqrt(12)]
+target_dods = [100.0*sqrt(12)]
 qp_args = [4]
 
 parameters = Dict(
