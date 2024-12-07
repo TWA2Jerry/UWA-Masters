@@ -137,3 +137,8 @@ function give_cell_forward_quick(id::Int64, model; rhop = rho)
 	end
 	return give_cell_forward(model[id].pos, neighbour_positions, model, model[id].vel; rhop = rhop)
 end
+
+###Function that calculates the forward bounded cell for an agent i in a potential position pos given the current state of the model
+function give_potential_cell_forward(id::Int64, model, pos::Tuple{Float64, Float64})
+	
+end

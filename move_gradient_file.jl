@@ -314,7 +314,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			                	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, 2*rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane]) #Generates the set of vertices which define the voronoi cell
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane]) #Generates the set of vertices which define the voronoi cell
 			new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			if(new_area < eps) print("move gradient file here, new area was weird. cell was $agent_voronoi_cell\n") end			
 

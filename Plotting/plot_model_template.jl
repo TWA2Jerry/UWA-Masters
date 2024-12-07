@@ -29,7 +29,7 @@ function plot_model(model; marker_arg = :circle, markersize_arg = 30)
 end
 =#
 
-function plot_model(model; marker_arg = :circle, markersize_arg = 30)
+function plot_model(model; marker_arg = :circle, markersize_arg = 30, limits_arg = (0, rect_bound, 0, rect_bound))
     model_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
     model_rotations = Vector{Float64}(undef, 0)
     for i in 1:nagents(model)
@@ -41,7 +41,7 @@ function plot_model(model; marker_arg = :circle, markersize_arg = 30)
 	fig = Figure(size = (100, 100), figure_padding = (20, 50, 20, 50))
 	
 	ax = Axis(fig[1,1],
-		limits = (0, rect_bound, 0, rect_bound), 
+		limits = limits_arg, 
         aspect = 1,
         xticklabelsize = 30,
         yticklabelsize = 30,
