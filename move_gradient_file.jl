@@ -219,7 +219,7 @@ end
 
 
 
-function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; m_spacing = 1, qp = 1)
+function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; m_spacing = 1, qp = 1, conflicts_arg = 1, conflict_dist_arg = 2.0)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
@@ -290,18 +290,16 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 
 			conflict::Int64 = 0
 			new_agent_pos::Tuple{Float64, Float64} = agent.pos .+ j .* direction_of_move .* agent_speed .* dt .* m_spacing
-			push!(sampled_positions, new_agent_pos)	
 			#Check first if there are no other agents in the potential position, note that we don't need to keep updating nearest neighbours since we assume the neighbours of a given agent are static
 			for neighbour_position_tup in positions
 				neighbour_position::Tuple{Float64, Float64} = neighbour_position_tup[1]
-				if norm(new_agent_pos .- neighbour_position) < 2.0 #If moving in this direction and this m causes a collision, don't consider a move in this direction
-				#=
+				if norm(new_agent_pos .- neighbour_position) < conflict_dist_arg && conflicts_arg == 1 #If moving in this direction and this m causes a collision, don't consider a move in this direction
+					
 					if(j == 1)
 						angular_conflict = 1
 					end
 					conflict = 1
 					break
-				=#
 				end
 			end			
 			
@@ -310,7 +308,7 @@ function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true,
 			end
 
 			#If there are no other agents in the potential position (no conflicts), go ahead and evaluate the new DOD
-
+			push!(sampled_positions, new_agent_pos)
 			                	
 			###
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")

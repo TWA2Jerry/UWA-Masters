@@ -255,12 +255,12 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	return figure, ax
 end
 
-function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1)
+function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1, draw_best_cell_arg = 1, conflict_dist_arg = 2.0)
         ##First, show the position that the agent with id of id will go to
         kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
         q::Int64 = 8
         m::Int64 = m_arg
-        move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area, m_spacing = m_spacing_arg, qp = qp_arg)
+        move_tuple = move_gradient_alt(model[id], model, kn, q, m, rho, model.target_area, m_spacing = m_spacing_arg, qp = qp_arg, conflict_dist_arg = conflict_dist_arg)
         pot_pos::Tuple{Float64, Float64} = move_tuple[1]
         sampled_positions = move_tuple[3]
         sampled_colours = move_tuple[4]
@@ -284,8 +284,10 @@ function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 	Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size, colormap = :cool) #The agents sampled positions
         #Makie.scatter!(model[id].pos, color = :blue, marker = :circle, markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
         Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
-        circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-        draw_agent_cell_bounded!(circled_cell)
+        if(draw_best_cell_arg == 1)
+			circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
+			draw_agent_cell_bounded!(circled_cell)
+		end
         #display(figure)
 end
 

@@ -29,7 +29,7 @@ function plot_model(model; marker_arg = :circle, markersize_arg = 30)
 end
 =#
 
-function plot_model(model; marker_arg = :circle, markersize_arg = 30, limits_arg = (0, rect_bound, 0, rect_bound))
+function plot_model(model; marker_arg = :circle, markersize_arg = 30, limits_arg = (0, rect_bound, 0, rect_bound), resize_to_layout_arg = 1)
     model_positions = Vector{Tuple{Float64, Float64}}(undef, 0)
     model_rotations = Vector{Float64}(undef, 0)
     for i in 1:nagents(model)
@@ -58,8 +58,10 @@ function plot_model(model; marker_arg = :circle, markersize_arg = 30, limits_arg
 	)
 	
 	colsize!(fig.layout, 1, Aspect(1, 1.0))
-    resize_to_layout!(fig)
-
+    
+	if(resize_to_layout_arg == 1)
+		resize_to_layout!(fig)
+	end
 
 	return fig, ax
 end
