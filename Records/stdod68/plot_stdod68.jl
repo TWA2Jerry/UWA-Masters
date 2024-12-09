@@ -1,4 +1,5 @@
 using LaTeXStrings
+model = AgentsIO.load_checkpoint("./Records/stdod68/stdod68_s50")
 fig, ax = give_model(model, fig_box = ((180, 180), (620, 620)), marker_size = 40)
 #fig, ax = give_model(model, fig_box = (model[2].pos .- (200, 200), model[2].pos .+ (200, 200)), marker_size = 40)
 hidedecorations!(ax)
