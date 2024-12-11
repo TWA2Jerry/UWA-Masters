@@ -255,7 +255,7 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	return figure, ax
 end
 
-function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1, draw_best_cell_arg = 1, conflict_dist_arg = 2.0)
+function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1, draw_best_cell_arg = 1, conflict_dist_arg = 2.0, colorrange_arg = (0, 1))
         ##First, show the position that the agent with id of id will go to
         kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
         q::Int64 = 8
@@ -281,7 +281,7 @@ function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
 
         print("Agent $id wanted to move to a new position of $pot_pos with area of $best_area from its old position of $(model[id].pos) which had an area of $(model[id].A)\n")
         Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker=:circle, color = :black, markersize = marker_size)
-	Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size, colormap = :cool) #The agents sampled positions
+	Makie.scatter!(sampled_positions, marker = :utriangle, color = sampled_colours, markersize = marker_size, colormap = :cool, colorrange = colorrange_arg) #The agents sampled positions
         #Makie.scatter!(model[id].pos, color = :blue, marker = :circle, markersize = marker_size, rotations = atan(model[id].vel[2], model[id].vel[1])) #The agent of interest's current position
         Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
         if(draw_best_cell_arg == 1)
