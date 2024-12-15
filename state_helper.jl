@@ -220,7 +220,7 @@ function draw_tesselation(positions, model)
 
 end
 
-function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10)
+function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, draw_best_cell_arg = 1)
 	##First, show the position that the agent with id of id will go to 
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
@@ -250,13 +250,16 @@ function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	#Makie.scatter!(pot_pos, markersize = marker_size/2, color = :cyan)
 	Makie.scatter!(pot_pos, markersize = marker_size, color = :cyan)
 	#Makie.scatter!(pot_pos, markersize = marker_size, color = :blue)
-	circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
-	draw_agent_cell_bounded!(circled_cell)
+	
+	if(draw_best_cell_arg == 1)
+		circled_cell = give_cell_circled(best_voronoi_cell, pot_pos)
+		draw_agent_cell_bounded!(circled_cell)
+	end
 	return figure, ax
 end
 
-function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1, draw_best_cell_arg = 1, conflict_dist_arg = 2.0, colorrange_arg = (0, 1))
-        ##First, show the position that the agent with id of id will go to
+function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker_size =10, m_arg = 100, m_spacing_arg = 1, qp_arg = 1, draw_best_cell_arg = 1, conflict_dist_arg = 2.0, colorrange_arg = (0, 1), show_calcs = 0)
+        #First, show the position that the agent with id of id will go to
         kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
         q::Int64 = 8
         m::Int64 = m_arg
@@ -264,8 +267,10 @@ function show_move!(model::UnremovableABM{ContinuousSpace{2, true, Float64, type
         pot_pos::Tuple{Float64, Float64} = move_tuple[1]
         sampled_positions = move_tuple[3]
         sampled_colours = move_tuple[4]
-        for colour in sampled_colours
-			print("$colour\n")
+        if(show_calcs == 1)
+			for colour in sampled_colours
+				print("$colour\n")
+			end
 		end
 		best_area = move_tuple[2]
         best_voronoi_cell = move_tuple[6]

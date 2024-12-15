@@ -85,6 +85,15 @@ function rotate_vector(theta::Float64, v::Tuple{Float64, Float64})
 	return (rv[1], rv[2]) 
 end
 
+function rotate_vector(theta::Irrational, v::Tuple{Float64, Float64})
+    rotation_matrix::Matrix{Float64} = [cos(theta) -sin(theta)
+                        sin(theta) cos(theta)]
+    vector_v::Vector{Float64} = [v[1], v[2]]
+    rv::Vector{Float64} = rotation_matrix * vector_v
+    return (rv[1], rv[2])
+end
+
+
 function center_of_pos(positions)
         com::Tuple{Float64, Float64} = (0.0, 0.0)
         n::Int64 = length(positions)

@@ -314,3 +314,25 @@ function mean_speed(model)
 	end
 	return mean_speed
 end
+
+function normalised_area(area::Float64; normalising_area::Float64 = pi*rho^2)
+	return	area/normalising_area
+end
+
+function normalised_area(agent; normalising_area::Float64 = pi*rho^2)
+	return agent.A/normalising_area
+end
+
+function normalised_true_area(agent; normalising_area::Float64 = pi*rho^2)
+	return agent.true_A/normalising_area
+end
+
+function mean_normalised_area(model)
+	mean_norm_area::Float64 = 0.0
+	n::Int64 = nagents(model)
+	for i in 1:n
+		mean_norm_area += model[i].A/n
+	end	
+	
+	return mean_norm_area
+end

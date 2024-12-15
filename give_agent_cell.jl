@@ -39,12 +39,14 @@ end
 
 
 ###Given a cell, circle it so that plot functions can draw the circle part 
-function give_cell_circled(cell, pos; rhop = rho)
+function give_cell_circled(cell, pos; rhop = rho, show_calcs = 0)
         cell_including_circle = []
         new_cell_i = cell
-        for point in new_cell_i 
+		if(show_calcs == 1)
+			for point in new_cell_i 
                 print("$point\n")
-        end
+			end
+		end
         print("Starting\n")
                 if(length(cell) <=  1)
 			circle_points = circle_seg(pos, rhop, 0.0, 2*pi)
@@ -138,7 +140,23 @@ function give_cell_forward_quick(id::Int64, model; rhop = rho)
 	return give_cell_forward(model[id].pos, neighbour_positions, model, model[id].vel; rhop = rhop)
 end
 
-###Function that calculates the forward bounded cell for an agent i in a potential position pos given the current state of the model
-function give_potential_cell_forward(id::Int64, model, pos::Tuple{Float64, Float64})
-	
+###Function that calculates the potential cell for agent id at a potential position of pos given the state of the current model, and also limiting the view of the agent's current heading to a total of angle
+function give_potential_cell_angled(id::Int64, model, pos::Tuple{Float64, Float64}; angle = pi)
+	neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
+	for i in 1:nagents(model)
+        if(i == id) continue end
+        push!(neighbour_positions, (model[i].pos, i))
+    end
+
+	left_half_plane = generate_relic_alt(model[id].pos, rotate_vector(angle/2, model[id].vel), pi)
+    right_half_plane = generate_relic_alt(model[id].pos, rotate_vector(-angle/2, model[id].vel))
+
+	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}}(undef, 0)
+
+	sampled_cell = voronoi_cell_bounded(model, pos, neighbour_positions, rho, eps, inf, temp_hp, model[id].vel, [left_half_plane, right_half_plane])
+	return sampled_cell
+end
+
+function give_potential_cell_angled_direction(id::Int64, model; angle = pi, m = 1, q = 8, qp = 1)
+	return give_potential_cell_angled(id, model, model[id].pos .+ m .* rotate_vector(qp*2*pi/q, model[id].vel), angle=angle)
 end

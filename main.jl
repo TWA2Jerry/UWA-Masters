@@ -75,8 +75,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	#init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -118,14 +118,19 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	
 		vix::Float64 = initial_vels[i][1]
 		viy::Float64 = initial_vels[i][2]
+		#=
 		relic_x::Float64 = -1.0*(-viy)
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
         	relic_is_box::Int64 = -1
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
+		=#
 
-		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
+		left_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(2*Float64(pi)/8, initial_vels[i]), pi)
+    right_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(-2*Float64(pi)/8, initial_vels[i]))
+
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [left_half_plane, right_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
@@ -182,8 +187,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Now make the agents with their respective DoDs and add to the model
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
+	init_best_q = 0
 	for i::Int32 in 1:no_birds
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0)
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, init_best_q)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -353,7 +359,8 @@ function model_step!(model)
 
 		#translate_periodic_quick(neighbour_positions) #Introduce period boundary conditions for Vicsek
 
-                ri::Tuple{Float64, Float64} = agent_i.pos
+        ri::Tuple{Float64, Float64} = agent_i.pos
+		#=
 		vix::Float64 = agent_i.vel[1]
 		viy::Float64 = agent_i.vel[2]
 		relic_x::Float64 = -1.0*(-viy)
@@ -362,9 +369,13 @@ function model_step!(model)
         	relic_angle::Float64 = atan(relic_y, relic_x)
         	relic_is_box::Int64 = -2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-		
+		=#
+
+		left_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(2*pi/8, agent_i.vel), pi)
+    right_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(-2*pi/8, agent_i.vel))		
+
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel)
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [left_half_plane, right_half_plane])
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod

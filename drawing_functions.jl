@@ -48,7 +48,8 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         for i in 1:nagents(model)
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
-        #Colorbar(figure[1,2], colourbarthing)
+        show_move!(model, tracked_agent)
+		#Colorbar(figure[1,2], colourbarthing)
       	#hidedecorations!(ax)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
 end
