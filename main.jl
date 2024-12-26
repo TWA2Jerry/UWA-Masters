@@ -45,11 +45,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, qp_arg = 1)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, q_arg = 8, qp_arg = 1)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -115,22 +115,10 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		for i in 1:length(neighbouring_positions)
 			print("$(neighbouring_positions[i])\n")
 		end =#		
-	
-		vix::Float64 = initial_vels[i][1]
-		viy::Float64 = initial_vels[i][2]
-		#=
-		relic_x::Float64 = -1.0*(-viy)
-        	relic_y::Float64 = -vix
-        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-        	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = -1
-        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
-		=#
+		
+		relic_half_plane = generate_relic(initial_positions[i], initial_vels[i])
 
-		left_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(2*Float64(pi)/8, initial_vels[i]), pi)
-    right_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(-2*Float64(pi)/8, initial_vels[i]))
-
-		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [left_half_plane, right_half_plane])
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
@@ -269,7 +257,7 @@ function agent_step!(agent, model)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
-		move_made_main_tuple =  move_gradient(agent, model, k1, 8, 100, rho, target_area, qp = model.qp)
+		move_made_main_tuple =  move_gradient(agent, model, k1, model.q, 100, rho, target_area, qp = model.qp)
 		move_made_main = move_made_main_tuple
 	end
 	no_move[Int64(agent.id)] = move_made_main
@@ -370,12 +358,10 @@ function model_step!(model)
         	relic_is_box::Int64 = -2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		=#
-
-		left_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(2*pi/8, agent_i.vel), pi)
-    right_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(-2*pi/8, agent_i.vel))		
+		relic_half_plane = generate_relic(agent_i.pos, agent_i.vel)
 
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [left_half_plane, right_half_plane])
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
