@@ -45,11 +45,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, q_arg = 8, qp_arg = 1)
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, q_arg = 8, qp_arg = 1, m_arg = 100)
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg)
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg, :m => m_arg)
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -257,7 +257,7 @@ function agent_step!(agent, model)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
-		move_made_main_tuple =  move_gradient(agent, model, k1, model.q, 100, rho, target_area, qp = model.qp)
+		move_made_main_tuple =  move_gradient(agent, model, k1, model.q, model.m, rho, target_area, qp = model.qp)
 		move_made_main = move_made_main_tuple
 	end
 	no_move[Int64(agent.id)] = move_made_main
