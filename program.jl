@@ -7,11 +7,11 @@ include("prog.h")
 adata = [(normalised_true_area, StatsBase.mean)]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [0.1sqrt(12)]
+target_dods = [1000*sqrt(12)]
 q_args = [8]
 qp_args = [1]
 m_args = [100]
-
+fov_args = [100.0]
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
@@ -19,6 +19,7 @@ parameters = Dict(
 		:q_arg => q_args,
 		:qp_arg => qp_args,
 		:m_arg => m_args,
+		:fov_arg => fov_args,
         #:left_bias_arg => left_biases
 ) 
 
