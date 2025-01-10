@@ -117,8 +117,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		end =#		
 		
 		#relic_half_plane = generate_relic(initial_positions[i], initial_vels[i])
-		left_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(2*Float64(pi)/8, initial_vels[i]), pi)
-    right_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(-2*Float64(pi)/8, initial_vels[i]))
+		left_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(6*Float64(pi)/16, initial_vels[i]), pi)
+    right_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(-6*Float64(pi)/16, initial_vels[i]))
 	
 		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [left_half_plane, right_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
@@ -361,8 +361,8 @@ function model_step!(model)
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
 		=#
 		#relic_half_plane = generate_relic(agent_i.pos, agent_i.vel)
-		left_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(2*pi/8, agent_i.vel), pi)
-    right_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(-2*pi/8, agent_i.vel))
+		left_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(6*pi/16, agent_i.vel), pi)
+    right_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(-6*pi/16, agent_i.vel))
 
 		#print("The time for calculating a cell was\n")
                 new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [left_half_plane, right_half_plane])

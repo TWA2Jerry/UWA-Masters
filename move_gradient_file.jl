@@ -48,8 +48,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	=#
 	
 	#relic_half_plane = generate_relic(agent.pos, agent.vel)	
-	left_half_plane = generate_relic_alt(agent.pos, rotate_vector(2*pi/8, unit_v), pi)
-	right_half_plane = generate_relic_alt(agent.pos, rotate_vector(-2*pi/8, unit_v))
+	left_half_plane = generate_relic_alt(agent.pos, rotate_vector(6*pi/16, unit_v), pi)
+	right_half_plane = generate_relic_alt(agent.pos, rotate_vector(-6*pi/16, unit_v))
 	
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
