@@ -1,6 +1,3 @@
-const no_simulations::Int64 = 1
-const no_steps::Int64 = 75000
-
 ###Define IO. files
 compac_frac_file = open("compaction_frac.txt", "w")
 mean_a_file = open("mean_area.txt", "w")

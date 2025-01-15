@@ -28,9 +28,6 @@ print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
 rect = Rectangle(Point2(0,0), Point2(Int64(trunc(rect_bound)), Int64(trunc(rect_bound))))
-include("genetic_alg.jl")
-genetic_alg_enforced::Int64 = -1
-
 
 include("some_math_functions.jl")
 include("give_agent_cell.jl")
@@ -48,11 +45,11 @@ print("Agent template created\n")
 
 ###Create the initialisation function
 using Random #for reproducibility
-function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = no_birds, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, area_args = (sqrt(12), 1000*sqrt(12)))
+function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1, no_bird = 100, seed = 123, tracked_agent_arg = tracked_agent, no_moves_arg = no_birds, left_bias_arg = 0.5, q_arg = 8, qp_arg = 1, m_arg = 100, fov_arg = 180.0, area_args = (sqrt(12), 1000*sqrt(12)))
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :lower_area => area_args[1], :upper_area => area_args[2])
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg, :m => m_arg, :fov => fov_arg, :lower_area => area_args[1], :upper_area => area_args[2])
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -74,24 +71,22 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	regularities = zeros(Float64, 100)
 	init_sides_squared = zeros(Float64, 100)
 	
-	pack_positions = Vector{Point2{Float64}}(undef, no_bird)
+	pack_positions = Vector{Point2{Float64}}(undef, no_birds)
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_bird, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	#assign_positions(2.0, 2.0, no_bird, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)	
-	#initialise_two_clusters(initial_positions, initial_vels, no_birds, domain_span = rect_bound)
-	for i in 1:no_bird
+	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	#init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
+	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
 		#push!(last_half_planes, [])
 		#=if(model.simulation_number==1)
 			push!(new_pos, (0.0, 0.0))
-		end
+		end=#
 		if(i == tracked_agent)
 			push!(tracked_path, initial_positions[i])
 		end
-		=#
 	end 
 
 	
@@ -104,11 +99,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#initial_dods = voronoi_area(model, initial_positions, rho)
 	initial_dods::Vector{Float64} = []
 	true_initial_dods::Vector{Float64} = []
-	for i::Int32 in 1:no_bird
+	for i::Int32 in 1:no_birds
 		print("\n\nCalculatin initial DOD for agent $i, at position $(initial_positions[i]).")
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
-		for j::Int32 in 1:no_bird
+		for j::Int32 in 1:no_birds
 			if(i == j)
 				continue 
 			end
@@ -120,27 +115,19 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		for i in 1:length(neighbouring_positions)
 			print("$(neighbouring_positions[i])\n")
 		end =#		
-	
-		vix::Float64 = initial_vels[i][1]
-		viy::Float64 = initial_vels[i][2]
-		relic_x::Float64 = -1.0*(-viy)
-        	relic_y::Float64 = -vix
-        	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-        	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = -1
-        	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, ri, relic_is_box)
-
-		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
+		
+		#relic_half_plane = generate_relic(initial_positions[i], initial_vels[i])
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
                 true_initial_A::Float64 = voronoi_area(model, ri, true_initial_cell, rho)
-		num_neighbours[i] = no_neighbours(true_initial_cell)		
-		
+		num_neighbours[i] = no_neighbours(true_initial_cell)				
 		if(num_neighbours[i] > 20)
 			print("$(true_initial_cell)\n")
 		end
+		print("Bounded cell area was $initial_A, true area was $true_initial_A\n")
 		
 		init_sides_squared[i] = cell_sides_squared(true_initial_cell)	
 		#regularities[i] = regularity_metric(true_initial_cell, true_initial_A)	
@@ -170,7 +157,6 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 			
 			area_zero[i] = 1
 		end
-	
 		if(abs(initial_A-init_tess_areas[i]) > eps)
 			print("Difference in area calculated between our code and the voronoi package. Our code calculated $initial_A, theirs $(init_tess_areas[i])\n")
 		end
@@ -188,8 +174,14 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Now make the agents with their respective DoDs and add to the model
 	total_area::Float64 = 0.0
 	total_speed::Float64 = 0.0
-	for i::Int32 in 1:no_bird
-		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), 0.0, 0.0, 0.0, 0, 0)
+	init_best_q = 0
+	for i::Int32 in 1:no_birds
+		init_rl = 0.0
+		init_distance = 0.0
+		init_best_A  = 0.0
+		init_rot_dir = 0
+		init_direction = 0
+		agent = bird(i, initial_positions[i], initial_vels[i], 1.0, initial_dods[i], true_initial_dods[i], target_area_arg,  num_neighbours[i], init_sides_squared[i], 0.0, 0.0, rand([0]), init_rl, init_distance, init_best_A, init_rot_dir, init_direction)
 		agent.vel = agent.vel ./ norm(agent.vel)
 		print("The area for agent $i was $(agent.A)\n")
 		#print("Initial velocity of $(agent.vel) \n")
@@ -205,11 +197,11 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	packing_fraction = nagents(model)*pi*1^2/model.CHA
 	init_rot_ord::Float64 = rot_ord(allagents(model))
 	init_rot_ord_alt::Float64 = rot_ord_alt(allagents(model))
-	print("Packing fraction at n = 0 is $(packing_fraction)\n")
+	#print("Packing fraction at n = 0 is $(packing_fraction)\n")
 	#write(compac_frac_file, "$packing_fraction ")
 	average_area::Float64 = total_area / nagents(model)
         #write(mean_a_file, "$average_area ")
-	average_speed::Float64 = total_speed/no_bird
+	average_speed::Float64 = total_speed/no_birds
 	#write(mean_speed_file, "$average_speed ")
 	#write(rot_o_file, "$init_rot_ord ")
 	#write(rot_o_alt_file, "$init_rot_ord_alt ")
@@ -227,7 +219,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	end	
 	#=
 	Plots.scatter(pack_positions, markersize = 6, label = "generators")
-annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_bird])
+annotate!([(pack_positions[n][1] + 0.02, pack_positions[n][2] + 0.03, Plots.text(n)) for n in 1:no_birds])
 display(Plots.plot!(init_tess, legend=:topleft))
 savefig("voronoi_pack_init_tess.png")
 	=#
@@ -237,7 +229,7 @@ savefig("voronoi_pack_init_tess.png")
 	previous_areas::Vector{Float64} = zeros(nagents(model))
         actual_areas::Vector{Float64} = zeros(nagents(model))
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area-pi*rho^2/2))
-	draw_figures(model, initial_positions, tracked_path)
+	#draw_figures(model, actual_areas, previous_areas, delta_max, initial_positions, tracked_path)
 	print("Finished initial figure\n")	
 
 	###Saving the state of the model for replays
@@ -247,7 +239,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	write_pos_vel(positions, velocities, pos_vels_file, 0)
+	#write_pos_vel(positions, velocities, pos_vels_file, 0)
 	#write_agent_vals(model)	
 
 	return model
@@ -269,13 +261,12 @@ function agent_step!(agent, model)
 	if(agent.collaborator == 1)
 		move_made_main = move_gradient_collab(agent, model, k1, rho, eta)
 	else
-		move_made_main_tuple =  move_gradient(agent, model, k1, 8, 10, rho, target_area)
+		move_made_main_tuple =  move_gradient(agent, model, k1, model.q, model.m, rho, target_area, qp = model.qp)
 		move_made_main = move_made_main_tuple[1]
 	end
 	no_move[Int64(agent.id)] = move_made_main
-	
-	agent.distance = distance(agent.pos, move_made_main_tuple[2])	
-	agent.best_A = move_made_main_tuple[3]
+
+	#agent.distance = distance(move_made_main_tuple[1], agent.pos)
 	
 	#Update the agent position and velocity
 	new_agent_pos::Tuple{Float64, Float64} = Tuple(agent.pos .+ dt .* k1[1:2])
@@ -297,11 +288,13 @@ function agent_step!(agent, model)
 	#move_agent!(agent, new_agent_pos, model)
 	com::Tuple{Float64, Float64} = center_of_mass(model)
 	r_com::Tuple{Float64, Float64} = agent.pos .- com
-	agent.rot_o_alt = rot_o_generic(r_com, agent.vel)	
-	
+
+	#=	
 	if(agent.collaborator == 0)
-		best_pos[agent.id] = move_made_main_tuple[2]
+		best_pos[agent.id] = move_made_main_tuple[1]
+		agent.best_A = move_made_main_tuple[2]
 	end
+	=#
 end
 	
 
@@ -313,10 +306,11 @@ function model_step!(model)
         all_agents_iterable = allagents(model)
 	rot_order::Float64 = rot_ord(allagents(model))
         rot_order_alt::Float64 = rot_ord_alt(allagents(model))
-	#print("Alternate rotational order returned as $rot_order_alt\n")	
+	print("Alternate rotational order returned as $rot_order_alt\n")	
+
 
 	#Calculate the correlation of the moves between agents just before they move
-	for i in 1:nagents(model)
+	for i in 1:no_birds
 		cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = give_agent_cell(model[i], model)
 		agent_neighbour_set::Vector{Int64} = neighbours(cell)
         	model[i].rot_o_alt_corr = agent_neighbour_correlation(model[i], agent_neighbour_set, model)
@@ -356,18 +350,21 @@ function model_step!(model)
 
 		#translate_periodic_quick(neighbour_positions) #Introduce period boundary conditions for Vicsek
 
-                ri::Tuple{Float64, Float64} = agent_i.pos
+        ri::Tuple{Float64, Float64} = agent_i.pos
+		#=
 		vix::Float64 = agent_i.vel[1]
 		viy::Float64 = agent_i.vel[2]
 		relic_x::Float64 = -1.0*(-viy)
         	relic_y::Float64 = -vix
         	relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
         	relic_angle::Float64 = atan(relic_y, relic_x)
-        	relic_is_box::Int64 = -1
+        	relic_is_box::Int64 = -2
         	relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent_i.pos, relic_is_box)
-		
+		=#
+		#relic_half_plane = generate_relic(agent_i.pos, agent_i.vel)
+
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel)
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
@@ -381,13 +378,10 @@ function model_step!(model)
                 true_new_area = voronoi_area(model, ri, true_new_cell_i, rho)
 		#detect_write_periphery(true_new_area, true_new_cell_i, model.n+1)	
 		agent_i.no_neighbours = no_neighbours(true_new_cell_i)	
-		
-		if(agent_i.no_neighbours > 40) 
-			print("Main here. $true_new_cell_i\n") 
+		if(agent_i.no_neighbours > 30) 
+			print("Main file here, regularities number is too large. $true_new_cell_i\n") 
 			exit() 
 		end
-		
-
 		agent_i.perimeter_squared = cell_sides_squared(true_new_cell_i)
 		#agent_i.regularity = regularity_metric(true_new_cell_i, true_new_area)
 		
@@ -414,28 +408,15 @@ function model_step!(model)
 	model.t += model.dt
         model.n += 1
 
-
-
-	###Rotation stuff
-	#=
-	if(rot_o(model) > 0.65 && genetic_alg_enforced == -1)
-                dominant_rot_direction = dominant_rotation(model)
-                enforce_rotation(model, dominant_rot_direction)
-                global genetic_alg_enforced = model.n
-        end
-	=#
-
-	ave_group_rot_o(model)
-	record_group_rot_o(model)	
-
+	
 	###Plotting
 	delta_max = max(abs(model.target_area - 0), abs(model.target_area - 0.5*pi*rho^2))
 	if(model.simulation_number == 1)
-		draw_figures(model,  new_pos, tracked_path)
+		draw_figures(model, new_pos, tracked_path)
 		#figure = draw_model_cell(model)
                 #save("./Cell_Images/shannon_flock_n_=_$(model.n).png", figure)
 	end	
-	#push!(tracked_path, new_pos[tracked_agent])
+	push!(tracked_path, new_pos[tracked_agent])
 	
 
 	##Statistics recording
@@ -446,27 +427,29 @@ function model_step!(model)
 		push!(velocities, model[i].vel)
 	end
 	packing_fraction = nagents(model)*pi/model.CHA
-	print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
-	print("Rotational order is given as $rot_order\n")
+	#print("Packing fraction at n = $(model.n) is $(packing_fraction)\n")
+	#=
 	if(model.n < no_steps)
-		#write(compac_frac_file, "$packing_fraction ")
-		#write(rot_o_file, "$rot_order ")
-		#write(rot_o_alt_file, "$rot_order_alt ")
+		write(compac_frac_file, "$packing_fraction ")
+		write(rot_o_file, "$rot_order ")
+		write(rot_o_alt_file, "$rot_order_alt ")
 	else
-		#write(compac_frac_file, "$packing_fraction\n")
-		#write(rot_o_file, "$rot_order\n")
-		#write(rot_o_alt_file, "$rot_order_alt\n")
+		write(compac_frac_file, "$packing_fraction\n")
+		write(rot_o_file, "$rot_order\n")
+		write(rot_o_alt_file, "$rot_order_alt\n")
 	end
+	=#
 	average_area = total_area / nagents(model)
 	average_speed = total_speed/nagents(model)
+	#=
 	if(model.n < no_steps)
-		#write(mean_a_file, "$average_area ")
-		#write(mean_speed_file, "$average_speed ")
+		write(mean_a_file, "$average_area ")
+		write(mean_speed_file, "$average_speed ")
 	else 
-		#write(mean_a_file, "$average_area\n")
-		#write(mean_speed_file, "$average_speed\n")
+		write(mean_a_file, "$average_area\n")
+		write(mean_speed_file, "$average_speed\n")
 	end
-	
+	=#
 	#=
 	last_hp_vert = open("Last_hp_vert.txt", "w")
 	for i in 1:nagents(model)
@@ -478,12 +461,10 @@ function model_step!(model)
 	close(last_hp_vert) 
 	=#
 	
-	
-
-	write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
 	
-	print("Finished step $(model.n) for simulation $(model.simulation_number) with a left_bias of $(model.left_bias).\n\n\n")
+	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
 end
 
 
