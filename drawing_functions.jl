@@ -26,7 +26,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  markersize = 10, rotations = rotations, color = :black)
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = arrow_marker,  markersize = 10, rotations = rotations, color = :black)
 	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
 	hidedecorations!(ax)
 

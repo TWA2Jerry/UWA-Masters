@@ -1,4 +1,4 @@
-const no_simulations::Int64 = 20
+const no_simulations::Int64 = 1
 const no_steps::Int64 = 5000
 
 
@@ -7,11 +7,11 @@ include("prog.h")
 adata = [(normalised_true_area, StatsBase.mean)]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [1000*sqrt(12)]
+target_dods = [100*sqrt(12)]
 q_args = [8]
-qp_args = [1]
+qp_args = [0]
 m_args = [100]
-fov_args = [100.0]
+fov_args = [30.0] #The FOV parameter (total angular vision in degrees)
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
