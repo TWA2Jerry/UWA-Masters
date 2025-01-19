@@ -9,7 +9,7 @@ mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
 target_dods = [1*sqrt(12)]
 q_args = [8]
-qp_args = [1]
+qp_args = [4]
 m_args = [100]
 fov_args = [100.0] #The FOV parameter (total angular vision in degrees)
 
