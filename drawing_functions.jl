@@ -6,7 +6,7 @@ import ColorSchemes.balance
 include("marker_template.jl")
 
 ###Function for drawing the plots for model step
-function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [], marker_arg = :circle, markersize_arg = 10)
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
@@ -25,9 +25,10 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         #print("About to do the figure\n")
 
 
-        #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = arrow_marker,  markersize = 10, rotations = rotations, color = :black)
-	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0)) #This is for detecting cave ins better
+        figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], 
+			axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1, title="Step $(model.n), FOV = $(model.fov) degrees, tdod = $(model.target_area)BL^2, q = $(model.q), qp = $(model.qp), m = $(model.m)"), 
+			marker = simulation_marker,  markersize = simulation_markersize, 
+			rotations = rotations, color = :black)
 	hidedecorations!(ax)
 
 	#=
@@ -48,7 +49,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
         for i in 1:nagents(model)
                 text!(new_pos[i], text = "$(trunc(radial_distances[i]))", align = (:center, :top))
         end=#
-        show_move!(model, tracked_agent)
+        #show_move!(model, tracked_agent)
 		#Colorbar(figure[1,2], colourbarthing)
       	#hidedecorations!(ax)
 	save("./Simulation_Images/shannon_flock_n_=_$(model.n).png", figure)
@@ -66,7 +67,7 @@ function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
         Colorbar(figure_actual[1,2], colourbarthing)
-        save("./Simulation_Images_Actual_Areas/shannon_flock_n_=_$(model.n).png", figure_actual)
+        #save("./Simulation_Images_Actual_Areas/shannon_flock_n_=_$(model.n).png", figure_actual)
 
 end
 
