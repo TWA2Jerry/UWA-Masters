@@ -48,8 +48,8 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
 	=#
 	
 	relic_half_plane = generate_relic(agent.pos, agent.vel)	
-	#left_half_plane = generate_relic_alt(agent.pos, rotate_vector((model.fov/2)/360.0 * 2*Float64(pi), unit_v), pi)
-	#right_half_plane = generate_relic_alt(agent.pos, rotate_vector(-(model.fov/2)/360.0 * 2*Float64(pi), unit_v))
+	left_half_plane = generate_relic_alt(agent.pos, rotate_vector((model.fov/2)/360.0 * 2*Float64(pi), unit_v), pi)
+	right_half_plane = generate_relic_alt(agent.pos, rotate_vector(-(model.fov/2)/360.0 * 2*Float64(pi), unit_v))
 	
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
@@ -91,7 +91,7 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 	
 			### Agent cell calculation
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-            bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane])
+            bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_half_plane, right_half_plane])
 			bounded_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
 			new_area::Float64 = bounded_area 
 

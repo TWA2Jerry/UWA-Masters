@@ -8,10 +8,10 @@ adata = [(normalised_true_area, StatsBase.mean)]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
 target_dods = [1000*sqrt(12)]
-q_args = [8]
+q_args = [24]
 qp_args = [1]
 m_args = [100]
-fov_args = [180.0] #The FOV parameter (total angular vision in degrees)
+fov_args = [40.0] #The FOV parameter (total angular vision in degrees)
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
@@ -23,8 +23,8 @@ parameters = Dict(
         #:left_bias_arg => left_biases
 ) 
 
-simulation_marker = :circle
-simulation_markersize = 10
+simulation_marker = arrow_marker
+simulation_markersize = 4
 
 
 
