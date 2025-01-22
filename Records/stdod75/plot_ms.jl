@@ -34,14 +34,14 @@ df3 = DataFrame(CSV.File("../stdod73/stdod73_combined_mdata"))
 
 Makie.lines!(main_axis, 
 		df1[:, :target_area_arg], 
-		df1[:, :rot_o_alt_mean_mean],
+		df1[:, :mean_speed_mean_mean],
 		color = :red,
 		linewidth = 5)
 #errorbars!(main_axis, df1[:, :target_area_arg], df1[:, :rot_o_alt_mean_mean], df1[:, :rot_o_alt_mean_std])
 
 Makie.lines!(main_axis, 
 		df2[:, :target_area_arg], 
-		df2[:, :rot_o_alt_mean_mean],
+		df2[:, :mean_speed_mean_mean],
 		color = :blue,
 		linewidth = 5)
 #errorbars!(main_axis, df2[:, :target_area_arg], df2[:, :rot_o_alt_mean_mean], df2[:, :rot_o_alt_mean_std])
@@ -50,7 +50,7 @@ hidespines!(main_axis, :t, :r)
 
 Makie.lines!(main_axis, 
 	df3[:, :target_area_arg], 
-	df3[:, :rot_o_alt_mean_mean],
+	df3[:, :mean_speed_mean_mean],
 	color = :grey,
 	linewidth = 5)
 #errorbars!(main_axis, df3[:, :target_area_arg], df3[:, :rot_o_alt_mean_mean], df3[:, :rot_o_alt_mean_std])

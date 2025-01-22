@@ -75,8 +75,8 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	empty!(tracked_path)
 	print("Pack positions i is $(pack_positions[1])\n")	
 	#Initialise the positions based on the spawn-error free function of assign_positions
-	assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
-	#init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
+	#assign_positions(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, (rect_bound-spawn_dim_x)/2, (rect_bound-spawn_dim_x)/2, initial_positions, initial_vels)
+	init_thesis_2(2.0, 2.0, no_birds, spawn_dim_x, spawn_dim_y, 0.0, 0.0, initial_positions, initial_vels)
 	for i in 1:no_birds
 		pack_positions[i] = initial_positions[i]
 		print("Pack positions i is $(pack_positions[i])\n")
@@ -119,7 +119,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		relic_half_plane = generate_relic(initial_positions[i], initial_vels[i])
 		left_half_plane = generate_relic_alt(initial_positions[i], rotate_vector((model.fov/2)/360.0 * 2*Float64(pi), initial_vels[i]), pi)
 		right_half_plane = generate_relic_alt(initial_positions[i], rotate_vector(-(model.fov/2)/360.0 * 2*Float64(pi), initial_vels[i]))
-		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [left_half_plane, right_half_plane])
+		initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [relic_half_plane])
 		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
 		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
@@ -143,7 +143,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		#What is this? last_half_planes[i], (initial_cell, temp_hp, ri)
 			
 		print("Initial DOD calculated to be $initial_A\n")
-		if(abs(initial_A) > pi*rho^2/2)
+		if(abs(initial_A) > pi*rho^2)
 			print("Main file here. Conventional area exceeded by agent $(i)in position $(initial_positions[i])\n")	
 			print("The cell was \n")
 			for i in 1:length(initial_cell)
@@ -364,7 +364,7 @@ function model_step!(model)
 		right_half_plane = generate_relic_alt(agent_i.pos, rotate_vector(-(model.fov/2)/360.0 * 2*Float64(pi), agent_i.vel))
 
 		#print("The time for calculating a cell was\n")
-                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [left_half_plane, right_half_plane])
+                new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell_bounded(model, ri, neighbour_positions, rho, eps, inf, temp_hp, agent_i.vel, [relic_half_plane])
                 new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
                 agent_i.A = new_area
 		#agent_i.tdodr = agent_i.A/agent_i.tdod
