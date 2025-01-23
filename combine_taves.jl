@@ -2,7 +2,7 @@
 using CSV
 using DataFrames
 using StatsBase
-record = "stdod66" 
+record = "stdod71" 
 mdf = DataFrame(CSV.File("Records/$(record)/$(record)_1stdod_mdata"))
 if(columnindex(mdf, :q_arg) > 0)
 	mdf = select!(mdf, Not([:q_arg]))
@@ -33,7 +33,7 @@ for i in [10, 100, 1000, 2000]
 	append!(mdf, mdft)
 end
 
-mdft = DataFrame(CSV.File("Records/$(record)/$(record)_$(22000)stdod_mdata"))
+mdft = DataFrame(CSV.File("Records/$(record)/$(record)_$(22000)_mdata"))
 if(columnindex(mdft, :q_arg) > 0)
     mdft = select!(mdft, Not([:q_arg]))
 end
