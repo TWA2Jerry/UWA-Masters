@@ -2,7 +2,7 @@
 using CSV
 using DataFrames
 using StatsBase
-record = "stdod71" 
+record = "stdod73" 
 mdf = DataFrame(CSV.File("Records/$(record)/$(record)_1stdod_mdata"))
 if(columnindex(mdf, :q_arg) > 0)
 	mdf = select!(mdf, Not([:q_arg]))
