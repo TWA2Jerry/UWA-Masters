@@ -91,7 +91,14 @@ function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, tru
                 	
 			### Agent cell calculation
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-            bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_half_plane, right_half_plane])
+			bounded_cell_1::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}}(undef, 0)
+			if(abs(model.fov - 180.0) < eps)
+				bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane])
+			elseif(abs(model.fov - 360.0) < eps)
+				bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move)
+			else 
+				bounded_cell_1 = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_half_plane, right_half_plane])
+			end
 			bounded_area::Float64 = voronoi_area(model, new_agent_pos, bounded_cell_1, rho) #Finds the area of the agent's voronoi cell
 			new_area::Float64 = bounded_area 
 
