@@ -11,7 +11,7 @@ target_dods = [1000*sqrt(12)]
 q_args = [8]
 qp_args = [1]
 m_args = [100]
-fov_args = [180.0] #The FOV parameter (total angular vision in degrees)
+fov_args = [100.0] #The FOV parameter (total angular vision in degrees)
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
