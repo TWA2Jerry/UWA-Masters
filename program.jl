@@ -7,11 +7,11 @@ include("prog.h")
 adata = [(normalised_true_area, StatsBase.mean)]
 mdata = [mean_speed, rot_o_alt, rot_o, polarisation]
 
-target_dods = [22000.0]
+target_dods = [1000.0*sqrt(12)]
 q_args = [8]
 qp_args = [1]
 m_args = [100]
-fov_args = [100.0] #The FOV parameter (total angular vision in degrees)
+fov_args = [360.0] #The FOV parameter (total angular vision in degrees). Please note that since Voronoi cells are only convex, we can only handle an FOV such that 0 < FOV < 180, or FOV = 360 degrees.
 
 parameters = Dict(
         :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
@@ -23,8 +23,9 @@ parameters = Dict(
         #:left_bias_arg => left_biases
 ) 
 
-simulation_marker = arrow_marker
-simulation_markersize = 4
+#Simulation marker details. The best settings are marker = :circle, markersize = 10, or marker = arrow_marker, markersize = 4
+simulation_marker = :circle 
+simulation_markersize = 10
 
 
 
