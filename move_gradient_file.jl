@@ -6,7 +6,7 @@ include("global_vars.jl")
 
 using StatsBase
 using VoronoiCells
-function move_gradient(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; qp = 1)
+function move_gradient(agent::bird, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; qp = 1)
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
 	theta_0::Float64 = atan(unit_v[2], unit_v[1])
@@ -227,7 +227,7 @@ end
 
 
 
-function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; m_spacing = 1, qp = 1, conflicts_arg = 1, conflict_dist_arg = 2.0, show_calcs = 0)
+function move_gradient_alt(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; m_spacing = 1, qp = 1, conflicts_arg = 1, conflict_dist_arg = 2.0, show_calcs = 0)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0

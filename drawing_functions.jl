@@ -6,7 +6,7 @@ import ColorSchemes.balance
 include("marker_template.jl")
 
 ###Function for drawing the plots for model step
-function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [], marker_arg = :circle, markersize_arg = 10)
+function draw_figures(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [], marker_arg = :circle, markersize_arg = 10)
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
@@ -56,7 +56,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 end
 
 
-function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_actual_DODs(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         print("draw actual called\n") 
 	##Draw the figure of the agents with their actual DODs
         for id in 1:nagents(model)
@@ -72,7 +72,7 @@ function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64
 end
 
 
-function draw_delta_DOD(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_delta_DOD(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the figure of the agents with their change in DOD
         for id in 1:nagents(model)
                 #print("Current A is $(model[id].A), previous areas was $(previous_areas[id])\n")
@@ -91,7 +91,7 @@ end
 
 
 ###Function for drawing future figures and whatnot
-function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_figures_futures(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = []
         rotations::Vector{Float64} = []
@@ -139,7 +139,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
         save("./Better_Positions/shannon_flock_n_=_$(model.n).png", figure)
 end
 
-function draw_better_positions(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, better_positions::Vector{Tuple{Float64, Float64}})
+function draw_better_positions(model, better_positions::Vector{Tuple{Float64, Float64}})
 	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in better_positions], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle, color = (:blue, 0.5))
 	Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker = :circle,  color = :black)
 	save("./Better_Positions/shannon_flock_n_=_$(model.n).png", figure)
@@ -196,7 +196,7 @@ function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}};
 	return figure	
 end
 
-function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), label_offset = (0.0, 0.0))
+function draw_half_planes_quick(id::Int64, model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), label_offset = (0.0, 0.0))
 	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:nagents(model)
 		push!(positions, model[i].pos)

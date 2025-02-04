@@ -1,6 +1,6 @@
 include("some_math_functions.jl")
  
-function find_nearest_agents(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function find_nearest_agents(agent::bird, model)
 	distance_id_v::Vector{Tuple{Float64, Int64}} = []
 	for i in 1:nagents(model)
 		if(model[i].id == agent.id) continue end
@@ -15,7 +15,7 @@ function find_nearest_agents(agent::bird, model::UnremovableABM{ContinuousSpace{
 	return ids
 end
 
-function find_turn(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function find_turn(agent::bird, model)
 	left_turns::Int32 = 0
 	agent_angle::Float64 = atan(agent.vel[2], agent.vel[1])
 	for i in 1:nagents(model)
@@ -36,7 +36,7 @@ function find_turn(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, F
 	return left_turns >= 0 ? 1 : -1
 end
 
-function find_cop(agent::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function find_cop(agent::bird, model)
 	agent_angle::Float64 = atan(agent.vel[2], agent.vel[1])
         positions::Vector{Tuple{Float64, Float64}} = []
 	for i in 1:nagents(model)

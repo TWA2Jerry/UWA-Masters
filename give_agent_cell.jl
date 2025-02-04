@@ -6,7 +6,7 @@ include("global_vars.jl")
 
 
 ###Given a position and neighbouring positions, give the uncircled, unbounded cell
-function give_cell(pos::Tuple{Float64, Float64}, neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, vel::Tuple{Float64, Float64} = (0.0, 0.0), relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), 0); rhop = rho)
+function give_cell(pos::Tuple{Float64, Float64}, neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, model, vel::Tuple{Float64, Float64} = (0.0, 0.0), relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), 0); rhop = rho)
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	new_cell_i::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = voronoi_cell(model, pos, neighbour_positions, rhop, eps, inf, temp_hp)
         #new_area::Float64 = voronoi_area(model, ri, new_cell_i, rho)
@@ -14,7 +14,7 @@ function give_cell(pos::Tuple{Float64, Float64}, neighbour_positions::Vector{Tup
         return new_cell_i
 end
 
-function give_cell_forward(pos::Tuple{Float64, Float64}, neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, vel::Tuple{Float64, Float64} = (0.0, 0.0), relic_half_plane_arg::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), 0); rhop = rho, relic_passed = 0)
+function give_cell_forward(pos::Tuple{Float64, Float64}, neighbour_positions::Vector{Tuple{Tuple{Float64, Float64}, Int64}}, model, vel::Tuple{Float64, Float64} = (0.0, 0.0), relic_half_plane_arg::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (0.0, (0.0, 0.0), (0.0, 0.0), 0); rhop = rho, relic_passed = 0)
         temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 	
 	ri::Tuple{Float64, Float64} = pos
@@ -80,7 +80,7 @@ end
 
 
 ##Function that takes an agent, and given the model, gives the cell of that agent under that configuration
-function give_agent_cell(agent_i::bird, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; rhop = rho)
+function give_agent_cell(agent_i::bird, model; rhop = rho)
         all_agents_iterable =  allagents(model)
         temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
         previous_areas::Vector{Float64} = zeros(nagents(model))

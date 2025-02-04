@@ -11,7 +11,7 @@ function plot_data_hist(data_lines, dimension_to_plot)
 	return figure
 end
 
-function plot_dod_hist(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function plot_dod_hist(model)
 	areas_on_periphery = []
 	areas_on_interior = []	
 	max_cell_area::Float64 = 0.0
