@@ -20,8 +20,11 @@ function move_gradient(agent::bird, model,  kn::Vector{Float64}, q::Int64, m::In
 		if(neighbour.id == agent.id)
 			continue
 		end
-			
-		if(abs(relative_angle(agent.vel, neighbour.pos .- agent.pos)) > model.fov/2)
+		
+		rel_angle = abs(relative_angle(agent.vel, neighbour.pos .- agent.pos))
+		#print("Relative angle is $rel_angle\n")	
+		if(abs(relative_angle(agent.vel, neighbour.pos .- agent.pos)) > model.fov/2 * (2*pi/360.0))
+			#print("move gradient file here. agent excluded due to being outside fov.\n")
 			continue
 		end
 
