@@ -20,6 +20,11 @@ function move_gradient(agent::bird, model,  kn::Vector{Float64}, q::Int64, m::In
 		if(neighbour.id == agent.id)
 			continue
 		end
+			
+		if(abs(relative_angle(agent.vel, neighbour.pos .- agent.pos)) > model.fov/2)
+			continue
+		end
+
 		pushfirst!(positions, (neighbour.pos, neighbour.id))	
 	end	
 	

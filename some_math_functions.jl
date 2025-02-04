@@ -124,3 +124,7 @@ end
 function cross(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
         return v1[1] * v2[2] - v1[2]*v2[1]
 end
+
+function relative_angle(v1::Tuple{Float64, Float64}, v2::Tuple{Float64, Float64})
+	return acos(dot(v1, v2)/(norm(v1) * norm(v2)))
+end
