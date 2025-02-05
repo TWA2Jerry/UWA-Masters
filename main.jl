@@ -104,9 +104,12 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		ri::Tuple{Float64, Float64}  = Tuple(initial_positions[i])
 		neighbouring_positions = Vector{Tuple{Tuple{Float64, Float64}, Int64}}(undef, 0)
 		for j::Int32 in 1:no_birds
-			if(i == j || abs(relative_angle(initial_vels[i], initial_positions[j] .- initial_positions[i])) > model.fov/2.0 * (2*pi/360.0))
+			
+			#=if(i == j || abs(relative_angle(initial_vels[i], initial_positions[j] .- initial_positions[i])) > model.fov/2.0 * (2*pi/360.0))
 				continue 
 			end
+			=#
+
 			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
 
@@ -351,10 +354,12 @@ function model_step!(model)
                                 continue
                         end
 	
+						#=
 						if(abs(relative_angle(agent_i.vel, agent_j.pos .- agent_i.pos)) > model.fov/2 * (2*pi/360.0))
 							continue
 						end		
-
+						=#
+					
                         push!(neighbour_positions, (agent_j.pos, agent_j.id))
                 end
 
