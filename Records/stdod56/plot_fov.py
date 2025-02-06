@@ -17,7 +17,7 @@ ax.set(
 
 ax.arrow(0., 0., 0., .7, head_width = 60*0.001, color = 'k')
 ax.annotate(r"$\hat{v}_i$", (0.0, 0.), xytext = (0.1,0.7), size = 40)
-ax.annotate(r"$\Phi$", (0.0, 0.0), xytext = (0.15, 0.15), size = 40) 
+ax.annotate(r"$\phi$", (0.0, 0.0), xytext = (0.15, 0.15), size = 40) 
 ax.set_axis_off()
 plt.tight_layout(pad = 0.0, w_pad = 0.0)
 #plt.show()

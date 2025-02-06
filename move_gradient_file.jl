@@ -7,6 +7,7 @@ include("global_vars.jl")
 using StatsBase
 using VoronoiCells
 function move_gradient(agent::bird, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; qp = 1)
+	print("move gradient called for model step $(model.n)\n")
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
 	theta_0::Float64 = atan(unit_v[2], unit_v[1])

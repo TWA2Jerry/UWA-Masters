@@ -109,7 +109,9 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 				continue 
 			end
 			=#
-
+			if(i== j)
+				continue
+			end
 			push!(neighbouring_positions, (Tuple(initial_positions[j]), j))
 		end
 
@@ -130,7 +132,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 		else
 			initial_cell = @time voronoi_cell_bounded(model, ri, neighbouring_positions, rho, eps, inf, temp_hp, initial_vels[i], [left_half_plane, right_half_plane])	
 		end
-		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 
+		initial_A::Float64 = voronoi_area(model, ri, initial_cell, rho) 	
 		#detect_write_periphery(initial_A, initial_cell, model.n) 	
 
 		true_initial_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = @time voronoi_cell(model, ri, neighbouring_positions, rho,eps, inf, temp_hp, initial_vels[i])
