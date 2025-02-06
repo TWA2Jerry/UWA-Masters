@@ -3,19 +3,35 @@ using CSV
 using DataFrames
 using StatsBase
 record = "stdod73" 
-mdf = DataFrame(CSV.File("Records/$(record)/$(record)_1stdod_mdata"))
+
+mdf = DataFrame(CSV.File("Records/$(record)/$(record)_01stdod_mdata"))
 if(columnindex(mdf, :q_arg) > 0)
-	mdf = select!(mdf, Not([:q_arg]))
+    mdf = select!(mdf, Not([:q_arg]))
 end
 
 if(columnindex(mdf, :m_arg) > 0)
     mdf = select!(mdf, Not([:m_arg]))
-end 
+end
 
 if(columnindex(mdf, :fov_arg) > 0)
     mdf = select!(mdf, Not([:fov_arg]))
+end
+
+
+mdf2 = DataFrame(CSV.File("Records/$(record)/$(record)_1stdod_mdata"))
+if(columnindex(mdf2, :q_arg) > 0)
+	mdf2 = select!(mdf2, Not([:q_arg]))
+end
+
+if(columnindex(mdf2, :m_arg) > 0)
+    mdf2 = select!(mdf2, Not([:m_arg]))
 end 
 
+if(columnindex(mdf2, :fov_arg) > 0)
+    mdf2 = select!(mdf2, Not([:fov_arg]))
+end 
+
+append!(mdf, mdf2)
 
 for i in [10, 100, 1000, 2000]
 	mdft = DataFrame(CSV.File("Records/$(record)/$(record)_$(i)stdod_mdata"))	
