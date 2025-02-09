@@ -10,7 +10,7 @@ main_figures = f[1,1] = GridLayout()
 offset = 5/4
 
 main_axis = Axis(f[1,1],
-	width = 800,
+	width = 1000,
 	xscale = log10,
 	xlabelsize = 50,
 	xlabel = "tDOD",
@@ -18,8 +18,8 @@ main_axis = Axis(f[1,1],
 	ylabel = L"\Phi_S",
 	xticklabelsize = 30,
 	yticklabelsize = 30,
-	xticks = ([1*sqrt(12), 10*sqrt(12),  100*sqrt(12), 1000*sqrt(12)], [L"1\times\sqrt{12}", L"10\times\sqrt{12}", L"100\times\sqrt{12}", L"1000\times\sqrt{12}"]),
-	limits = ((1*sqrt(12)/offset, 20000*sqrt(12)/offset), nothing),
+	xticks = ([0.1*sqrt(12), 1*sqrt(12), 10*sqrt(12),  100*sqrt(12), 1000*sqrt(12)], [L"0.1\times\sqrt{12}", L"1\times\sqrt{12}", L"10\times\sqrt{12}", L"100\times\sqrt{12}", L"1000\times\sqrt{12}"]),
+	limits = ((0.1*sqrt(12)/offset, 22000*sqrt(12)/offset), nothing),
 	xgridvisible = false, 
 	ygridvisible = false	
 )
