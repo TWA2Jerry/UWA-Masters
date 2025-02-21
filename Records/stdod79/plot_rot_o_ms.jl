@@ -18,7 +18,7 @@ ax1 = Axis(f[1,1],
 	xticklabelsize = 30,
 	yticklabelsize = 30,
 	yticks = ([0.6, 0.3, 0.0], ["0.6", "0.3", "0.0"]),
-	limits = ((0, 5001), nothing),
+	limits = ((0, 10001), nothing),
 	xgridvisible = false, 
 	ygridvisible = false	
 )
@@ -29,7 +29,7 @@ ax2 = Axis(f[1,1],
     ylabel = L"\Phi_S",
     yticklabelsize = 30,
     yaxisposition = :right,
-	limits = ((0, 5001), nothing),
+	limits = ((0, 10001), (0.0, 1.0)),
 	xgridvisible = false,
 	ygridvisible = false,
 	xticklabelsvisible = false
@@ -52,7 +52,7 @@ Makie.lines!(ax2,
 		df1[:, :step], 
 		df1[:, :mean_speed],
 		color = :blue,
-		linewidth = 5)
+		linewidth = 20)
 #errorbars!(main_axis, df2[:, :target_area_arg], df2[:, :rot_o_alt_mean_mean], df2[:, :rot_o_alt_mean_std])
 hidespines!(ax1, :t)
 hidespines!(ax2, :t)
