@@ -8,7 +8,7 @@ using StatsBase
 using VoronoiCells
 
 
-function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; qp = 1)
+function move_gradient(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0; qp = 1)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0
@@ -51,13 +51,11 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
 	temp_hp::Vector{Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64}} = []
 
 	#For the relic idea, we have a bounding half plane based on the agent's current position and velocity
-        relic_x::Float64 = -1.0*(-viy)
-        relic_y::Float64 = -vix
-        relic_pq::Tuple{Float64, Float64} = (relic_x, relic_y)
-        relic_angle::Float64 = atan(relic_y, relic_x)
-        relic_is_box::Int64 = -2
-        relic_half_plane::Tuple{Float64, Tuple{Float64, Float64}, Tuple{Float64, Float64}, Int64} = (relic_angle, relic_pq, agent.pos, relic_is_box)
 	best_pos::Tuple{Float64, Float64} = agent.pos
+
+	relic_half_plane = generate_relic(agent.pos, agent.vel)	
+	left_half_plane = generate_relic_alt(agent.pos, rotate_vector((model.fov/2)/360.0 * 2*Float64(pi), unit_v), pi)
+	right_half_plane = generate_relic_alt(agent.pos, rotate_vector(-(model.fov/2)/360.0 * 2*Float64(pi), unit_v))
 
 	for i::Int64 in 0:(q-1) #For every direction
 		direction_of_move::Tuple{Float64, Float64} = (cos(i*2*pi/q)*vix - sin(i*2*pi/q)*viy, sin(i*2*pi/q)*vix + cos(i*2*pi/q)*viy)
@@ -99,7 +97,14 @@ function move_gradient(agent, model::UnremovableABM{ContinuousSpace{2, true, Flo
                 	
 			###VORONOI CELL CALCULATION
 			#print("\nThe time to calculate a voronoi cell in move gradient is ")
-			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} =  voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move) #Generates the set of vertices which define the voronoi cell
+			agent_voronoi_cell::Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}} = Vector{Tuple{Tuple{Float64, Float64}, Int64, Int64}}(undef, 0)
+			if(abs(model.fov - 180.0) < eps)
+				agent_voronoi_cell = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [relic_half_plane])
+			elseif(abs(model.fov - 360.0) < eps)
+				agent_voronoi_cell = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move)
+			else 
+				agent_voronoi_cell = voronoi_cell_bounded(model, new_agent_pos, positions, rho, eps, inf, temp_hp, direction_of_move, [left_half_plane, right_half_plane])
+			end
 			new_area::Float64 = voronoi_area(model, new_agent_pos, agent_voronoi_cell, rho) #Finds the area of the agent's voronoi cell
 			
 
@@ -286,7 +291,7 @@ end
 
 
 
-function move_gradient_alt(agent, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister},  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
+function move_gradient_alt(agent, model,  kn::Vector{Float64}, q::Int64, m::Int64, rho::Float64, target_area::Float64 = 0.0)
 	#Calculate the unit vector in the current direction of motion
 	dt::Float64 = model.dt
 	unit_v::Tuple{Float64,Float64} = agent.vel ./ 1.0

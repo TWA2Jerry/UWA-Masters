@@ -12,13 +12,13 @@ adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :ro
 mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_rot_o, max_rot_o_group_size, no_groups]
 
 const no_simulations::Int64 = 1
-const no_steps::Int64 = 75000
+const no_steps::Int64 = 20000
 target_dods = [100.0]
 left_biases = [0.5, 0.75]
 lower_upper_areas = [(1*sqrt(12), 2000*sqrt(12))]
 q_args = [8]
-m_args = [100]
-qp_args = [4]
+m_args = [10]
+qp_args = [1]
 
 no_birds_vec = [100]
 
