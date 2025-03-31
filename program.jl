@@ -15,7 +15,7 @@ const no_simulations::Int64 = 1
 const no_steps::Int64 = 20000
 target_dods = [100.0]
 left_biases = [0.5, 0.75]
-lower_upper_areas = [(1*sqrt(12), 2000*sqrt(12))]
+lower_upper_areas = [(1*sqrt(12), 1000*sqrt(12))]
 q_args = [8]
 m_args = [10]
 qp_args = [1]
@@ -24,7 +24,7 @@ no_birds_vec = [100]
 
 parameters = Dict(
     :simulation_number_arg => [i for i::Int64 in 1:no_simulations],
-    :area_args => [(1*sqrt(12), 2000*sqrt(12))],
+    :area_args => lower_upper_areas,
 	:no_bird => no_birds_vec,
 	:q_arg => q_args,
 	:m_arg => m_args,
