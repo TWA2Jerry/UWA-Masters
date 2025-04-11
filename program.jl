@@ -11,14 +11,15 @@ no_hp_behind_ignored::Vector{Int32} = Vector{Int32}(undef, 0)
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, :distance, agent_regularity, :best_A, :A, :direction]
 mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_rot_o, max_rot_o_group_size, no_groups]
 
-const no_simulations::Int64 = 1
-const no_steps::Int64 = 20000
+const no_simulations::Int64 = 40
+const no_steps::Int64 = 75000
 target_dods = [100.0]
 left_biases = [0.5, 0.75]
-lower_upper_areas = [(1*sqrt(12), 1000*sqrt(12))]
+lower_upper_areas = [(1*sqrt(12), 10*sqrt(12))]
 q_args = [8]
 m_args = [10]
 qp_args = [1]
+fov_args = [180.0]
 
 no_birds_vec = [100]
 
@@ -29,6 +30,7 @@ parameters = Dict(
 	:q_arg => q_args,
 	:m_arg => m_args,
 	:qp_arg => qp_args,
+	:fov_arg => fov_args,
 	#:target_area_arg => target_dods,
 )
 

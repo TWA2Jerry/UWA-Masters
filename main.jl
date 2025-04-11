@@ -49,7 +49,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg, :m => m_arg, :fov => fov_arg, :lower_area => area_args[1], :upper_area => area_args[2])
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => (area_args[1] + area_args[2])/2.0, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg, :m => m_arg, :fov => fov_arg, :lower_area => area_args[1], :upper_area => area_args[2])
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
