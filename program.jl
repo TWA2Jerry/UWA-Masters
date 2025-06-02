@@ -15,11 +15,11 @@ const no_simulations::Int64 = 40
 const no_steps::Int64 = 75000
 target_dods = [100.0]
 left_biases = [0.5, 0.75]
-lower_upper_areas = [(1*sqrt(12), 22000.0)]
+lower_upper_areas = [(1*sqrt(12), 2000.0*sqrt(12))]
 q_args = [8]
 m_args = [10]
-qp_args = [1]
-fov_args = [180.0]
+qp_args = [4]
+fov_args = [360.0]
 
 no_birds_vec = [100]
 
