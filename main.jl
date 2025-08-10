@@ -49,7 +49,7 @@ function initialise(; target_area_arg = 1000*sqrt(12), simulation_number_arg = 1
 	#Create the space
 	space = ContinuousSpace((rect_bound, rect_bound); periodic = true)
 	#Create the properties of the model
-	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => (area_args[1] + area_args[2])/2.0, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg, :m => m_arg, :fov => fov_arg, :lower_area => area_args[1], :upper_area => area_args[2])
+	properties = Dict(:t => 0.0, :dt => 1.0, :n => 0, :CHA => 0.0, :target_area => target_area_arg, :simulation_number => simulation_number_arg, :tracked_agent => tracked_agent_arg, :no_moves => no_moves_arg, :left_bias => left_bias_arg, :qp => qp_arg, :q => q_arg, :m => m_arg, :fov => fov_arg, :lower_area => area_args[1], :upper_area => area_args[2])
 	
 	#Create the rng
 	rng = Random.MersenneTwister(Int64(seed))
@@ -248,7 +248,7 @@ savefig("voronoi_pack_init_tess.png")
 		push!(positions, model[i].pos)
 		push!(velocities, model[i].vel)
 	end
-	#write_pos_vel(positions, velocities, pos_vels_file, 0)
+	write_pos_vel(positions, velocities, pos_vels_file, 0)
 	#write_agent_vals(model)	
 
 	return model
@@ -486,7 +486,7 @@ function model_step!(model)
 	close(last_hp_vert) 
 	=#
 	
-	#write_pos_vel(positions, velocities, pos_vels_file, model.n)
+	write_pos_vel(positions, velocities, pos_vels_file, model.n)
 	#write_agent_vals(model)
 	
 	print("Finished step $(model.n) for simulation $(model.simulation_number) with a target DOD of $(model.target_area).\n\n\n")
