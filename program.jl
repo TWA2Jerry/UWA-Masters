@@ -11,11 +11,11 @@ no_hp_behind_ignored::Vector{Int32} = Vector{Int32}(undef, 0)
 adata = [happiness, :true_A, :perimeter_squared, :no_neighbours, :rot_o_alt, :rot_o_alt_corr, :distance, agent_regularity, :best_A, :A, :direction]
 mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_rot_o, max_rot_o_group_size, no_groups]
 
-const no_simulations::Int64 = 1
-const no_steps::Int64 = 40000
-target_dods = [(1*sqrt(12)+2000*sqrt(12))/2.0]
+const no_simulations::Int64 = 40
+const no_steps::Int64 = 75000
+target_dods = [(1*sqrt(12)+1750*sqrt(12))/2.0]
 left_biases = [0.5, 0.75]
-lower_upper_areas = [(1*sqrt(12), 2000*sqrt(12))]
+lower_upper_areas = [(1*sqrt(12), 1750*sqrt(12))]
 q_args = [8]
 m_args = [10]
 qp_args = [1]
