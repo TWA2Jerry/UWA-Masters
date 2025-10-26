@@ -13,9 +13,9 @@ mdata = [mean_speed, rot_o_alt, polarisation, rot_o, ave_group_rot_o, max_group_
 
 const no_simulations::Int64 = 40
 const no_steps::Int64 = 75000
-target_dods = [(1*sqrt(12)+1875*sqrt(12))/2.0]
+target_dods = [(1*sqrt(12)+2375.0*sqrt(12))/2.0]
 left_biases = [0.5, 0.75]
-lower_upper_areas = [(1*sqrt(12), 1875*sqrt(12))]
+lower_upper_areas = [(1*sqrt(12), 2375.0*sqrt(12))]
 q_args = [8]
 m_args = [10]
 qp_args = [1]
