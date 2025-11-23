@@ -1,10 +1,11 @@
 using CairoMakie
 using Plots
 
-function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", linewidth_arg = 10, labelvisible_arg = true, limits_arg = (nothing, nothing), figure_padding_arg = (1, 1, 1, 1))
+function give_line_plot(data_points; label_arg = "", xlabel_arg = "", ylabel_arg = "", linewidth_arg = 10, labelvisible_arg = true, limits_arg = (nothing, nothing), figure_padding_arg = (1, 1, 1, 1), xscale_arg = :identity)
 	fig = Figure(figure_padding = figure_padding_arg)
 	ax = Axis(fig[1,1],
-		limits = limits_arg,
+			xscale = xscale_arg,
+			limits = limits_arg,
             #width = 900,
             xlabelsize = 50,
             ylabelsize = 50,

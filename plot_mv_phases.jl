@@ -1,0 +1,58 @@
+using CairoMakie
+using LaTeXStrings
+include("prog.h")
+
+f = Figure(size= (2000, 300))
+main_figures = f[1,1] = GridLayout()
+main_axis = Axis(f[1,1])
+lower_figs = main_figures[1,1]
+
+offset = 5/4
+
+lower_ax1 = Axis(lower_figs, 
+	width = 800,
+	xscale = log10,
+	xlabelsize = 50,
+	xlabel = "u",
+	ylabelsize = 50, 
+	ylabel = L"\Phi_{R*}",
+	xticklabelsize = 30,
+	yticklabelsize = 30,
+	#xticks = ([10*sqrt(12), 100, 100*sqrt(12), 1000, 1000*sqrt(12), 10000], [L"10\times\sqrt{12}", "100", L"100\times\sqrt{12}", "1000", L"1000\times\sqrt{12}", "10000"]),
+	#limits = ((10, 10000*sqrt(12)), nothing),
+	xticks = ([10*sqrt(12),  100*sqrt(12), 1000*sqrt(12)], [L"10\times\sqrt{12}", L"100\times\sqrt{12}", L"1000\times\sqrt{12}"]),
+	limits = ((10*sqrt(12)/offset, 20000*sqrt(12)/offset), nothing),
+	xgridvisible = false, 
+	ygridvisible = false	
+)
+#rowsize!(main_figures, 2, Fixed(400))
+hidedecorations!(main_axis)
+hidespines!(main_axis)
+
+#hidedecorations!(lower_ax1)
+#hidespines!(lower_ax1)
+
+
+###Process rot_o data 
+rot_o_alt_taves_file = open("Records/mv131/mv131_data", "r")
+tdods_rot_o_alt_lines = readlines(rot_o_alt_taves_file)
+tdods = Vector{Float64}(undef, 0)
+rot_o_alts = Vector{Float64}(undef, 0)
+for i in 2:length(tdods_rot_o_alt_lines)
+    line = tdods_rot_o_alt_lines[i]
+    split_line = parse.(Float64, split(line, ","))
+    push!(tdods, split_line[1])
+    push!(rot_o_alts, split_line[3])
+end
+
+
+Makie.lines!(lower_ax1, tdods, rot_o_alts)
+hidespines!(lower_ax1, :t, :r)
+#Makie.xlims!(10*sqrt(12), 10000*sqrt(12))
+
+#Makie.bracket!(lower_ax1,  log10(10*sqrt(12)), 0.1, log10(100*sqrt(12)), 0.1, text = "Crystal", style = :curly)
+#Makie.bracket!(lower_ax1,  log10(10*sqrt(12)/offset), 0.1, log10(100*sqrt(12)), 0.1, text = "Solid", style = :curly)
+#Makie.bracket!(lower_ax1,  log10(100*sqrt(12)), 0.1, log10(2000*sqrt(12)), 0.1, text = "Swarm", style = :curly)
+#Makie.bracket!(lower_ax1, log10(2000*sqrt(12)), 0.1, log10(20000*sqrt(12)), 0.1, text = "Gas", style = :curly)
+#Makie.bracket!(lower_ax1, log10(2000*sqrt(12)), 0.1, log10(20000*sqrt(12)/offset), 0.1, text = "Diffusive", style = :curly)
+resize_to_layout!(f)
