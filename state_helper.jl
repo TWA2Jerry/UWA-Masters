@@ -48,7 +48,7 @@ function display_model_cell(model)
 end
 
 ###Function which returns a figure of the model
-function give_model(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size = 20, colour = :black)
+function give_model(model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size = 20, colour = :black)
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
         colours::Vector{Float64} = []
@@ -86,7 +86,7 @@ end
 
 
 ###Function that returns a figure of the cells for the entire model. 
-function give_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model_cell(model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
 	##Scatter the agent positions
 	b_positions::Vector{Tuple{Float64, Float64}} = []
 	colours::Vector{Float64} = []
@@ -137,7 +137,7 @@ function give_model_cell(model::UnremovableABM{ContinuousSpace{2, true, Float64,
 	return figure		
 end
 
-function give_model_cell_circled(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model_cell_circled(model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
         colours::Vector{Float64} = []
@@ -222,7 +222,7 @@ function draw_tesselation(positions, model)
 
 end
 
-function show_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size= 20, colour = :black)
+function show_move(model, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size= 20, colour = :black)
 	##First, show the position that the agent with id of id will go to 
 	kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
 	q::Int64 = 8
@@ -338,7 +338,7 @@ end
 
 
 
-function give_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int32)
+function give_move(model, id::Int32)
         ##First, show the position that the agent with id of id will go to
         kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
         q::Int64 = 8
@@ -360,7 +360,7 @@ function give_move(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeo
 	return move_tuple
 end
 
-function find_model_limits(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister})
+function find_model_limits(model)
 	minx = model[1].pos[1]
         maxx = model[1].pos[1]
         miny = model[1].pos[2]
@@ -391,7 +391,7 @@ function draw_cell_context(cell, positions::Vector{Tuple{Float64, Float64}}; fig
 	return figure, ax
 end
 
-function draw_cell_context_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), circled = 0, rhop = rho, filled = 0)
+function draw_cell_context_quick(id::Int64, model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), circled = 0, rhop = rho, filled = 0)
 	ri::Tuple{Float64, Float64} = model[id].pos
 	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:nagents(model)
@@ -405,7 +405,7 @@ function draw_cell_context_quick(id::Int64, model::UnremovableABM{ContinuousSpac
 	return draw_cell_context(cell_id, positions; fig_box = fig_box, filled = filled)
 end
 
-function draw_cell_forward_context_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), circled = 0, rhop = rho, filled = 0)
+function draw_cell_forward_context_quick(id::Int64, model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)), circled = 0, rhop = rho, filled = 0)
         ri::Tuple{Float64, Float64} = model[id].pos
         positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
         for i in 1:nagents(model)
@@ -418,7 +418,7 @@ function draw_cell_forward_context_quick(id::Int64, model::UnremovableABM{Contin
         return draw_cell_context(cell_id, positions; fig_box = fig_box, filled= filled)
 end
 
-function give_model_moves(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model_moves(model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
         positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, nagents(model))
         colours::Vector{Float64} = Vector{Float64}(undef, nagents(model))
         best_positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, nagents(model))           
@@ -445,7 +445,7 @@ function give_model_moves(model::UnremovableABM{ContinuousSpace{2, true, Float64
         return figure, ax
 end
 
-function return_show_move_figure(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size= 20, colour = :black)
+function return_show_move_figure(model, id::Int64; view_box = ((0.0, 0.0), (rect_bound, rect_bound)), marker = '→', marker_size= 20, colour = :black)
         ##First, show the position that the agent with id of id will go to
         kn::Vector{Float64} = [0.0, 0.0, 0.0, 0.0]
         q::Int64 = 8
@@ -486,7 +486,7 @@ end
 
 
 ###Function that draws the circle and forward bounded voronoi tesselation
-function give_model_cell_forward_circled(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function give_model_cell_forward_circled(model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
         ##Scatter the agent positions
         b_positions::Vector{Tuple{Float64, Float64}} = []
         colours::Vector{Float64} = []

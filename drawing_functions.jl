@@ -6,11 +6,11 @@ import ColorSchemes.balance
 include("marker_template.jl")
 
 ###Function for drawing the plots for model step
-function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, new_pos::Vector{Tuple{Float64, Float64}} = [], path_points::Vector{Tuple{Float64, Float64}} = []; marker_size = 40)
+function draw_figures(model, new_pos::Vector{Tuple{Float64, Float64}} = [], path_points::Vector{Tuple{Float64, Float64}} = []; marker_size = 40)
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = Vector{Float64}(undef, 0)
         #colours = []
-	rotations::Vector{Float64} = []
+	rotation::Vector{Float64} = []
         allagents_iterable = allagents(model)
         target_area::Float64 = model.target_area
         com::Tuple{Float64, Float64} = center_of_mass(model)
@@ -21,7 +21,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 	group_rot_o_info(model, group, group_rot_o)
 	
 	for id in 1:nagents(model)
-                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+                push!(rotation, atan(model[id].vel[2], model[id].vel[1]))
 		
 		rot_o_raw = rot_o_generic(model[id].pos .- com, model[id].vel)
 		#=	
@@ -45,7 +45,7 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = :black)
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = arrow_marker,  markersize = 5, rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = :cool) #This is for detecting cave ins better
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = arrow_marker,  markersize = 5, rotation = rotation, color = colours, colorrange= (0.0, 1.0), colormap = :cool) #This is for detecting cave ins better
 	#figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→',  markersize = marker_size, rotations = rotations, color = colours) 	
 
 	#=	
@@ -73,13 +73,13 @@ function draw_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, ty
 end
 
 
-function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_actual_DODs(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         print("draw actual called\n") 
 	##Draw the figure of the agents with their actual DODs
         for id in 1:nagents(model)
                 colours[id] = actual_areas[id]/(pi*rho^2)
         end
-        figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
+        figure_actual, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotation = rotation, color = colours, colormap = :viridis, colorrange = (0.0, 0.250)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
@@ -89,13 +89,13 @@ function draw_actual_DODs(model::UnremovableABM{ContinuousSpace{2, true, Float64
 end
 
 
-function draw_delta_DOD(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_delta_DOD(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the figure of the agents with their change in DOD
         for id in 1:nagents(model)
                 #print("Current A is $(model[id].A), previous areas was $(previous_areas[id])\n")
                 colours[id] = (abs(model[id].A - model.target_area)-abs(previous_areas[id]-model.target_area))/(2*delta_max)
         end
-        figure_difference, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = :viridis, colorrange = (-0.1, 0.1)) #Note that I have no idea what the colorbarthing is for
+        figure_difference, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; limits = (0, rect_bound, 0, rect_bound)), marker = '→', markersize = 20, rotation = rotation, color = colours, colormap = :viridis, colorrange = (-0.1, 0.1)) #Note that I have no idea what the colorbarthing is for
         #=for i in 1:nagents(model)
                 text!(new_pos[i], text = "$i", align = (:center, :top))
         end=#
@@ -108,10 +108,10 @@ end
 
 
 ###Function for drawing future figures and whatnot. I.e, plot the agents' current position, as well as their desired (ideal) position from sampling
-function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
+function draw_figures_futures(model, actual_areas::Vector{Float64}, previous_areas::Vector{Float64}, delta_max::Float64, new_pos::Vector{Tuple{Float64, Float64}}, path_points::Vector{Tuple{Float64, Float64}} = [])
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = []
-        rotations::Vector{Float64} = []
+        rotation::Vector{Float64} = []
         allagents_iterable = allagents(model)
         target_area::Float64 = model.target_area
         com::Tuple{Float64, Float64} = center_of_mass(model)
@@ -119,7 +119,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
                 #push!(colours, abs(model[id].A-model.target_area)/(delta_max))
                 #push!(colours, radial_distance(model[id], com)/200.0)
                 push!(colours, distance(model[id].pos, best_pos[id]))
-                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+                push!(rotation, atan(model[id].vel[2], model[id].vel[1]))
         end
         #figure, _ = abmplot(model)
         print("\n\n\nThe number of points in new_pos is $(length(new_pos)), the first element is $(new_pos[1])\n")
@@ -127,8 +127,8 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
 
 
         #figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in new_pos], axis = (; title = "Model state at step $(model.n)", limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = '→', markersize = 20, rotations = rotations, color = colours, colormap = cgrad(:matter, 300, categorical = true))
-	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotations = rotations, color = colours, colormap = :viridis, colorrange = (0.0, 100.0))
-	Makie.scatter!([Tuple(point) for point in best_pos], marker = :circle,  rotations = rotations, color = :blue)
+	figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle,  rotation = rotation, color = colours, colormap = :viridis, colorrange = (0.0, 100.0))
+	Makie.scatter!([Tuple(point) for point in best_pos], marker = :circle,  rotation = rotation, color = :blue)
 	
 	for i in 1:length(new_pos)
 		Makie.lines!([new_pos[i], best_pos[i]], color= :black)
@@ -156,7 +156,7 @@ function draw_figures_futures(model::UnremovableABM{ContinuousSpace{2, true, Flo
 end
 
 ###This functions draws, for the current model, all positions that are better than an agents' current position during sampling
-function draw_better_positions(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, better_positions::Vector{Tuple{Float64, Float64}})
+function draw_better_positions(model, better_positions::Vector{Tuple{Float64, Float64}})
 	figure, ax, colourbarthing = Makie.scatter([Tuple(point) for point in better_positions], axis = (;  limits = (0, rect_bound, 0, rect_bound), aspect = 1), marker = :circle, color = (:blue, 0.5))
 	Makie.scatter!([model[i].pos for i in 1:nagents(model)], marker = :circle,  color = :black)
 	save("./Better_Positions/shannon_flock_n_=_$(model.n).png", figure)
@@ -204,7 +204,7 @@ function draw_half_planes(id::Int64, positions::Vector{Tuple{Float64, Float64}};
 	return figure	
 end
 
-function draw_half_planes_quick(id::Int64, model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
+function draw_half_planes_quick(id::Int64, model; fig_box = ((0.0, 0.0), (rect_bound, rect_bound)))
 	positions::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0)
 	for i in 1:nagents(model)
 		push!(positions, model[i].pos)
@@ -223,11 +223,11 @@ function draw_graph(positions, adj)
 	return fig, ax
 end
 
-function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50, colourbarvisible_arg = 1, padding_arg = (10, 10, 10, 10))
+function return_thesis_figures(model, path_points::Vector{Tuple{Float64, Float64}} = Vector{Tuple{Float64, Float64}}(undef, 0); fig_box = ((0,0), (rect_bound, rect_bound)), marker = '→', marker_size = 30, hide_decorations = 0, colourmap_arg  = :viridis, colourbarlabel_arg = "", colourbarlabelsize_arg = 50, colourbarvisible_arg = 1, padding_arg = (10, 10, 10, 10))
         ##Draw the standard figure of the agents with their DODs after the step
         colours::Vector{Float64} = Vector{Float64}(undef, 0)
         #colours= []
-		rotations::Vector{Float64} = []
+		rotation::Vector{Float64} = []
         allagents_iterable = allagents(model)
         target_area::Float64 = model.target_area
         com::Tuple{Float64, Float64} = center_of_mass(model)
@@ -238,7 +238,7 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
         group_rot_o_info(model, group, group_rot_o)
 
         for id in 1:nagents(model)
-                push!(rotations, atan(model[id].vel[2], model[id].vel[1]))
+                push!(rotation, atan(model[id].vel[2], model[id].vel[1]))
 
                 rot_o_raw = rot_o_generic(model[id].pos .- com, model[id].vel)
 
@@ -272,7 +272,7 @@ function return_thesis_figures(model::UnremovableABM{ContinuousSpace{2, true, Fl
         limits = (fig_box[1][1], fig_box[2][1], fig_box[1][2], fig_box[2][2]), aspect = 1), 
 		marker = marker,
 		markersize = marker_size, 
-		rotations = rotations, color = colours, colorrange= (0.0, 1.0), colormap = colourmap_arg) #This is for detecting cave ins better
+		rotation = rotation, color = colours, colorrange= (0.0, 1.0), colormap = colourmap_arg) #This is for detecting cave ins better
 
 
         #print("The number of points in path points is $(length(path_points))\n")

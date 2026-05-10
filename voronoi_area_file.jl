@@ -1,7 +1,7 @@
 ###Function that calculates the area of a voronoi cell given the vertices that
 #comprise the cell.
 using Random
-function voronoi_area(model::UnremovableABM{ContinuousSpace{2, true, Float64, typeof(Agents.no_vel_update)}, bird, typeof(Agents.Schedulers.fastest), Dict{Symbol, Real}, MersenneTwister}, ri, cell, rho)
+function voronoi_area(model, ri, cell, rho)
        	Area = 0.0
 	circle_area = 0.0
 	circle_detected = 0
