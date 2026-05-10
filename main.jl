@@ -2,7 +2,7 @@
 #Hello, this is the file that defines all of the main data structures and functions for simulating our program. If you want to actually run the program, use the program.jl file instead. Run using "julia program.jl".
 
 ###Preliminaries
-#using Agents
+using Agents
 include("agent_definition.jl")
 using Random
 using VoronoiCells
@@ -27,6 +27,7 @@ include("global_vars.jl")
 print("Global variables included\n")
 const tracked_agent::Int64 = rand(1:no_birds)
 tracked_path::Vector{Tuple{Float64, Float64}} = []
+#rect = Rect(Point2(0,0), Point2(Int64(trunc(rect_bound)), Int64(trunc(rect_bound))))
 rect = Rectangle(Point2(0,0), Point2(Int64(trunc(rect_bound)), Int64(trunc(rect_bound))))
 
 include("some_math_functions.jl")

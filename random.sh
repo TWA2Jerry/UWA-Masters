@@ -1,0 +1,2 @@
+cc random.c
+

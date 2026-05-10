@@ -11,4 +11,3 @@ pos_vels_file = open("pos_vels.txt", "w")
 include("order_parameters.jl")
 include("io_file.jl")
 include("main.jl")
-
