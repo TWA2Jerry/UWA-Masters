@@ -263,7 +263,7 @@ function return_thesis_figures(model, path_points::Vector{Tuple{Float64, Float64
 
 
         figure, ax, colourbarthing = Makie.scatter([model[i].pos for i in 1:nagents(model)], 
-		figure_padding = padding_arg,
+		#figure_padding = padding_arg,
 		axis = (;
         xticklabelsize = 30,
         yticklabelsize = 30,
@@ -273,7 +273,7 @@ function return_thesis_figures(model, path_points::Vector{Tuple{Float64, Float64
 		marker = marker,
 		markersize = marker_size, 
 		rotation = rotation, color = colours, colorrange= (0.0, 1.0), colormap = colourmap_arg) #This is for detecting cave ins better
-
+	set_theme!(figure_padding = padding_arg)
 
         #print("The number of points in path points is $(length(path_points))\n")
         #draw_path(path_points)
